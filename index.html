@@ -879,20 +879,18 @@ textarea.input-field{resize:vertical;min-height:80px}
     </div>
     <div class="tab-panel active" id="panelPlay"><div id="renderZone" style="margin-top:3px;width:100%;"></div></div>
     <div class="tab-panel" id="panelShare">
-      <div style="text-align:center;padding:14px 8px 10px;">
-        <div class="share-summary">
-          <div class="ss-title" id="shareTitleText">My Quiz</div>
-          <div class="ss-meta" id="shareMetaText">0 questions</div>
-          <div id="shareShortBox" style="margin-top:10px;padding:10px 12px;border-radius:12px;background:#fff;border:1.5px dashed #c7d2fe;font-size:.85rem;font-weight:700;color:#4f46e5;word-break:break-all;">Preparing short link…</div>
+      <div style="text-align:center;padding:18px 8px;">
+        <div style="width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,#ede9fe,#e0e7ff);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:1.55rem;color:#6366f1;"><i class="fas fa-link"></i></div>
+        <h4 id="shareHeading" style="margin-bottom:4px;font-size:1.05rem;font-weight:800;">Share your quiz</h4>
+        <p id="shareMetaText" style="font-size:.82rem;color:var(--text-secondary);margin-bottom:14px;max-width:300px;margin-left:auto;margin-right:auto;">Anyone with this link can play — no account needed.</p>
+        <div class="share-link-wrapper">
+          <input type="text" id="shareLinkInput" readonly placeholder="Creating short link…" />
+          <button class="btn btn-primary" id="copyLinkBtn" type="button"><i class="fas fa-copy"></i> Copy</button>
         </div>
-        <input type="text" id="shareLinkInput" class="share-link-hidden" readonly tabindex="-1" aria-hidden="true" />
-        <div class="share-actions">
-          <button class="btn btn-primary btn-sm" id="copyLinkBtn" type="button" disabled><i class="fas fa-copy"></i> Copy</button>
-          <button class="btn btn-outline btn-sm" id="shareWhatsApp" type="button" style="border-color:#25D366;color:#128C7E;" disabled><i class="fab fa-whatsapp"></i> WhatsApp</button>
-        </div>
-        <div class="share-actions" style="margin-top:8px;">
-          <button class="btn btn-outline btn-sm" id="shareTwitter" type="button" disabled><i class="fab fa-twitter"></i> X</button>
-          <button class="btn btn-outline btn-sm" id="shareEmail" type="button" disabled><i class="fas fa-envelope"></i> Email</button>
+        <div style="margin-top:14px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+          <button class="btn btn-outline btn-sm" id="shareWhatsApp" type="button"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+          <button class="btn btn-outline btn-sm" id="shareTwitter" type="button"><i class="fab fa-twitter"></i> X / Twitter</button>
+          <button class="btn btn-outline btn-sm" id="shareEmail" type="button"><i class="fas fa-envelope"></i> Email</button>
         </div>
       </div>
     </div>
@@ -1081,7 +1079,6 @@ function fromBase64Url(str) {
 }
 function buildSharePayload(data) {
   if (!data || !data.questions) return null;
-  // Compact array form: [text, options[], correct] — shorter than object keys
   const slimQ = data.questions.map(q => {
     const row = [q.text || '', q.options || [], q.correct || ''];
     if (q.image && typeof q.image === 'string' && q.image.length < 40000) row.push(q.image);
@@ -1123,157 +1120,145 @@ function expandSharePayload(p) {
     })
   };
 }
-function makeShareUrl(id, data) {
-  const base = window.location.href.split('?')[0].split('#')[0];
-  const payload = buildSharePayload({ ...(data || getQuizData(id) || {}), id });
-  if (!payload) return `${base}?q=${encodeURIComponent(id || '')}`;
-  const encoded = toBase64Url(JSON.stringify(payload));
-  return `${base}?q=${encodeURIComponent(id || payload.i)}#s=${encoded}`;
-}
 function shareLabel(data) {
   const d = data || {};
   const title = (d.title || '').trim() || 'My Quiz';
   const n = (d.questions && d.questions.length) || 0;
   return { title, n, line: title + ' (' + n + ')' };
 }
-const _shortUrlCache = {};
-function isShortHttpUrl(u) {
-  return typeof u === 'string' && /^https?:\/\/[^\s]+$/i.test(u) && u.length < 80;
+function getShareBase() {
+  return window.location.href.split('?')[0].split('#')[0];
 }
-async function shortenShareUrl(longUrl) {
-  if (!longUrl) return null;
-  if (_shortUrlCache[longUrl] && isShortHttpUrl(_shortUrlCache[longUrl])) return _shortUrlCache[longUrl];
+/** Upload quiz JSON → get tiny public id (no giant URL). */
+async function uploadShareBlob(payload) {
+  // 1) jsonblob.com
   try {
-    const saved = localStorage.getItem('qcShort:' + longUrl.slice(0, 120));
-    if (saved && isShortHttpUrl(saved)) { _shortUrlCache[longUrl] = saved; return saved; }
-  } catch (e) {}
-
-  const enc = encodeURIComponent(longUrl);
-  const attempts = [
-    // Direct is.gd JSON
-    async () => {
-      const r = await fetch('https://is.gd/create.php?format=json&url=' + enc, { mode: 'cors' });
-      const j = await r.json();
-      if (j && j.shorturl) return j.shorturl;
-      throw new Error('is.gd');
-    },
-    // Direct v.gd JSON
-    async () => {
-      const r = await fetch('https://v.gd/create.php?format=json&url=' + enc, { mode: 'cors' });
-      const j = await r.json();
-      if (j && j.shorturl) return j.shorturl;
-      throw new Error('v.gd');
-    },
-    // is.gd via allorigins (bypasses CORS)
-    async () => {
-      const target = 'https://is.gd/create.php?format=simple&url=' + enc;
-      const r = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(target));
-      const t = (await r.text()).trim();
-      if (t.startsWith('http')) return t.split(/\s/)[0];
-      throw new Error('allorigins is.gd');
-    },
-    // tinyurl via allorigins
-    async () => {
-      const target = 'https://tinyurl.com/api-create.php?url=' + enc;
-      const r = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(target));
-      const t = (await r.text()).trim();
-      if (t.startsWith('http')) return t.split(/\s/)[0];
-      throw new Error('allorigins tinyurl');
+    const r = await fetch('https://jsonblob.com/api/jsonBlob', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (r.ok) {
+      const loc = r.headers.get('Location') || r.headers.get('location') || '';
+      const id = (loc.split('/').filter(Boolean).pop() || '').trim();
+      if (id) return { type: 'j', id };
+      try {
+        const j = await r.json();
+        if (j && (j.id || j.blobId)) return { type: 'j', id: String(j.id || j.blobId) };
+      } catch (e) {}
     }
-  ];
-
-  for (const fn of attempts) {
+  } catch (e) {}
+  // 2) Fallback: npoint-style via jsonbin mirror not required
+  return null;
+}
+async function fetchShareBlob(type, id) {
+  if (type === 'j' || !type) {
     try {
-      const short = await fn();
-      if (isShortHttpUrl(short)) {
-        _shortUrlCache[longUrl] = short;
-        try { localStorage.setItem('qcShort:' + longUrl.slice(0, 120), short); } catch (e) {}
-        return short;
-      }
-    } catch (e) { /* next */ }
+      const r = await fetch('https://jsonblob.com/api/jsonBlob/' + encodeURIComponent(id), {
+        headers: { 'Accept': 'application/json' }
+      });
+      if (r.ok) return await r.json();
+    } catch (e) {}
   }
   return null;
 }
+function makeShortShareUrl(quizId, blobRef) {
+  const base = getShareBase();
+  if (blobRef && blobRef.id) {
+    return base + '?q=' + encodeURIComponent(quizId || blobRef.id) + '&j=' + encodeURIComponent(blobRef.id);
+  }
+  return base + '?q=' + encodeURIComponent(quizId || '');
+}
+function makeLongShareUrl(id, data) {
+  const base = getShareBase();
+  const payload = buildSharePayload({ ...(data || getQuizData(id) || {}), id });
+  if (!payload) return base + '?q=' + encodeURIComponent(id || '');
+  return base + '?q=' + encodeURIComponent(id || payload.i) + '#s=' + toBase64Url(JSON.stringify(payload));
+}
+const _shareLinkCache = {};
+async function ensureShareLink(id, data) {
+  const cacheKey = id || 'x';
+  if (_shareLinkCache[cacheKey]) return _shareLinkCache[cacheKey];
+  try {
+    const stored = localStorage.getItem('qcShare:' + cacheKey);
+    if (stored && stored.indexOf('http') === 0 && stored.length < 200) {
+      _shareLinkCache[cacheKey] = stored;
+      return stored;
+    }
+  } catch (e) {}
+
+  const payload = buildSharePayload({ ...(data || getQuizData(id) || {}), id });
+  if (!payload) return makeLongShareUrl(id, data);
+
+  // Upload → always-short URL like https://site/?q=abc&j=xyz
+  const blob = await uploadShareBlob(payload);
+  let url;
+  if (blob && blob.id) {
+    url = makeShortShareUrl(id || payload.i, blob);
+  } else {
+    // last resort: long hash link
+    url = makeLongShareUrl(id, data);
+  }
+  _shareLinkCache[cacheKey] = url;
+  try { localStorage.setItem('qcShare:' + cacheKey, url); } catch (e) {}
+  return url;
+}
+function makeShareUrl(id, data) {
+  // Sync fallback (prefer cached short)
+  const cacheKey = id || 'x';
+  if (_shareLinkCache[cacheKey]) return _shareLinkCache[cacheKey];
+  try {
+    const stored = localStorage.getItem('qcShare:' + cacheKey);
+    if (stored) return stored;
+  } catch (e) {}
+  return makeLongShareUrl(id, data);
+}
 function wireShareButtons(id, data) {
   const d = data || getQuizData(id) || currentQuizData || {};
-  const longUrl = makeShareUrl(id, d);
   const { title, n, line } = shareLabel(d);
-  const titleEl = document.getElementById('shareTitleText');
+  const heading = document.getElementById('shareHeading');
   const metaEl = document.getElementById('shareMetaText');
-  const shortBox = document.getElementById('shareShortBox');
-  if (titleEl) titleEl.textContent = title;
-  if (metaEl) metaEl.textContent = n + (n === 1 ? ' question' : ' questions');
-  if (shortBox) { shortBox.textContent = 'Preparing short link…'; shortBox.style.color = '#4f46e5'; }
-
-  let shareUrl = null; // only set when we have a REAL short link
-  const msg = () => line + '\n' + (shareUrl || '');
-
-  const setEnabled = (on) => {
-    ['copyLinkBtn', 'shareWhatsApp', 'shareTwitter', 'shareEmail'].forEach(bid => {
-      const b = document.getElementById(bid);
-      if (b) b.disabled = !on;
-    });
-  };
-  setEnabled(false);
-
   const inp = document.getElementById('shareLinkInput');
+  if (heading) heading.textContent = 'Share your quiz';
+  if (metaEl) metaEl.textContent = title + ' · ' + n + (n === 1 ? ' question' : ' questions');
+  if (inp) { inp.value = ''; inp.placeholder = 'Creating short link…'; }
+
+  let shareUrl = makeShareUrl(id, d);
+  if (shareUrl && shareUrl.indexOf('#s=') === -1) {
+    if (inp) inp.value = shareUrl;
+  }
+
+  const msg = () => line + '\n' + shareUrl;
   const bind = () => {
     const copyBtn = document.getElementById('copyLinkBtn');
     if (copyBtn) copyBtn.onclick = () => {
-      if (!shareUrl) return showToast('Wait for short link…', 'error');
-      navigator.clipboard.writeText(shareUrl).then(() => showToast('Short link copied!', 'success')).catch(() => {
-        if (inp) { inp.value = shareUrl; inp.select(); document.execCommand('copy'); }
-        showToast('Short link copied!', 'success');
+      if (!shareUrl) return;
+      navigator.clipboard.writeText(shareUrl).then(() => showToast('Link copied!', 'success')).catch(() => {
+        if (inp) { inp.select(); document.execCommand('copy'); }
+        showToast('Link copied!', 'success');
       });
     };
     const wa = document.getElementById('shareWhatsApp');
     if (wa) wa.onclick = () => {
-      if (!shareUrl) return showToast('Wait for short link…', 'error');
-      // ONLY short message: "History quiz (5)\nhttps://is.gd/xxxx"
+      if (!shareUrl) return;
       window.open('https://wa.me/?text=' + encodeURIComponent(msg()), '_blank');
     };
     const tw = document.getElementById('shareTwitter');
-    if (tw) tw.onclick = () => {
-      if (!shareUrl) return;
-      window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(line) + '&url=' + encodeURIComponent(shareUrl), '_blank');
-    };
+    if (tw) tw.onclick = () => window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(line) + '&url=' + encodeURIComponent(shareUrl), '_blank');
     const em = document.getElementById('shareEmail');
-    if (em) em.onclick = () => {
-      if (!shareUrl) return;
-      window.location.href = 'mailto:?subject=' + encodeURIComponent(line) + '&body=' + encodeURIComponent(msg());
-    };
+    if (em) em.onclick = () => { window.location.href = 'mailto:?subject=' + encodeURIComponent(line) + '&body=' + encodeURIComponent(msg()); };
   };
   bind();
 
-  shortenShareUrl(longUrl).then(short => {
-    if (short && isShortHttpUrl(short)) {
-      shareUrl = short;
-      if (inp) inp.value = short;
-      if (shortBox) {
-        shortBox.textContent = short;
-        shortBox.style.color = '#16a34a';
-        shortBox.style.borderColor = '#86efac';
-      }
-      if (metaEl) metaEl.textContent = n + (n === 1 ? ' question' : ' questions') + ' · short link ready';
-      setEnabled(true);
-    } else {
-      if (shortBox) {
-        shortBox.textContent = 'Could not create short link. Check internet & try again.';
-        shortBox.style.color = '#dc2626';
-      }
-      showToast('Short link failed — check internet', 'error');
-      // Last resort: still allow share with long URL only if shorten failed
-      shareUrl = longUrl;
-      if (inp) inp.value = longUrl;
-      setEnabled(true);
-    }
+  // Always refresh short link fast in background
+  ensureShareLink(id, d).then(url => {
+    shareUrl = url;
+    if (inp) inp.value = url;
+    bind();
   }).catch(() => {
-    if (shortBox) {
-      shortBox.textContent = 'Could not create short link. Check internet & try again.';
-      shortBox.style.color = '#dc2626';
-    }
-    shareUrl = longUrl;
-    setEnabled(true);
+    shareUrl = makeLongShareUrl(id, d);
+    if (inp) inp.value = shareUrl;
+    bind();
   });
 }
 
@@ -2006,31 +1991,47 @@ function showFullRecap(results) {
   modal.addEventListener("click", (e) => { if (e.target === modal) modal.remove(); });
 }
 
-function resolveSharedQuiz() {
+async function resolveSharedQuiz() {
   const params = new URLSearchParams(window.location.search);
   let id = params.get("q");
   let data = null;
+  const jId = params.get("j");
 
-  // 1) Payload in hash (#s=...) so shared links open on other devices
-  const hash = window.location.hash || '';
-  const hashMatch = hash.match(/[#&]s=([^&]+)/);
-  if (hashMatch) {
+  // 1) Short link: ?j=jsonblobId  (preferred)
+  if (jId) {
     try {
-      const raw = fromBase64Url(decodeURIComponent(hashMatch[1]));
-      const payload = raw ? JSON.parse(raw) : null;
+      showToast('Opening quiz…', 'success', 1200);
+      const payload = await fetchShareBlob('j', jId);
       data = expandSharePayload(payload);
       if (data) {
         id = id || (payload && (payload.i || payload.id)) || generateId();
-        if (!getQuizData(id)) saveQuizData(id, data);
-        else data = getQuizData(id) || data;
+        saveQuizData(id, data);
       }
-    } catch (e) { console.error('share decode', e); }
+    } catch (e) { console.error('blob load', e); }
   }
 
-  // 2) Already saved on this device
+  // 2) Payload in hash (#s=...)
+  if (!data) {
+    const hash = window.location.hash || '';
+    const hashMatch = hash.match(/[#&]s=([^&]+)/);
+    if (hashMatch) {
+      try {
+        const raw = fromBase64Url(decodeURIComponent(hashMatch[1]));
+        const payload = raw ? JSON.parse(raw) : null;
+        data = expandSharePayload(payload);
+        if (data) {
+          id = id || (payload && (payload.i || payload.id)) || generateId();
+          if (!getQuizData(id)) saveQuizData(id, data);
+          else data = getQuizData(id) || data;
+        }
+      } catch (e) { console.error('share decode', e); }
+    }
+  }
+
+  // 3) Already on this device
   if (!data && id) data = getQuizData(id);
 
-  // 3) Query ?s= payload (fallback if hash stripped)
+  // 4) Query ?s= base64 payload
   if (!data) {
     const sParam = params.get('s');
     if (sParam) {
@@ -2048,7 +2049,7 @@ function resolveSharedQuiz() {
 
   if (!id && !data) return false;
   if (!data || !data.questions || !data.questions.length) {
-    showToast("Quiz not found. Open the full shared link from the creator.", 'error');
+    showToast("Quiz not found. Ask the creator to share the link again.", 'error');
     return false;
   }
 
@@ -2061,8 +2062,7 @@ function resolveSharedQuiz() {
   document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
   ensurePlayZone();
   document.getElementById("panelPlay").classList.add("active");
-  const shareInp = document.getElementById("shareLinkInput");
-  if (shareInp) shareInp.value = makeShareUrl(id, data);
+  wireShareButtons(id, data);
   isQuizStarted = false; isQuizActive = false; quizResults = null; playerAnswers = [];
   if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
   renderAssessmentFromData(data);
@@ -2209,6 +2209,8 @@ document.getElementById("finalCreateBtn").onclick = () => {
     const id = generateId();
     const data = { title: quizTitle, questions: JSON.parse(JSON.stringify(questionsBank)), mode: currentMode, templateId: selectedTemplate.id, logo: quizLogo, timerEnabled, timerSeconds, createdAt: Date.now() };
     saveQuizData(id, data);
+    // Start short-link creation immediately so Share is ready
+    try { ensureShareLink(id, data); } catch (e) {}
     currentShortId = id; currentQuizData = data;
     isQuizStarted = false; isQuizActive = false; quizResults = null; playerAnswers = [];
     if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
@@ -2237,31 +2239,32 @@ window.onload = function() {
   const demoBtn = document.getElementById('tryDemoBtn');
   if (demoBtn) demoBtn.onclick = startDemoQuiz;
   
-  const hasShared = resolveSharedQuiz();
-  if (!hasShared) {
-    const restored = restoreState();
-    if (restored && currentView === 'play' && currentShortId) {
-      const data = getQuizData(currentShortId);
-      if (data) {
-        currentQuizData = data;
-        document.getElementById("createdArea").style.display = "block";
-        document.getElementById("tabBar").style.display = "flex";
-        document.querySelectorAll("#tabBar .tab-btn").forEach(b => { b.style.display = "flex"; b.classList.remove("active"); });
-        const pb = document.querySelector("#tabBar .tab-btn[data-tab='play']"); if (pb) pb.classList.add("active");
-        document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
-        document.getElementById("panelPlay").classList.add("active");
-        ensurePlayZone();
-        renderAssessmentFromData(data);
-        return;
+  (async function boot() {
+    const hasShared = await resolveSharedQuiz();
+    if (!hasShared) {
+      const restored = restoreState();
+      if (restored && currentView === 'play' && currentShortId) {
+        const data = getQuizData(currentShortId);
+        if (data) {
+          currentQuizData = data;
+          document.getElementById("createdArea").style.display = "block";
+          document.getElementById("tabBar").style.display = "flex";
+          document.querySelectorAll("#tabBar .tab-btn").forEach(b => { b.style.display = "flex"; b.classList.remove("active"); });
+          const pb = document.querySelector("#tabBar .tab-btn[data-tab='play']"); if (pb) pb.classList.add("active");
+          document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+          document.getElementById("panelPlay").classList.add("active");
+          ensurePlayZone();
+          renderAssessmentFromData(data);
+          return;
+        }
       }
+      if (restored && currentView === 'share' && currentShortId) { showShareView(); return; }
+      if (restored && currentView === 'dashboard') { showDashboardView(); return; }
+      if (restored && currentView === 'create' && currentMode) { showCreateView(); return; }
+      showHomeView();
     }
-    if (restored && currentView === 'share' && currentShortId) { showShareView(); return; }
-    if (restored && currentView === 'dashboard') { showDashboardView(); return; }
-    if (restored && currentView === 'create' && currentMode) { showCreateView(); return; }
-    
-    showHomeView();
-  }
-  processBulk();
+    processBulk();
+  })();
 };
 window.addEventListener('beforeunload', function() { saveState(); });
 window.navigateTo = navigateTo;
