@@ -1131,39 +1131,31 @@ function getShareBase() {
 }
 /** Save quiz JSON in Firebase Firestore and return its compact document id. */
 async function uploadShareBlob(payload) {
-  try {
-    if (!window.qcFirebaseReady) return null;
-    await window.qcFirebaseReady;
-    if (typeof window.qcSaveSharedQuiz !== 'function') return null;
-    const id = await window.qcSaveSharedQuiz(payload);
-    return id ? { type: 'f', id } : null;
-  } catch (e) {
-    console.warn('Firebase share upload failed:', e);
-    return null;
-  }
+  if (!window.qcFirebaseReady) throw new Error('Firebase is not initialized. Reload the page and try again.');
+  await window.qcFirebaseReady;
+  if (typeof window.qcSaveSharedQuiz !== 'function') throw new Error('Firebase save function is unavailable.');
+  const id = await window.qcSaveSharedQuiz(payload);
+  if (!id) throw new Error('Firebase did not return a share ID.');
+  return { type: 'f', id };
 }
 async function fetchShareBlob(type, id) {
   try {
     if (type === 'f') {
-      if (!window.qcFirebaseReady) return null;
+      if (!window.qcFirebaseReady) throw new Error('Firebase is not initialized.');
       await window.qcFirebaseReady;
       return typeof window.qcGetSharedQuiz === 'function' ? await window.qcGetSharedQuiz(id) : null;
     }
-    // Backward compatibility: open older jsonblob links.
+    // Backward compatibility: open older JSONBlob links.
     if (type === 'j' || !type) {
       const r = await fetch('https://jsonblob.com/api/jsonBlob/' + encodeURIComponent(id), { headers: { 'Accept': 'application/json' } });
       if (r.ok) return await r.json();
     }
-  } catch (e) { console.warn('Shared quiz fetch failed:', e); }
+  } catch (e) { console.error('Shared quiz fetch failed:', e); }
   return null;
 }
 function makeShortShareUrl(quizId, blobRef) {
   const base = getShareBase();
-  if (blobRef && blobRef.id) {
-    const key = blobRef.type === 'f' ? 'f' : 'j';
-    return base + '?q=' + encodeURIComponent(quizId || blobRef.id) + '&' + key + '=' + encodeURIComponent(blobRef.id);
-  }
-  return base + '?q=' + encodeURIComponent(quizId || '');
+  return base + '?q=' + encodeURIComponent(quizId || blobRef.id) + '&f=' + encodeURIComponent(blobRef.id);
 }
 function makeLongShareUrl(id, data) {
   const base = getShareBase();
@@ -1174,42 +1166,33 @@ function makeLongShareUrl(id, data) {
 const _shareLinkCache = {};
 async function ensureShareLink(id, data) {
   const cacheKey = id || 'x';
-  if (_shareLinkCache[cacheKey]) return _shareLinkCache[cacheKey];
+  if (_shareLinkCache[cacheKey] && /[?&]f=/.test(_shareLinkCache[cacheKey])) return _shareLinkCache[cacheKey];
   try {
     const stored = localStorage.getItem('qcShare:' + cacheKey);
-    // Reuse only Firebase links. Older cached JSONBlob links are regenerated
-    // so newly shared quizzes use the current Firestore backend.
     if (stored && stored.indexOf('http') === 0 && stored.length < 200 && /[?&]f=/.test(stored)) {
       _shareLinkCache[cacheKey] = stored;
       return stored;
     }
+    // Remove old Base64/JSONBlob cached URLs; they must not be reused.
+    if (stored) localStorage.removeItem('qcShare:' + cacheKey);
   } catch (e) {}
 
   const payload = buildSharePayload({ ...(data || getQuizData(id) || {}), id });
-  if (!payload) return makeLongShareUrl(id, data);
-
-  // Upload → always-short URL like https://site/?q=abc&j=xyz
+  if (!payload) throw new Error('Could not prepare this quiz for sharing.');
   const blob = await uploadShareBlob(payload);
-  let url;
-  if (blob && blob.id) {
-    url = makeShortShareUrl(id || payload.i, blob);
-  } else {
-    // last resort: long hash link
-    url = makeLongShareUrl(id, data);
-  }
+  const url = makeShortShareUrl(id || payload.i, blob);
   _shareLinkCache[cacheKey] = url;
   try { localStorage.setItem('qcShare:' + cacheKey, url); } catch (e) {}
   return url;
 }
 function makeShareUrl(id, data) {
-  // Sync fallback (prefer cached short)
   const cacheKey = id || 'x';
-  if (_shareLinkCache[cacheKey]) return _shareLinkCache[cacheKey];
+  if (_shareLinkCache[cacheKey] && /[?&]f=/.test(_shareLinkCache[cacheKey])) return _shareLinkCache[cacheKey];
   try {
     const stored = localStorage.getItem('qcShare:' + cacheKey);
     if (stored && /[?&]f=/.test(stored)) return stored;
   } catch (e) {}
-  return makeLongShareUrl(id, data);
+  return '';
 }
 function wireShareButtons(id, data) {
   const d = data || getQuizData(id) || currentQuizData || {};
@@ -1219,44 +1202,40 @@ function wireShareButtons(id, data) {
   const inp = document.getElementById('shareLinkInput');
   if (heading) heading.textContent = 'Share your quiz';
   if (metaEl) metaEl.textContent = title + ' · ' + n + (n === 1 ? ' question' : ' questions');
-  if (inp) { inp.value = ''; inp.placeholder = 'Creating short link…'; }
+  if (inp) { inp.value = ''; inp.placeholder = 'Uploading quiz and creating short link…'; }
 
   let shareUrl = makeShareUrl(id, d);
-  if (shareUrl && shareUrl.indexOf('#s=') === -1) {
-    if (inp) inp.value = shareUrl;
-  }
-
   const msg = () => line + '\n' + shareUrl;
   const bind = () => {
     const copyBtn = document.getElementById('copyLinkBtn');
-    if (copyBtn) copyBtn.onclick = () => {
-      if (!shareUrl) return;
-      navigator.clipboard.writeText(shareUrl).then(() => showToast('Link copied!', 'success')).catch(() => {
-        if (inp) { inp.select(); document.execCommand('copy'); }
-        showToast('Link copied!', 'success');
-      });
-    };
+    if (copyBtn) {
+      copyBtn.disabled = !shareUrl;
+      copyBtn.onclick = () => {
+        if (!shareUrl) return showToast('Please wait. Creating your short link…', '');
+        navigator.clipboard.writeText(shareUrl).then(() => showToast('Short link copied!', 'success')).catch(() => {
+          if (inp) { inp.select(); document.execCommand('copy'); }
+          showToast('Short link copied!', 'success');
+        });
+      };
+    }
     const wa = document.getElementById('shareWhatsApp');
-    if (wa) wa.onclick = () => {
-      if (!shareUrl) return;
-      window.open('https://wa.me/?text=' + encodeURIComponent(msg()), '_blank');
-    };
+    if (wa) wa.onclick = () => { if (shareUrl) window.open('https://wa.me/?text=' + encodeURIComponent(msg()), '_blank'); else showToast('Please wait. Creating your short link…'); };
     const tw = document.getElementById('shareTwitter');
-    if (tw) tw.onclick = () => window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(line) + '&url=' + encodeURIComponent(shareUrl), '_blank');
+    if (tw) tw.onclick = () => { if (shareUrl) window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(line) + '&url=' + encodeURIComponent(shareUrl), '_blank'); else showToast('Please wait. Creating your short link…'); };
     const em = document.getElementById('shareEmail');
-    if (em) em.onclick = () => { window.location.href = 'mailto:?subject=' + encodeURIComponent(line) + '&body=' + encodeURIComponent(msg()); };
+    if (em) em.onclick = () => { if (shareUrl) window.location.href = 'mailto:?subject=' + encodeURIComponent(line) + '&body=' + encodeURIComponent(msg()); else showToast('Please wait. Creating your short link…'); };
   };
   bind();
-
-  // Always refresh short link fast in background
   ensureShareLink(id, d).then(url => {
     shareUrl = url;
-    if (inp) inp.value = url;
+    if (inp) { inp.value = url; inp.placeholder = 'Your short share link'; }
     bind();
-  }).catch(() => {
-    shareUrl = makeLongShareUrl(id, d);
-    if (inp) inp.value = shareUrl;
+    showToast('Short share link created!', 'success');
+  }).catch(err => {
+    console.error('QuizCraft short-link creation failed:', err);
+    if (inp) { inp.value = ''; inp.placeholder = 'Could not create link — check Firebase setup'; }
     bind();
+    showToast('Could not create short link: ' + (err && err.message ? err.message : 'Firebase error'), 'error', 5000);
   });
 }
 
@@ -3824,7 +3803,7 @@ function renderVideoStudio(data) {
 </script>
 
 <script type="module">
-// QuizCraft Firebase Web configuration supplied by the site owner.
+// Firebase Firestore integration for QuizCraft.
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getFirestore, collection, addDoc, doc, getDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 const firebaseConfig = {
@@ -3836,11 +3815,22 @@ const firebaseConfig = {
   appId: '1:61692118652:web:de0809f404c98de91febf9',
   measurementId: 'G-7RDVJNE1TE'
 };
-try {
+// Assign the promise immediately so the main page can safely await module startup.
+window.qcFirebaseReady = (async () => {
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
   window.qcSaveSharedQuiz = async (payload) => {
-    const record = { ...payload, sharedAt: serverTimestamp() };
+    // Keep the Firestore document fields aligned with the published rules.
+    const record = {
+      v: payload.v || 2,
+      i: payload.i || '',
+      t: payload.t || '',
+      m: payload.m || 'quiz',
+      q: Array.isArray(payload.q) ? payload.q : [],
+      ...(payload.tpl ? { tpl: payload.tpl } : {}),
+      ...(payload.te ? { te: payload.te, ts: payload.ts || 10 } : {}),
+      sharedAt: serverTimestamp()
+    };
     const ref = await addDoc(collection(db, 'quizShares'), record);
     return ref.id;
   };
@@ -3848,12 +3838,11 @@ try {
     const snap = await getDoc(doc(db, 'quizShares', shareId));
     return snap.exists() ? snap.data() : null;
   };
-  window.qcFirebaseReady = Promise.resolve(true);
-} catch (err) {
+  return true;
+})();
+window.qcFirebaseReady.catch(err => {
   console.error('QuizCraft Firebase initialization failed:', err);
-  window.qcFirebaseReady = Promise.reject(err);
-  window.qcFirebaseReady.catch(() => {});
-}
+});
 </script>
 
 </body>
