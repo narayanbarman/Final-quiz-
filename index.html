@@ -883,15 +883,16 @@ textarea.input-field{resize:vertical;min-height:80px}
         <div class="share-summary">
           <div class="ss-title" id="shareTitleText">My Quiz</div>
           <div class="ss-meta" id="shareMetaText">0 questions</div>
+          <div id="shareShortBox" style="margin-top:10px;padding:10px 12px;border-radius:12px;background:#fff;border:1.5px dashed #c7d2fe;font-size:.85rem;font-weight:700;color:#4f46e5;word-break:break-all;">Preparing short link…</div>
         </div>
         <input type="text" id="shareLinkInput" class="share-link-hidden" readonly tabindex="-1" aria-hidden="true" />
         <div class="share-actions">
-          <button class="btn btn-primary btn-sm" id="copyLinkBtn" type="button"><i class="fas fa-copy"></i> Copy link</button>
-          <button class="btn btn-outline btn-sm" id="shareWhatsApp" type="button" style="border-color:#25D366;color:#128C7E;"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+          <button class="btn btn-primary btn-sm" id="copyLinkBtn" type="button" disabled><i class="fas fa-copy"></i> Copy</button>
+          <button class="btn btn-outline btn-sm" id="shareWhatsApp" type="button" style="border-color:#25D366;color:#128C7E;" disabled><i class="fab fa-whatsapp"></i> WhatsApp</button>
         </div>
         <div class="share-actions" style="margin-top:8px;">
-          <button class="btn btn-outline btn-sm" id="shareTwitter" type="button"><i class="fab fa-twitter"></i> X</button>
-          <button class="btn btn-outline btn-sm" id="shareEmail" type="button"><i class="fas fa-envelope"></i> Email</button>
+          <button class="btn btn-outline btn-sm" id="shareTwitter" type="button" disabled><i class="fab fa-twitter"></i> X</button>
+          <button class="btn btn-outline btn-sm" id="shareEmail" type="button" disabled><i class="fas fa-envelope"></i> Email</button>
         </div>
       </div>
     </div>
@@ -1136,34 +1137,62 @@ function shareLabel(data) {
   return { title, n, line: title + ' (' + n + ')' };
 }
 const _shortUrlCache = {};
+function isShortHttpUrl(u) {
+  return typeof u === 'string' && /^https?:\/\/[^\s]+$/i.test(u) && u.length < 80;
+}
 async function shortenShareUrl(longUrl) {
-  if (!longUrl) return longUrl;
-  if (_shortUrlCache[longUrl]) return _shortUrlCache[longUrl];
-  // Try free shorteners (full URL incl. hash is encoded in query — fragment is preserved)
-  const tries = [
+  if (!longUrl) return null;
+  if (_shortUrlCache[longUrl] && isShortHttpUrl(_shortUrlCache[longUrl])) return _shortUrlCache[longUrl];
+  try {
+    const saved = localStorage.getItem('qcShort:' + longUrl.slice(0, 120));
+    if (saved && isShortHttpUrl(saved)) { _shortUrlCache[longUrl] = saved; return saved; }
+  } catch (e) {}
+
+  const enc = encodeURIComponent(longUrl);
+  const attempts = [
+    // Direct is.gd JSON
     async () => {
-      const r = await fetch('https://is.gd/create.php?format=json&url=' + encodeURIComponent(longUrl));
+      const r = await fetch('https://is.gd/create.php?format=json&url=' + enc, { mode: 'cors' });
       const j = await r.json();
       if (j && j.shorturl) return j.shorturl;
-      throw new Error(j && j.errormessage || 'is.gd fail');
+      throw new Error('is.gd');
     },
+    // Direct v.gd JSON
     async () => {
-      const r = await fetch('https://v.gd/create.php?format=json&url=' + encodeURIComponent(longUrl));
+      const r = await fetch('https://v.gd/create.php?format=json&url=' + enc, { mode: 'cors' });
       const j = await r.json();
       if (j && j.shorturl) return j.shorturl;
-      throw new Error('v.gd fail');
+      throw new Error('v.gd');
+    },
+    // is.gd via allorigins (bypasses CORS)
+    async () => {
+      const target = 'https://is.gd/create.php?format=simple&url=' + enc;
+      const r = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(target));
+      const t = (await r.text()).trim();
+      if (t.startsWith('http')) return t.split(/\s/)[0];
+      throw new Error('allorigins is.gd');
+    },
+    // tinyurl via allorigins
+    async () => {
+      const target = 'https://tinyurl.com/api-create.php?url=' + enc;
+      const r = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(target));
+      const t = (await r.text()).trim();
+      if (t.startsWith('http')) return t.split(/\s/)[0];
+      throw new Error('allorigins tinyurl');
     }
   ];
-  for (const fn of tries) {
+
+  for (const fn of attempts) {
     try {
       const short = await fn();
-      if (short && /^https?:\/\//i.test(short)) {
+      if (isShortHttpUrl(short)) {
         _shortUrlCache[longUrl] = short;
+        try { localStorage.setItem('qcShort:' + longUrl.slice(0, 120), short); } catch (e) {}
         return short;
       }
-    } catch (e) { /* try next */ }
+    } catch (e) { /* next */ }
   }
-  return longUrl;
+  return null;
 }
 function wireShareButtons(id, data) {
   const d = data || getQuizData(id) || currentQuizData || {};
@@ -1171,52 +1200,80 @@ function wireShareButtons(id, data) {
   const { title, n, line } = shareLabel(d);
   const titleEl = document.getElementById('shareTitleText');
   const metaEl = document.getElementById('shareMetaText');
+  const shortBox = document.getElementById('shareShortBox');
   if (titleEl) titleEl.textContent = title;
   if (metaEl) metaEl.textContent = n + (n === 1 ? ' question' : ' questions');
+  if (shortBox) { shortBox.textContent = 'Preparing short link…'; shortBox.style.color = '#4f46e5'; }
+
+  let shareUrl = null; // only set when we have a REAL short link
+  const msg = () => line + '\n' + (shareUrl || '');
+
+  const setEnabled = (on) => {
+    ['copyLinkBtn', 'shareWhatsApp', 'shareTwitter', 'shareEmail'].forEach(bid => {
+      const b = document.getElementById(bid);
+      if (b) b.disabled = !on;
+    });
+  };
+  setEnabled(false);
+
   const inp = document.getElementById('shareLinkInput');
-  if (inp) inp.value = longUrl;
-
-  // Shared mutable ref — updated once short URL is ready
-  let shareUrl = longUrl;
-  const msg = () => line + '\n' + shareUrl;
-
-  const copyBtn = document.getElementById('copyLinkBtn');
-  if (copyBtn) {
-    copyBtn.disabled = false;
-    copyBtn.onclick = () => {
-      navigator.clipboard.writeText(shareUrl).then(() => showToast('Copied: ' + line, 'success')).catch(() => {
+  const bind = () => {
+    const copyBtn = document.getElementById('copyLinkBtn');
+    if (copyBtn) copyBtn.onclick = () => {
+      if (!shareUrl) return showToast('Wait for short link…', 'error');
+      navigator.clipboard.writeText(shareUrl).then(() => showToast('Short link copied!', 'success')).catch(() => {
         if (inp) { inp.value = shareUrl; inp.select(); document.execCommand('copy'); }
-        showToast('Copied!', 'success');
+        showToast('Short link copied!', 'success');
       });
     };
-  }
-  const wa = document.getElementById('shareWhatsApp');
-  if (wa) {
-    wa.disabled = true;
-    wa.innerHTML = '<i class="fab fa-whatsapp"></i> …';
-    wa.onclick = () => window.open('https://wa.me/?text=' + encodeURIComponent(msg()), '_blank');
-  }
-  const tw = document.getElementById('shareTwitter');
-  if (tw) tw.onclick = () => window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(line) + '&url=' + encodeURIComponent(shareUrl), '_blank');
-  const em = document.getElementById('shareEmail');
-  if (em) em.onclick = () => { window.location.href = 'mailto:?subject=' + encodeURIComponent(line) + '&body=' + encodeURIComponent(msg()); };
+    const wa = document.getElementById('shareWhatsApp');
+    if (wa) wa.onclick = () => {
+      if (!shareUrl) return showToast('Wait for short link…', 'error');
+      // ONLY short message: "History quiz (5)\nhttps://is.gd/xxxx"
+      window.open('https://wa.me/?text=' + encodeURIComponent(msg()), '_blank');
+    };
+    const tw = document.getElementById('shareTwitter');
+    if (tw) tw.onclick = () => {
+      if (!shareUrl) return;
+      window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(line) + '&url=' + encodeURIComponent(shareUrl), '_blank');
+    };
+    const em = document.getElementById('shareEmail');
+    if (em) em.onclick = () => {
+      if (!shareUrl) return;
+      window.location.href = 'mailto:?subject=' + encodeURIComponent(line) + '&body=' + encodeURIComponent(msg());
+    };
+  };
+  bind();
 
-  // Create a tiny short link so WhatsApp stays clean: "History quiz (5)\nhttps://is.gd/xxxx"
   shortenShareUrl(longUrl).then(short => {
-    shareUrl = short || longUrl;
-    if (inp) inp.value = shareUrl;
-    if (wa) {
-      wa.disabled = false;
-      wa.innerHTML = '<i class="fab fa-whatsapp"></i> WhatsApp';
-    }
-    if (metaEl && shareUrl !== longUrl) {
-      metaEl.textContent = n + (n === 1 ? ' question' : ' questions') + ' · short link ready';
+    if (short && isShortHttpUrl(short)) {
+      shareUrl = short;
+      if (inp) inp.value = short;
+      if (shortBox) {
+        shortBox.textContent = short;
+        shortBox.style.color = '#16a34a';
+        shortBox.style.borderColor = '#86efac';
+      }
+      if (metaEl) metaEl.textContent = n + (n === 1 ? ' question' : ' questions') + ' · short link ready';
+      setEnabled(true);
+    } else {
+      if (shortBox) {
+        shortBox.textContent = 'Could not create short link. Check internet & try again.';
+        shortBox.style.color = '#dc2626';
+      }
+      showToast('Short link failed — check internet', 'error');
+      // Last resort: still allow share with long URL only if shorten failed
+      shareUrl = longUrl;
+      if (inp) inp.value = longUrl;
+      setEnabled(true);
     }
   }).catch(() => {
-    if (wa) {
-      wa.disabled = false;
-      wa.innerHTML = '<i class="fab fa-whatsapp"></i> WhatsApp';
+    if (shortBox) {
+      shortBox.textContent = 'Could not create short link. Check internet & try again.';
+      shortBox.style.color = '#dc2626';
     }
+    shareUrl = longUrl;
+    setEnabled(true);
   });
 }
 
