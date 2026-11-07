@@ -3821,12 +3821,33 @@ window.qcFirebaseReady = (async () => {
   const db = getFirestore(app);
   window.qcSaveSharedQuiz = async (payload) => {
     // Keep the Firestore document fields aligned with the published rules.
+    // Firestore does not allow arrays directly inside arrays. QuizCraft's
+    // compact format stores each question as [text, options[], correct, image?].
+    // Convert the outer question array into an array of MAPS; options remain
+    // arrays inside each map, which Firestore supports.
+    const firestoreQuestions = (Array.isArray(payload.q) ? payload.q : []).map((row) => {
+      if (row && !Array.isArray(row) && typeof row === 'object') {
+        return {
+          text: String(row.text || row.t || ''),
+          options: Array.isArray(row.options || row.o) ? (row.options || row.o) : [],
+          correct: String(row.correct || row.c || ''),
+          ...(row.image || row.i ? { image: row.image || row.i } : {})
+        };
+      }
+      const q = Array.isArray(row) ? row : [];
+      return {
+        text: String(q[0] || ''),
+        options: Array.isArray(q[1]) ? q[1] : [],
+        correct: String(q[2] || ''),
+        ...(typeof q[3] === 'string' && q[3] ? { image: q[3] } : {})
+      };
+    });
     const record = {
       v: payload.v || 2,
       i: payload.i || '',
       t: payload.t || '',
       m: payload.m || 'quiz',
-      q: Array.isArray(payload.q) ? payload.q : [],
+      q: firestoreQuestions,
       ...(payload.tpl ? { tpl: payload.tpl } : {}),
       ...(payload.te ? { te: payload.te, ts: payload.ts || 10 } : {}),
       sharedAt: serverTimestamp()
