@@ -898,7 +898,6 @@ textarea.input-field{resize:vertical;min-height:80px}
   </div>
 
   <div class="site-footer" id="siteFooter">
-    <div class="privacy"><i class="fas fa-shield-alt"></i> Your data stays on this device — we never upload quizzes</div>
     <div>Made with care for teachers, creators &amp; learners</div>
     <div style="margin-top:6px;">
       <a href="mailto:narayanbarman3210@gmail.com">Contact</a> · 
@@ -1065,6 +1064,93 @@ document.getElementById('sendHelpBtn').onclick = () => {
 function getAllQuizzes() { try { return JSON.parse(localStorage.getItem("quizCraftData") || "{}"); } catch { return {}; } }
 function saveQuizData(id, data) { try { const all = getAllQuizzes(); all[id] = data; localStorage.setItem("quizCraftData", JSON.stringify(all)); } catch (e) { console.error(e); } }
 function getQuizData(id) { return getAllQuizzes()[id] || null; }
+function toBase64Url(str) {
+  try {
+    return btoa(unescape(encodeURIComponent(str))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+  } catch (e) { return ''; }
+}
+function fromBase64Url(str) {
+  try {
+    let s = String(str || '').replace(/-/g, '+').replace(/_/g, '/');
+    while (s.length % 4) s += '=';
+    return decodeURIComponent(escape(atob(s)));
+  } catch (e) { return null; }
+}
+function buildSharePayload(data) {
+  if (!data || !data.questions) return null;
+  const slimQ = data.questions.map(q => {
+    const item = { t: q.text, o: q.options, c: q.correct };
+    if (q.image && typeof q.image === 'string' && q.image.length < 80000) item.i = q.image;
+    return item;
+  });
+  return {
+    v: 1,
+    id: data.id || currentShortId || generateId(),
+    title: data.title || '',
+    mode: data.mode || 'quiz',
+    templateId: data.templateId || 't25',
+    timerEnabled: !!data.timerEnabled,
+    timerSeconds: data.timerSeconds || 10,
+    questions: slimQ
+  };
+}
+function expandSharePayload(p) {
+  if (!p || !p.questions) return null;
+  return {
+    title: p.title || '',
+    mode: p.mode || 'quiz',
+    templateId: p.templateId || 't25',
+    logo: null,
+    timerEnabled: !!p.timerEnabled,
+    timerSeconds: p.timerSeconds || 10,
+    createdAt: Date.now(),
+    questions: p.questions.map(q => ({
+      text: q.t || q.text || '',
+      options: q.o || q.options || [],
+      correct: q.c || q.correct || '',
+      image: q.i || q.image || null
+    }))
+  };
+}
+function makeShareUrl(id, data) {
+  const base = window.location.href.split('?')[0].split('#')[0];
+  const payload = buildSharePayload({ ...(data || getQuizData(id) || {}), id });
+  if (!payload) return `${base}?q=${encodeURIComponent(id || '')}`;
+  const encoded = toBase64Url(JSON.stringify(payload));
+  // Prefer hash payload so links open offline / static hosts; keep short id in query
+  return `${base}?q=${encodeURIComponent(id || payload.id)}#s=${encoded}`;
+}
+function wireShareButtons(id, data) {
+  const url = makeShareUrl(id, data);
+  const inp = document.getElementById('shareLinkInput');
+  if (inp) inp.value = url;
+  const copyBtn = document.getElementById('copyLinkBtn');
+  if (copyBtn) copyBtn.onclick = () => {
+    navigator.clipboard.writeText(url).then(() => showToast('Link copied!', 'success')).catch(() => {
+      if (inp) { inp.select(); document.execCommand('copy'); }
+      showToast('Link copied!', 'success');
+    });
+  };
+  const wa = document.getElementById('shareWhatsApp');
+  if (wa) wa.onclick = () => window.open('https://wa.me/?text=' + encodeURIComponent('Take my quiz! ' + url), '_blank');
+  const tw = document.getElementById('shareTwitter');
+  if (tw) tw.onclick = () => window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent('Take my quiz!') + '&url=' + encodeURIComponent(url), '_blank');
+  const em = document.getElementById('shareEmail');
+  if (em) em.onclick = () => { window.location.href = 'mailto:?subject=Quiz Invitation&body=' + encodeURIComponent('Take my quiz: ' + url); };
+}
+
+function stopActiveAssessment() {
+  isQuizActive = false;
+  isQuizStarted = false;
+  if (timerInterval) { try { clearInterval(timerInterval); } catch (e) {} timerInterval = null; }
+  timeRemaining = 0;
+  document.querySelectorAll('.modal-overlay.assessment-modal, .modal-overlay').forEach(m => {
+    if (m.id === 'helpModal' || m.id === 'cpModal') return;
+    if (m.classList.contains('assessment-modal') || m.querySelector('#showResultsFromTimeBtn') || m.querySelector('#closeScoreBtn') || m.querySelector('#recapBtn') || m.querySelector('#closeRecapFinal')) {
+      try { m.remove(); } catch (e) {}
+    }
+  });
+}
 function deleteQuizData(id) {
   try {
     const all = getAllQuizzes(); delete all[id];
@@ -1261,6 +1347,7 @@ function ensurePlayZone() {
 
 function showHomeView() {
   exitVideoLayout();
+  stopActiveAssessment();
   document.getElementById("stepHome").style.display = "block";
   document.getElementById("stepUpload").style.display = "none";
   document.getElementById("stepType").style.display = "none";
@@ -1385,6 +1472,7 @@ window.deleteQuiz = function(id) { if (!confirm("Delete this quiz and all its da
 function showCreateView() {
   if (!currentMode) { showHomeView(); return; }
   exitVideoLayout();
+  stopActiveAssessment();
   hideCreatedReadyLine();
   document.getElementById("stepHome").style.display = "none";
   document.getElementById("stepUpload").style.display = "block";
@@ -1419,7 +1507,7 @@ function showShareView() {
   const sb = document.querySelector("#tabBar .tab-btn[data-tab='share']"); if (sb) sb.classList.add("active");
   document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
   document.getElementById("panelShare").classList.add("active");
-  document.getElementById("shareLinkInput").value = `${window.location.origin}${window.location.pathname}?q=${currentShortId}`;
+  wireShareButtons(currentShortId, getQuizData(currentShortId) || currentQuizData);
   pushState('share', null);
 }
 function showPlayView(data) {
@@ -1705,17 +1793,33 @@ function attachMockEvents(data) {
 function startTotalTimer(data) {
   if (timerInterval) clearInterval(timerInterval);
   timeRemaining = data.timerSeconds * data.questions.length;
+  const runId = (data && data._runId) || (data._runId = Date.now() + Math.random());
   timerInterval = setInterval(() => {
+    if (!isQuizActive) { clearInterval(timerInterval); timerInterval = null; return; }
+    // If user left play view, stop silently
+    const created = document.getElementById('createdArea');
+    const play = document.getElementById('panelPlay');
+    if (!created || created.style.display === 'none' || (play && !play.classList.contains('active'))) {
+      stopActiveAssessment();
+      return;
+    }
     timeRemaining--;
     const tEl = document.getElementById("quizTotalTimer") || document.getElementById("mockTotalTimer");
     if (tEl) { tEl.innerHTML = `<i class="fas fa-clock"></i> ${formatTime(timeRemaining)}`; if (timeRemaining <= 10) tEl.classList.add("warning"); }
-    if (timeRemaining <= 0) { clearInterval(timerInterval); timerInterval = null; if (isQuizActive) { isQuizActive = false; showTimeOverModal(data); } }
+    if (timeRemaining <= 0) {
+      clearInterval(timerInterval); timerInterval = null;
+      if (isQuizActive) { isQuizActive = false; showTimeOverModal(data); }
+    }
   }, 1000);
 }
 function showTimeOverModal(data) {
+  // Don't interrupt if user already left the assessment
+  if (!isQuizStarted && !document.getElementById('quizTotalTimer') && !document.getElementById('mockTotalTimer')) return;
+  const created = document.getElementById('createdArea');
+  if (!created || created.style.display === 'none') return;
   const answers = playerAnswers || new Array(data.questions.length).fill(null);
   const modal = document.createElement("div");
-  modal.className = "modal-overlay active";
+  modal.className = "modal-overlay active assessment-modal";
   modal.innerHTML = `<div class="modal-card"><span class="big-icon"><i class="fas fa-hourglass-end" style="color:var(--danger);"></i></span><h2 style="color:var(--danger);">Time's Over!</h2><p>You ran out of time.</p><div style="background:#fafbff;border-radius:var(--radius-sm);padding:10px;margin-bottom:12px;"><div style="display:flex;justify-content:space-between;font-size:.85rem;"><span>Answered:</span><strong>${answers.filter(a=>a!==null).length} / ${data.questions.length}</strong></div></div><button class="btn btn-primary btn-block" id="showResultsFromTimeBtn" style="justify-content:center;"><i class="fas fa-chart-bar"></i> Show Results</button></div>`;
   document.body.appendChild(modal);
   document.getElementById("showResultsFromTimeBtn").onclick = () => { modal.remove(); submitQuiz(data, answers); };
@@ -1737,7 +1841,7 @@ function showScoreModal(results) {
   const emoji = percent >= 80 ? '🌟' : percent >= 60 ? '👏' : '📚';
   const msg = percent >= 80 ? 'Excellent!' : percent >= 60 ? 'Good job!' : 'Keep practicing!';
   const modal = document.createElement("div");
-  modal.className = "modal-overlay active";
+  modal.className = "modal-overlay active assessment-modal";
   modal.innerHTML = `<div class="modal-card"><span class="big-icon">${emoji}</span><h2>Your Results</h2><p style="color:var(--text-secondary);">${score} / ${total} correct • ${msg}</p><div style="position:relative;width:120px;margin:10px auto;"><canvas id="scoreCanvas" width="140" height="140"></canvas><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:1.6rem;font-weight:800;color:var(--text);">${percent}<span style="font-size:.7rem;color:var(--text-secondary);">%</span></div></div>${unanswered > 0 ? `<p style="font-size:.8rem;color:var(--danger);">⚠️ ${unanswered} unanswered</p>` : ''}<div class="flex-between" style="gap:6px;margin-top:12px;"><button id="recapBtn" class="btn btn-outline btn-sm"><i class="fas fa-list-ul"></i> Recap</button><button id="closeScoreBtn" class="btn btn-primary btn-sm"><i class="fas fa-check"></i> Done</button></div></div>`;
   document.body.appendChild(modal);
   try {
@@ -1765,10 +1869,51 @@ function showFullRecap(results) {
 }
 
 function resolveSharedQuiz() {
-  const id = new URLSearchParams(window.location.search).get("q");
-  if (!id) return false;
-  const data = getQuizData(id);
-  if (!data || !data.questions || !data.questions.length) { showToast("Quiz not found", 'error'); return false; }
+  const params = new URLSearchParams(window.location.search);
+  let id = params.get("q");
+  let data = null;
+
+  // 1) Payload in hash (#s=...) so shared links open on other devices
+  const hash = window.location.hash || '';
+  const hashMatch = hash.match(/[#&]s=([^&]+)/);
+  if (hashMatch) {
+    try {
+      const raw = fromBase64Url(decodeURIComponent(hashMatch[1]));
+      const payload = raw ? JSON.parse(raw) : null;
+      data = expandSharePayload(payload);
+      if (data) {
+        id = id || (payload && payload.id) || generateId();
+        if (!getQuizData(id)) saveQuizData(id, data);
+        else data = getQuizData(id) || data;
+      }
+    } catch (e) { console.error('share decode', e); }
+  }
+
+  // 2) Already saved on this device
+  if (!data && id) data = getQuizData(id);
+
+  // 3) Query ?s= payload (fallback if hash stripped)
+  if (!data) {
+    const sParam = params.get('s');
+    if (sParam) {
+      try {
+        const raw = fromBase64Url(decodeURIComponent(sParam));
+        const payload = raw ? JSON.parse(raw) : null;
+        data = expandSharePayload(payload);
+        if (data) {
+          id = id || (payload && payload.id) || generateId();
+          if (!getQuizData(id)) saveQuizData(id, data);
+        }
+      } catch (e) {}
+    }
+  }
+
+  if (!id && !data) return false;
+  if (!data || !data.questions || !data.questions.length) {
+    showToast("Quiz not found. Open the full shared link from the creator.", 'error');
+    return false;
+  }
+
   currentShortId = id; currentQuizData = data;
   document.getElementById("stepHome").style.display = "none";
   document.getElementById("stepUpload").style.display = "none";
@@ -1778,7 +1923,8 @@ function resolveSharedQuiz() {
   document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
   ensurePlayZone();
   document.getElementById("panelPlay").classList.add("active");
-  document.getElementById("shareLinkInput").value = `${window.location.origin}${window.location.pathname}?q=${id}`;
+  const shareInp = document.getElementById("shareLinkInput");
+  if (shareInp) shareInp.value = makeShareUrl(id, data);
   isQuizStarted = false; isQuizActive = false; quizResults = null; playerAnswers = [];
   if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
   renderAssessmentFromData(data);
@@ -1807,7 +1953,7 @@ document.querySelectorAll("#tabBar .tab-btn").forEach(btn => {
         }
       }
     } else if (tab === "share") {
-      document.getElementById("shareLinkInput").value = `${window.location.origin}${window.location.pathname}?q=${currentShortId}`;
+      wireShareButtons(currentShortId, getQuizData(currentShortId) || currentQuizData);
       navigateTo('share');
     }
   });
@@ -1937,11 +2083,7 @@ document.getElementById("finalCreateBtn").onclick = () => {
     const pb = document.querySelector("#tabBar .tab-btn[data-tab='play']"); if (pb) pb.classList.add("active");
     document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
     document.getElementById("panelPlay").classList.add("active");
-    document.getElementById("shareLinkInput").value = `${window.location.origin}${window.location.pathname}?q=${id}`;
-    document.getElementById("copyLinkBtn").onclick = () => { const url = `${window.location.origin}${window.location.pathname}?q=${id}`; navigator.clipboard.writeText(url).then(() => showToast("Link copied!", 'success')).catch(() => { const inp = document.getElementById("shareLinkInput"); inp.select(); document.execCommand("copy"); showToast("Link copied!", 'success'); }); };
-    document.getElementById("shareWhatsApp").onclick = () => window.open(`https://wa.me/?text=Take my quiz! ${encodeURIComponent(`${window.location.origin}${window.location.pathname}?q=${id}`)}`, '_blank');
-    document.getElementById("shareTwitter").onclick = () => window.open(`https://twitter.com/intent/tweet?text=Take my quiz!&url=${encodeURIComponent(`${window.location.origin}${window.location.pathname}?q=${id}`)}`, '_blank');
-    document.getElementById("shareEmail").onclick = () => { window.location.href = `mailto:?subject=Quiz Invitation&body=Take my quiz: ${window.location.origin}${window.location.pathname}?q=${id}`; };
+    wireShareButtons(id, data);
     renderAssessmentFromData(data);
     pushState('play', { id });
     window.scrollTo({ top: 0, behavior: 'smooth' });
