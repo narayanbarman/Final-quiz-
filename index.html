@@ -121,7 +121,6 @@ textarea.input-field{resize:vertical;min-height:80px}
 .option-row.highlight-correct::after{content:"✓";position:absolute;right:16px;color:var(--success);font-weight:700;font-size:1.1rem}
 .option-row.disabled{pointer-events:none;opacity:.6}
 
-/* PROGRESS BAR CONTRAST IMPROVEMENTS */
 .progress-bar{background:#f1f3f5;border-radius:100px;height:8px;overflow:hidden;margin:10px 0 6px;border:1px solid rgba(0,0,0,0.08);box-shadow:inset 0 1px 3px rgba(0,0,0,0.05)}
 .progress-fill{background:linear-gradient(90deg,var(--primary),var(--primary-light));border-radius:100px;height:100%;transition:width .6s cubic-bezier(.34,1.56,.64,1);box-shadow:0 0 10px rgba(108,92,231,0.4)}
 
@@ -219,7 +218,6 @@ textarea.input-field{resize:vertical;min-height:80px}
 .tpl-opt{width:100%;padding:4px 6px;font-size:7px;font-weight:700;text-align:left;display:flex;align-items:center;gap:4px;border-radius:4px}
 .tpl-opt span{display:inline-flex;width:12px;height:12px;border-radius:50%;align-items:center;justify-content:center;font-size:6px;flex-shrink:0}
 
-/* ===== HOME MODE CARDS ===== */
 .home-mode-btn { display: flex; align-items: center; padding: 16px 14px; border-radius: 16px; border: 1.5px solid var(--border); background: #fff; cursor: pointer; transition: all 0.22s ease; text-align: left; width: 100%; font-family: inherit; }
 .home-mode-btn:hover { border-color: var(--primary-light); background: #fafbff; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(108,92,231,.12); }
 .home-mode-btn:active { transform: scale(0.985); }
@@ -227,17 +225,14 @@ textarea.input-field{resize:vertical;min-height:80px}
 .home-mode-btn .title { font-size: 1.02rem; font-weight: 800; color: var(--text); }
 .home-mode-btn .subtitle { font-size: 0.76rem; font-weight: 500; color: var(--text-secondary); margin-top: 2px; }
 
-/* ===== LIVE USERS BADGE ===== */
 .live-badge-container { display: flex; justify-content: center; margin-bottom: 20px; margin-top: -10px; }
 .live-badge { display: inline-flex; align-items: center; gap: 8px; background: #e6f9f1; color: #059669; padding: 6px 16px; border-radius: 40px; font-size: 0.75rem; font-weight: 700; border: 1px solid #a7f3d0; box-shadow: 0 4px 10px rgba(16,185,129,0.1); }
 .live-dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; animation: pulse-live 1.5s infinite; }
 
-/* ===== HELP FAB & MODAL ===== */
 .help-fab { position: fixed; bottom: 24px; right: 24px; width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: #fff; border: none; font-size: 1.5rem; cursor: pointer; box-shadow: 0 8px 24px rgba(108,92,231,0.4); z-index: 1500; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
 .help-fab:hover { transform: scale(1.1); box-shadow: 0 12px 32px rgba(108,92,231,0.5); }
 .help-fab:active { transform: scale(0.95); }
 
-/* === TEMPLATE PREVIEW THEMES === */
 .theme-t1{background:linear-gradient(180deg,#5eb3e4 0%,#8bd0f0 100%);padding:10px;border-radius:12px}
 .theme-t1 .tpl-q{background:#fff;border:2px solid #000;box-shadow:2px 2px 0 #000;font-family:'Bebas Neue',sans-serif;color:#000}
 .theme-t1 .tpl-opt{background:#ffd700;border:1px solid #000;color:#000;border-radius:0}
@@ -407,7 +402,6 @@ textarea.input-field{resize:vertical;min-height:80px}
 .theme-t42 .tpl-opt{background:#fff;color:#be123c;border-radius:12px;border:1px solid #fda4af}
 .theme-t42 .tpl-opt span{background:#f43f5e;color:#fff}
 
-/* Inner themes for Quiz Mode */
 .theme-t1 .question-card{background:#fff;border:4px solid #000;box-shadow:6px 6px 0 #000;border-radius:8px;padding:20px}
 .theme-t1 h3{color:#000!important;font-family:'Bebas Neue',sans-serif!important;font-size:1.6rem!important;margin-bottom:12px}
 .theme-t1 .option-row{background:#ffd700;border:2px solid #000;color:#000;border-radius:0;font-weight:900}
@@ -577,7 +571,6 @@ textarea.input-field{resize:vertical;min-height:80px}
 .theme-t42 .option-row{background:#fff;color:#be123c;border-radius:14px;border:1px solid #fda4af;font-weight:600}
 .theme-t42 .option-number{background:#f43f5e;color:#fff}
 
-/* VIDEO STUDIO */
 .vm-shell{position:relative;display:flex;flex-direction:column;gap:6px;height:calc(100vh - 56px);min-height:520px;padding:4px;background:#f8fafc;border-radius:14px;box-shadow:0 4px 24px rgba(15,23,42,.08);overflow:hidden;border:1px solid #e2e8f0}
 .vm-workspace{display:grid;grid-template-columns:58px 1fr 58px;gap:4px;flex:1;min-height:0;position:relative}
 .vm-rail{display:flex;flex-direction:column;gap:2px;padding:4px 2px;background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;overflow-y:auto;scrollbar-width:none;box-shadow:0 1px 3px rgba(0,0,0,.04);min-height:0;align-self:stretch}
@@ -738,7 +731,6 @@ textarea.input-field{resize:vertical;min-height:80px}
   </div>
   <div id="toast" class="toast"></div>
 
-  <!-- HOME VIEW: Mode Selection -->
   <div id="stepHome" class="card animate-in" style="display:none; text-align:center; padding: 28px 18px 24px;">
     <div class="live-badge-container" style="margin-top:-4px;margin-bottom:14px;">
       <div class="live-badge">
@@ -792,7 +784,6 @@ textarea.input-field{resize:vertical;min-height:80px}
     </div>
   </div>
 
-  <!-- STEP 1: UPLOAD -->
   <div id="stepUpload" class="card" style="display:none;">
     <div class="step-indicator">
       <span class="dot on"></span><span class="line"></span>
@@ -835,7 +826,6 @@ textarea.input-field{resize:vertical;min-height:80px}
     <button id="cancelCreateBtn" class="btn btn-outline btn-block mt-2"><i class="fas fa-arrow-left"></i> Back to Home</button>
   </div>
 
-  <!-- STEP 2: TEMPLATE + TIMER -->
   <div id="stepType" style="display:none;" class="card">
     <div class="step-indicator">
       <span class="dot on"></span><span class="line" style="background:var(--primary);"></span>
@@ -865,7 +855,6 @@ textarea.input-field{resize:vertical;min-height:80px}
     <button id="backFromTypeBtn" class="btn btn-outline btn-block mt-2"><i class="fas fa-arrow-left"></i> Back to questions</button>
   </div>
 
-  <!-- STEP 3: PLAY / SHARE / STATS -->
   <div id="createdArea" style="display:none;" class="card">
     <div class="created-ready-line" id="createdReadyLine" style="display:none;">
       <i class="fas fa-check-circle"></i>
@@ -908,10 +897,8 @@ textarea.input-field{resize:vertical;min-height:80px}
   </div>
 </div>
 
-<!-- HELP FAB -->
 <button class="help-fab" id="helpFab" title="Help & Support"><i class="fas fa-headset"></i></button>
 
-<!-- HELP MODAL -->
 <div class="modal-overlay" id="helpModal">
   <div class="modal-card" style="text-align:left; padding:20px;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
@@ -1000,7 +987,6 @@ function qcToast(msg, ms) {
   clearTimeout(t._tm); t._tm = setTimeout(() => t.classList.remove('show'), ms || 3000);
 }
 
-/* Global Confirm Modal */
 function showConfirmModal(message, onConfirm) {
   const modal = document.createElement("div");
   modal.className = "modal-overlay active";
@@ -1021,9 +1007,8 @@ function showConfirmModal(message, onConfirm) {
   };
 }
 
-/* Live Users Simulator */
 function initLiveUsers() {
-  const baseRealUsers = Math.floor(Math.random() * 30) + 5; // 5 to 35 real users
+  const baseRealUsers = Math.floor(Math.random() * 30) + 5;
   const extraFake = 93;
   let displayCount = baseRealUsers + extraFake;
   
@@ -1034,7 +1019,6 @@ function initLiveUsers() {
   
   updateCounter();
   
-  // Slight fluctuation to simulate live traffic
   setInterval(() => {
     const change = Math.floor(Math.random() * 5) - 2; 
     displayCount += change;
@@ -1043,7 +1027,6 @@ function initLiveUsers() {
   }, 8000);
 }
 
-/* Help System */
 document.getElementById('helpFab').onclick = () => document.getElementById('helpModal').classList.add('active');
 document.getElementById('closeHelpBtn').onclick = () => document.getElementById('helpModal').classList.remove('active');
 document.getElementById('helpModal').addEventListener('click', (e) => {
@@ -1129,9 +1112,7 @@ function shareLabel(data) {
 function getShareBase() {
   return window.location.href.split('?')[0].split('#')[0];
 }
-/** Upload quiz JSON → get tiny public id (no giant URL). */
 async function uploadShareBlob(payload) {
-  // 1) jsonblob.com
   try {
     const r = await fetch('https://jsonblob.com/api/jsonBlob', {
       method: 'POST',
@@ -1148,7 +1129,6 @@ async function uploadShareBlob(payload) {
       } catch (e) {}
     }
   } catch (e) {}
-  // 2) Fallback: npoint-style via jsonbin mirror not required
   return null;
 }
 async function fetchShareBlob(type, id) {
@@ -1175,6 +1155,43 @@ function makeLongShareUrl(id, data) {
   if (!payload) return base + '?q=' + encodeURIComponent(id || '');
   return base + '?q=' + encodeURIComponent(id || payload.i) + '#s=' + toBase64Url(JSON.stringify(payload));
 }
+
+/* ═══════════════ SHORT LINK CORE ═══════════════
+   Problem: jsonblob.com can fail (CORS/rate limit) so we fall back to a very
+   long #s=<base64> URL. Solution: pipe that final URL through a URL shortener
+   (is.gd — free, CORS-enabled, no API key). Result: https://is.gd/abc123
+   The WhatsApp/X/Email share buttons automatically pick up the short URL. */
+
+/** Shorten a URL using is.gd (free, CORS-friendly, no key). Falls back to input on error. */
+async function shortenUrl(longUrl) {
+  if (!longUrl) return longUrl;
+  // Skip if it's already short (nice for repeat calls)
+  try {
+    const u = new URL(longUrl);
+    if (u.hostname === 'is.gd' || u.hostname === 'v.gd') return longUrl;
+  } catch (_) {}
+  try {
+    const api = 'https://is.gd/create.php?format=simple&url=' + encodeURIComponent(longUrl);
+    const res = await fetch(api, { method: 'GET', mode: 'cors', cache: 'no-store' });
+    if (res.ok) {
+      const short = (await res.text()).trim();
+      if (short.startsWith('http') && short.length < 80) return short;
+    }
+  } catch (e) {
+    console.warn('is.gd shortener failed:', e);
+  }
+  // Secondary fallback: v.gd (same API)
+  try {
+    const api2 = 'https://v.gd/create.php?format=simple&url=' + encodeURIComponent(longUrl);
+    const res2 = await fetch(api2, { method: 'GET', mode: 'cors', cache: 'no-store' });
+    if (res2.ok) {
+      const short2 = (await res2.text()).trim();
+      if (short2.startsWith('http') && short2.length < 80) return short2;
+    }
+  } catch (_) {}
+  return longUrl;
+}
+
 const _shareLinkCache = {};
 async function ensureShareLink(id, data) {
   const cacheKey = id || 'x';
@@ -1190,21 +1207,24 @@ async function ensureShareLink(id, data) {
   const payload = buildSharePayload({ ...(data || getQuizData(id) || {}), id });
   if (!payload) return makeLongShareUrl(id, data);
 
-  // Upload → always-short URL like https://site/?q=abc&j=xyz
+  // 1) Try jsonblob upload → base short URL like /?q=abc&j=xyz
+  let baseUrl;
   const blob = await uploadShareBlob(payload);
-  let url;
   if (blob && blob.id) {
-    url = makeShortShareUrl(id || payload.i, blob);
+    baseUrl = makeShortShareUrl(id || payload.i, blob);
   } else {
-    // last resort: long hash link
-    url = makeLongShareUrl(id, data);
+    // 2) Fallback: long hash URL — but we will shorten that too
+    baseUrl = makeLongShareUrl(id, data);
   }
-  _shareLinkCache[cacheKey] = url;
-  try { localStorage.setItem('qcShare:' + cacheKey, url); } catch (e) {}
-  return url;
+
+  // 3) Pipe through is.gd → https://is.gd/abc123
+  const shortUrl = await shortenUrl(baseUrl);
+
+  _shareLinkCache[cacheKey] = shortUrl;
+  try { localStorage.setItem('qcShare:' + cacheKey, shortUrl); } catch (e) {}
+  return shortUrl;
 }
 function makeShareUrl(id, data) {
-  // Sync fallback (prefer cached short)
   const cacheKey = id || 'x';
   if (_shareLinkCache[cacheKey]) return _shareLinkCache[cacheKey];
   try {
@@ -1250,7 +1270,7 @@ function wireShareButtons(id, data) {
   };
   bind();
 
-  // Always refresh short link fast in background
+  // Async: resolve short link and re-bind all share buttons to use it
   ensureShareLink(id, d).then(url => {
     shareUrl = url;
     if (inp) inp.value = url;
@@ -1716,7 +1736,6 @@ function buildQuizHtml(data, tplId) {
   const questions = data.questions;
   let timerHtml = '';
   if (data.timerEnabled) timerHtml = `<div class="timer-badge total-timer" id="quizTotalTimer"><i class="fas fa-clock"></i> ${formatTime(data.timerSeconds * questions.length)}</div>`;
-  // Note: Added explicit text-shadow and color to title for better contrast
   return `<div class="theme-${tplId}" style="border-radius:var(--radius);padding:14px;">
     <div class="flex-between" style="margin-bottom:8px;background:rgba(255,255,255,.82);backdrop-filter:blur(8px);border-radius:60px;padding:6px 14px;box-shadow:0 2px 10px rgba(0,0,0,0.05);">
       <div style="display:flex;align-items:center;gap:8px;">${data.logo ? `<img src="${data.logo}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;" />` : ''}<span style="font-weight:800;color:#1e293b;font-size:.85rem;text-shadow:0 1px 2px rgba(0,0,0,0.1);">${data.title}</span></div>
@@ -1919,7 +1938,6 @@ function startTotalTimer(data) {
   const runId = (data && data._runId) || (data._runId = Date.now() + Math.random());
   timerInterval = setInterval(() => {
     if (!isQuizActive) { clearInterval(timerInterval); timerInterval = null; return; }
-    // If user left play view, stop silently
     const created = document.getElementById('createdArea');
     const play = document.getElementById('panelPlay');
     if (!created || created.style.display === 'none' || (play && !play.classList.contains('active'))) {
@@ -1936,7 +1954,6 @@ function startTotalTimer(data) {
   }, 1000);
 }
 function showTimeOverModal(data) {
-  // Don't interrupt if user already left the assessment
   if (!isQuizStarted && !document.getElementById('quizTotalTimer') && !document.getElementById('mockTotalTimer')) return;
   const created = document.getElementById('createdArea');
   if (!created || created.style.display === 'none') return;
@@ -1997,7 +2014,6 @@ async function resolveSharedQuiz() {
   let data = null;
   const jId = params.get("j");
 
-  // 1) Short link: ?j=jsonblobId  (preferred)
   if (jId) {
     try {
       showToast('Opening quiz…', 'success', 1200);
@@ -2010,7 +2026,6 @@ async function resolveSharedQuiz() {
     } catch (e) { console.error('blob load', e); }
   }
 
-  // 2) Payload in hash (#s=...)
   if (!data) {
     const hash = window.location.hash || '';
     const hashMatch = hash.match(/[#&]s=([^&]+)/);
@@ -2028,10 +2043,8 @@ async function resolveSharedQuiz() {
     }
   }
 
-  // 3) Already on this device
   if (!data && id) data = getQuizData(id);
 
-  // 4) Query ?s= base64 payload
   if (!data) {
     const sParam = params.get('s');
     if (sParam) {
@@ -2097,7 +2110,6 @@ document.querySelectorAll("#tabBar .tab-btn").forEach(btn => {
   });
 });
 
-/* Home Mode Buttons */
 document.querySelectorAll(".home-mode-btn").forEach(btn => {
   btn.addEventListener("click", function() {
     currentMode = this.dataset.mode;
@@ -2209,7 +2221,7 @@ document.getElementById("finalCreateBtn").onclick = () => {
     const id = generateId();
     const data = { title: quizTitle, questions: JSON.parse(JSON.stringify(questionsBank)), mode: currentMode, templateId: selectedTemplate.id, logo: quizLogo, timerEnabled, timerSeconds, createdAt: Date.now() };
     saveQuizData(id, data);
-    // Start short-link creation immediately so Share is ready
+    // Kick off short-link creation immediately so Share is ready
     try { ensureShareLink(id, data); } catch (e) {}
     currentShortId = id; currentQuizData = data;
     isQuizStarted = false; isQuizActive = false; quizResults = null; playerAnswers = [];
@@ -2271,7 +2283,7 @@ window.navigateTo = navigateTo;
 window.showCreateView = showCreateView;
 window.showDashboardView = showDashboardView;
 
-/* ═══════ COLOR PICKER ═══════ */
+/* ═══════════════ COLOR PICKER ═══════════════ */
 const CP_PRESETS = ['#ffffff','#f8fafc','#e2e8f0','#94a3b8','#475569','#1e293b','#0f172a','#000000','#ef4444','#f97316','#f59e0b','#eab308','#84cc16','#22c55e','#10b981','#14b8a6','#06b6d4','#0ea5e9','#3b82f6','#6366f1','#8b5cf6','#a855f7','#d946ef','#ec4899','#fecaca','#fed7aa','#fef08a','#bbf7d0','#a5f3fc','#bfdbfe','#ddd6fe','#fbcfe8'];
 let cpLastHue = 210; const cpState = { h: 210, s: 1, v: 1, hex: '#1a73e8' };
 let cpCB = { onInput: null, onReset: null }; let cpInitialHex = '#1a73e8';
@@ -2288,7 +2300,7 @@ function cpApplyHex(hex) { const rgb = cpHexToRgb(hex); if (!rgb) return; const 
 function openColorPicker(opts) { cpInit(); const m = document.getElementById('cpModal'); document.getElementById('cpTitle').textContent = (opts && opts.title) || 'Pick a color'; cpInitialHex = (opts && opts.current) || '#1a73e8'; cpCB.onInput = (opts && opts.onInput) || null; cpCB.onReset = (opts && opts.onReset) || null; document.getElementById('cpPrevOld').style.background = cpInitialHex; cpApplyHex(cpInitialHex); requestAnimationFrame(() => cpRender()); m.classList.add('active'); document.getElementById('cpResetBtn').onclick = () => { if (cpCB.onReset) cpCB.onReset(); else cpApplyHex(cpInitialHex); }; }
 function closeColorPicker() { document.getElementById('cpModal').classList.remove('active'); cpCB.onInput = null; cpCB.onReset = null; }
 
-/* ═══════ SOUND ENGINE + TTS ═══════ */
+/* ═══════════════ SOUND ENGINE + TTS ═══════════════ */
 function _tone(ctx, t, out, freq, dur, type, gain, freqEnd) { const o = ctx.createOscillator(), g = ctx.createGain(); o.type = type || 'sine'; o.frequency.setValueAtTime(freq, t); if (freqEnd) o.frequency.exponentialRampToValueAtTime(freqEnd, t + dur); g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(gain || 0.3, t + 0.008); g.gain.exponentialRampToValueAtTime(0.0001, t + dur); o.connect(g).connect(out); o.start(t); o.stop(t + dur + 0.05); }
 function _noise(ctx, t, out, dur, gain, ff) { const buf = ctx.createBuffer(1, Math.max(1, Math.floor(ctx.sampleRate * dur)), ctx.sampleRate); const d = buf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; const s = ctx.createBufferSource(); s.buffer = buf; const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = ff || 1200; f.Q.value = 1.2; const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(gain || 0.2, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + dur); s.connect(f).connect(g).connect(out); s.start(t); s.stop(t + dur + 0.02); }
 const SFX_LIB = {
@@ -2336,7 +2348,7 @@ const TTS = {
 TTS.load();
 function detectCorrectAnswerPrefix(text) { if (!text) return 'Correct answer'; const t = String(text); if (/[\u0980-\u09FF]/.test(t)) return 'সঠিক উত্তর'; if (/[\u0900-\u097F]/.test(t)) return 'सही उत्तर'; if (/[\u0600-\u06FF]/.test(t)) return 'الإجابة الصحيحة'; if (/[\u0B80-\u0BFF]/.test(t)) return 'சரியான பதில்'; if (/[\u0C00-\u0C7F]/.test(t)) return 'సరైన సమాధానం'; if (/[\u0C80-\u0CFF]/.test(t)) return 'ಸರಿಯಾದ ಉತ್ತರ'; if (/[\u0D00-\u0D7F]/.test(t)) return 'ശരിയായ ഉത്തരം'; if (/[\u0A80-\u0AFF]/.test(t)) return 'સાચો જવાબ'; if (/[\u0A00-\u0A7F]/.test(t)) return 'ਸਹੀ ਜਵਾਬ'; if (/[\u4E00-\u9FFF]/.test(t)) return '正确答案'; if (/[\u3040-\u30FF]/.test(t)) return '正解'; if (/[\uAC00-\uD7AF]/.test(t)) return '정답'; if (/[\u0400-\u04FF]/.test(t)) return 'Правильный ответ'; if (/[\u0E00-\u0E7F]/.test(t)) return 'คำตอบที่ถูกต้อง'; if (/[\u0370-\u03FF]/.test(t)) return 'Σωστή απάντηση'; if (/[\u0590-\u05FF]/.test(t)) return 'התשובה הנכונה'; return 'Correct answer'; }
 
-/* ═══════ VIDEO MAKER — STATE ═══════ */
+/* ═══════════════ VIDEO MAKER ═══════════════ */
 let vmSound = { ttsEnabled: false, ttsReadQ: true, ttsReadO: true, ttsReadA: true, ttsVoice: null, ttsRate: 1.0, ttsPitch: 1.0, qSfx: 'q_chime', oSfx: 'o_bubble', aSfx: 'a_tada', sfxVolume: 0.8, musicVolume: 0.4 };
 let vmSoundRuntime = { lastSceneIdx: -1, playedOptions: {} };
 let vmMuted = false;
@@ -2348,7 +2360,6 @@ function vmEaseOutBack(p) { const c1 = 1.1, c3 = c1 + 1; return 1 + c3 * Math.po
 function vmFormatTime(sec) { const m = Math.floor(sec / 60); const s = Math.floor(sec % 60); return `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`; }
 function estimateSpeechDuration(text, rate) { if (!text) return 0; const s = String(text), r = (rate && rate > 0) ? rate : 1.0; let cps = 13; if (/[\u0980-\u09FF\u0900-\u097F\u0B80-\u0BFF\u0C00-\u0C7F\u0C80-\u0CFF\u0D00-\u0D7F\u0A80-\u0AFF\u0A00-\u0A7F\u0600-\u06FF]/.test(s)) cps = 9; if (/[\u4E00-\u9FFF\u3040-\u30FF\uAC00-\uD7AF]/.test(s)) cps = 4; return (s.length / (cps * r)) + 0.5; }
 
-// Helper for safe contrast text
 function getSafeTextColor(hex, defaultHex = '#1e293b') {
   if (!hex) return defaultHex;
   let h = hex.replace('#', '');
@@ -2904,14 +2915,12 @@ function vmDrawTimer(ctx, cx, topY, t, th, u, sceneDur) {
   const timeStr = timeLeft.toString().padStart(2, '0');
 
   const baseCol = th.accent;
-  // Stronger contrast on light/white backgrounds
   const bgCol = th.light ? 'rgba(15,23,42,0.18)' : 'rgba(255,255,255,0.22)';
   const trackStroke = th.light ? 'rgba(15,23,42,0.28)' : 'rgba(255,255,255,0.35)';
   const trackFill = th.light ? 'rgba(15,23,42,0.08)' : 'rgba(255,255,255,0.12)';
 
   if (vmTimerStyle === 'bar') {
     const tbH = 10 * u, tbW = 1080 * u * 0.62, tbX = cx - tbW / 2;
-    // Track with border for visibility on white
     vmRR(ctx, tbX, topY, tbW, tbH, tbH / 2);
     ctx.fillStyle = trackFill; ctx.fill();
     ctx.strokeStyle = trackStroke; ctx.lineWidth = 1.5 * u; ctx.stroke();
@@ -2920,7 +2929,6 @@ function vmDrawTimer(ctx, cx, topY, t, th, u, sceneDur) {
       const tg = ctx.createLinearGradient(tbX, 0, tbX + tbW, 0);
       tg.addColorStop(0, baseCol); tg.addColorStop(1, th.accent2 || baseCol);
       ctx.fillStyle = tg; ctx.fill();
-      // subtle highlight
       ctx.fillStyle = 'rgba(255,255,255,0.25)';
       vmRR(ctx, tbX, topY, Math.max(tbH, tbW * tR), tbH * 0.4, tbH / 2); ctx.fill();
     }
@@ -2935,21 +2943,18 @@ function vmDrawTimer(ctx, cx, topY, t, th, u, sceneDur) {
       tg.addColorStop(0, baseCol); tg.addColorStop(1, th.accent2 || baseCol);
       ctx.fillStyle = tg; ctx.fill();
     }
-    // time text inside thick bar
     ctx.fillStyle = getSafeTextColor(baseCol, th.light ? '#0f172a' : '#ffffff');
     ctx.font = `800 ${13 * u}px ${vmFontStack()}`;
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillText(timeStr + 's', cx, topY + tbH / 2 + 1);
   } else if (vmTimerStyle === 'dualbar') {
     const gap = 5 * u, h1 = 6 * u, h2 = 6 * u, tbW = 1080 * u * 0.60, tbX = cx - tbW / 2;
-    // top track
     vmRR(ctx, tbX, topY, tbW, h1, h1 / 2);
     ctx.fillStyle = trackFill; ctx.fill();
     if (tR > 0) {
       vmRR(ctx, tbX, topY, Math.max(h1, tbW * tR), h1, h1 / 2);
       ctx.fillStyle = baseCol; ctx.fill();
     }
-    // bottom track (slightly delayed look or same)
     vmRR(ctx, tbX, topY + h1 + gap, tbW, h2, h2 / 2);
     ctx.fillStyle = trackFill; ctx.fill();
     if (tR > 0) {
@@ -2976,7 +2981,6 @@ function vmDrawTimer(ctx, cx, topY, t, th, u, sceneDur) {
   } else if (vmTimerStyle === 'ring') {
     const r = 26 * u, ringCX = cx, ringCY = topY + r;
     const thWidth = 7 * u;
-    // background ring with stronger contrast
     ctx.beginPath();
     ctx.arc(ringCX, ringCY, r, 0, Math.PI * 2);
     ctx.strokeStyle = trackStroke;
@@ -3012,7 +3016,6 @@ function vmDrawTimer(ctx, cx, topY, t, th, u, sceneDur) {
   } else if (vmTimerStyle === 'pie') {
     const r = 36 * u, pX = cx, pY = topY + r + 4 * u;
     const ringW = 9 * u;
-    // Soft outer glow
     ctx.beginPath();
     ctx.arc(pX, pY, r + 6 * u, 0, Math.PI * 2);
     const glow = ctx.createRadialGradient(pX, pY, r * 0.5, pX, pY, r + 8 * u);
@@ -3020,7 +3023,6 @@ function vmDrawTimer(ctx, cx, topY, t, th, u, sceneDur) {
     glow.addColorStop(1, 'rgba(0,0,0,0)');
     ctx.fillStyle = glow; ctx.fill();
 
-    // Track ring (full circle, high contrast)
     ctx.beginPath();
     ctx.arc(pX, pY, r, 0, Math.PI * 2);
     ctx.strokeStyle = th.light ? 'rgba(15,23,42,0.12)' : 'rgba(255,255,255,0.18)';
@@ -3028,11 +3030,9 @@ function vmDrawTimer(ctx, cx, topY, t, th, u, sceneDur) {
     ctx.lineCap = 'round';
     ctx.stroke();
 
-    // Colorful progress arc
     if (tR > 0.005) {
       const start = -Math.PI / 2;
       const end = start + (Math.PI * 2 * tR);
-      // Color shifts: green → yellow → orange → red as time runs out
       let c1 = '#22c55e', c2 = '#84cc16';
       if (tR < 0.35) { c1 = '#ef4444'; c2 = '#f97316'; }
       else if (tR < 0.55) { c1 = '#f59e0b'; c2 = '#eab308'; }
@@ -3046,7 +3046,6 @@ function vmDrawTimer(ctx, cx, topY, t, th, u, sceneDur) {
       ctx.lineCap = 'round';
       ctx.stroke();
 
-      // Inner accent stroke for polish
       ctx.beginPath();
       ctx.arc(pX, pY, r, start, end);
       ctx.strokeStyle = c2;
@@ -3055,7 +3054,6 @@ function vmDrawTimer(ctx, cx, topY, t, th, u, sceneDur) {
       ctx.stroke();
     }
 
-    // Center disc
     ctx.beginPath();
     ctx.arc(pX, pY, r - ringW * 0.75, 0, Math.PI * 2);
     ctx.fillStyle = th.light ? 'rgba(255,255,255,0.97)' : 'rgba(15,23,42,0.92)';
@@ -3064,14 +3062,12 @@ function vmDrawTimer(ctx, cx, topY, t, th, u, sceneDur) {
     ctx.lineWidth = 1.5 * u;
     ctx.stroke();
 
-    // Time number — large & bold
     const numColor = tR < 0.35 ? '#ef4444' : (tR < 0.55 ? '#f59e0b' : (th.light ? '#0f172a' : '#ffffff'));
     ctx.fillStyle = numColor;
     ctx.font = `900 ${22 * u}px ${vmFontStack()}`;
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillText(timeStr, pX, pY + 1 * u);
   } else if (vmTimerStyle === 'line') {
-    // Minimal thin line with end cap
     const tbH = 5 * u, tbW = 1080 * u * 0.65, tbX = cx - tbW / 2;
     ctx.beginPath();
     ctx.moveTo(tbX, topY + tbH / 2);
@@ -3095,11 +3091,9 @@ function vmDrawTimer(ctx, cx, topY, t, th, u, sceneDur) {
 function vmDrawQuestion(ctx, W, H, t, th, q, idx, total, reveal, sceneDur) {
   const u = Math.min(W, H) / 1080, pad = W * 0.075, maxW = W - pad * 2, cx = W / 2;
   const prog = (idx + (reveal ? 1 : 0.55)) / total;
-  // Stronger track for visibility on white / light backgrounds
   ctx.fillStyle = th.light ? 'rgba(15,23,42,0.14)' : 'rgba(255,255,255,0.18)'; ctx.fillRect(0, 0, W, 10 * u);
   ctx.fillStyle = th.light ? 'rgba(15,23,42,0.06)' : 'rgba(0,0,0,0.15)'; ctx.fillRect(0, 10 * u, W, 1.5 * u);
   const pg = ctx.createLinearGradient(0, 0, W, 0); pg.addColorStop(0, th.accent); pg.addColorStop(1, th.accent2 || th.accent); ctx.fillStyle = pg; ctx.fillRect(0, 0, W * vmClamp(prog, 0, 1), 10 * u);
-  // slight shine on progress
   if (prog > 0.02) {
     ctx.fillStyle = 'rgba(255,255,255,0.22)';
     ctx.fillRect(0, 0, W * vmClamp(prog, 0, 1), 3.5 * u);
@@ -3109,7 +3103,6 @@ function vmDrawQuestion(ctx, W, H, t, th, q, idx, total, reveal, sceneDur) {
   const label = reveal ? `ANSWER  ${idx + 1} / ${total}` : `QUESTION  ${idx + 1} / ${total}`;
   const pillW = ctx.measureText(label).width + 74 * u;
   
-  // FIXED: Use robust contrasting colors for the pill
   const pillBg = th.light ? 'rgba(255,255,255,0.95)' : 'rgba(15,23,42,0.85)';
   const pillStroke = th.light ? 'rgba(15,23,42,0.15)' : 'rgba(255,255,255,0.25)';
   const pillText = reveal ? '#22c55e' : getSafeTextColor(th.accent, th.light ? '#1e293b' : '#ffffff');
@@ -3136,10 +3129,8 @@ function vmDrawQuestion(ctx, W, H, t, th, q, idx, total, reveal, sceneDur) {
   const boxPadY = 22 * u, boxY = qTop - boxPadY, boxH = qMaxH + boxPadY * 2, boxX = pad + 10 * u, boxW = maxW - 20 * u;
   ctx.save(); ctx.globalAlpha = reveal ? 1 : qAnim.alpha; vmDrawQuestionBox(ctx, boxX, boxY, boxW, boxH, th); ctx.restore();
   ctx.save(); ctx.globalAlpha = qAnim.alpha; ctx.translate(cx + qAnim.offsetX * u, qTop + qMaxH / 2 + qAnim.offsetY * u); ctx.scale(qAnim.scale, qAnim.scale); if (qAnim.rotate) ctx.rotate(qAnim.rotate * Math.PI / 180); ctx.translate(-cx, -(qTop + qMaxH / 2)); ctx.font = `900 ${qFit.size}px ${vmFontStack()}`; const useWhite = vmQuestionBox === 'gradient' || vmQuestionBox === 'dark' || vmQuestionBox === 'accent'; ctx.fillStyle = useWhite ? '#ffffff' : vmGetQColor(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.shadowColor = useWhite ? 'rgba(0,0,0,.5)' : (th.light ? 'rgba(15,23,42,.18)' : 'rgba(0,0,0,.55)'); ctx.shadowBlur = 20 * u; const lh = qFit.size * 1.2;
-  // Typewriter: re-wrap visible portion so text grows naturally
   const qLines = (qAnim.typewriter !== undefined && qAnim.typewriter < 1) ? vmWrap(ctx, qDisplayText, maxW - 40 * u) : qFit.lines;
   qLines.forEach((l, i) => ctx.fillText(l, cx, qTop + qMaxH / 2 - (Math.max(qLines.length, 1) - 1) * lh / 2 + i * lh));
-  // Cursor blink while typing
   if (!reveal && qAnim.typewriter !== undefined && qAnim.typewriter < 0.98) {
     const last = qLines[qLines.length - 1] || '';
     const cursorX = cx + (ctx.measureText(last).width / 2) + 6 * u;
@@ -3417,7 +3408,7 @@ function vmOpenFlyout(side, key) {
 function vmCloseAllFlyouts() { document.querySelectorAll('.vm-flyout').forEach(f => f.classList.remove('open')); document.querySelectorAll('.vm-rail-btn').forEach(t => t.classList.remove('active')); const bd = document.getElementById('vmBackdrop'); if (bd) bd.classList.remove('on'); }
 function vmToggleMute() { vmMuted = !vmMuted; SE.setMasterMute(vmMuted); const mb = document.getElementById('vmMuteBtn'); if (mb) { mb.innerHTML = vmMuted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>'; mb.classList.toggle('muted', vmMuted); } vmSetStatusDefault(); }
 
-/* ═══════ VIDEO STUDIO — UI ═══════ */
+/* ═══════════════ VIDEO STUDIO ═══════════════ */
 function renderVideoStudio(data) {
   vmQuestions = data.q || [];
   vmTitle = (data.quizTitle || '').trim();
@@ -3434,7 +3425,6 @@ function renderVideoStudio(data) {
   vmSound = { ttsEnabled: false, ttsReadQ: true, ttsReadO: true, ttsReadA: true, ttsVoice: null, ttsRate: 1.0, ttsPitch: 1.0, qSfx: 'q_chime', oSfx: 'o_bubble', aSfx: 'a_tada', sfxVolume: 0.8, musicVolume: 0.4 };
 
   const container = document.getElementById('renderZone');
-  // Expand app width + hide help FAB so it doesn't cover panels
   const appEl = document.getElementById('app');
   if (appEl) appEl.classList.add('vm-expanded');
   const helpFab = document.getElementById('helpFab');
