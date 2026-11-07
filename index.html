@@ -1127,7 +1127,6 @@ function makeShareUrl(id, data) {
   const payload = buildSharePayload({ ...(data || getQuizData(id) || {}), id });
   if (!payload) return `${base}?q=${encodeURIComponent(id || '')}`;
   const encoded = toBase64Url(JSON.stringify(payload));
-  // Short query id + compact hash payload
   return `${base}?q=${encodeURIComponent(id || payload.i)}#s=${encoded}`;
 }
 function shareLabel(data) {
@@ -1136,31 +1135,89 @@ function shareLabel(data) {
   const n = (d.questions && d.questions.length) || 0;
   return { title, n, line: title + ' (' + n + ')' };
 }
+const _shortUrlCache = {};
+async function shortenShareUrl(longUrl) {
+  if (!longUrl) return longUrl;
+  if (_shortUrlCache[longUrl]) return _shortUrlCache[longUrl];
+  // Try free shorteners (full URL incl. hash is encoded in query — fragment is preserved)
+  const tries = [
+    async () => {
+      const r = await fetch('https://is.gd/create.php?format=json&url=' + encodeURIComponent(longUrl));
+      const j = await r.json();
+      if (j && j.shorturl) return j.shorturl;
+      throw new Error(j && j.errormessage || 'is.gd fail');
+    },
+    async () => {
+      const r = await fetch('https://v.gd/create.php?format=json&url=' + encodeURIComponent(longUrl));
+      const j = await r.json();
+      if (j && j.shorturl) return j.shorturl;
+      throw new Error('v.gd fail');
+    }
+  ];
+  for (const fn of tries) {
+    try {
+      const short = await fn();
+      if (short && /^https?:\/\//i.test(short)) {
+        _shortUrlCache[longUrl] = short;
+        return short;
+      }
+    } catch (e) { /* try next */ }
+  }
+  return longUrl;
+}
 function wireShareButtons(id, data) {
   const d = data || getQuizData(id) || currentQuizData || {};
-  const url = makeShareUrl(id, d);
+  const longUrl = makeShareUrl(id, d);
   const { title, n, line } = shareLabel(d);
   const titleEl = document.getElementById('shareTitleText');
   const metaEl = document.getElementById('shareMetaText');
   if (titleEl) titleEl.textContent = title;
   if (metaEl) metaEl.textContent = n + (n === 1 ? ' question' : ' questions');
   const inp = document.getElementById('shareLinkInput');
-  if (inp) inp.value = url;
-  // Short WhatsApp / social text — title + count, then link only
-  const shortMsg = line + '\n' + url;
+  if (inp) inp.value = longUrl;
+
+  // Shared mutable ref — updated once short URL is ready
+  let shareUrl = longUrl;
+  const msg = () => line + '\n' + shareUrl;
+
   const copyBtn = document.getElementById('copyLinkBtn');
-  if (copyBtn) copyBtn.onclick = () => {
-    navigator.clipboard.writeText(url).then(() => showToast('Link copied!', 'success')).catch(() => {
-      if (inp) { inp.select(); document.execCommand('copy'); }
-      showToast('Link copied!', 'success');
-    });
-  };
+  if (copyBtn) {
+    copyBtn.disabled = false;
+    copyBtn.onclick = () => {
+      navigator.clipboard.writeText(shareUrl).then(() => showToast('Copied: ' + line, 'success')).catch(() => {
+        if (inp) { inp.value = shareUrl; inp.select(); document.execCommand('copy'); }
+        showToast('Copied!', 'success');
+      });
+    };
+  }
   const wa = document.getElementById('shareWhatsApp');
-  if (wa) wa.onclick = () => window.open('https://wa.me/?text=' + encodeURIComponent(shortMsg), '_blank');
+  if (wa) {
+    wa.disabled = true;
+    wa.innerHTML = '<i class="fab fa-whatsapp"></i> …';
+    wa.onclick = () => window.open('https://wa.me/?text=' + encodeURIComponent(msg()), '_blank');
+  }
   const tw = document.getElementById('shareTwitter');
-  if (tw) tw.onclick = () => window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(line) + '&url=' + encodeURIComponent(url), '_blank');
+  if (tw) tw.onclick = () => window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(line) + '&url=' + encodeURIComponent(shareUrl), '_blank');
   const em = document.getElementById('shareEmail');
-  if (em) em.onclick = () => { window.location.href = 'mailto:?subject=' + encodeURIComponent(line) + '&body=' + encodeURIComponent(shortMsg); };
+  if (em) em.onclick = () => { window.location.href = 'mailto:?subject=' + encodeURIComponent(line) + '&body=' + encodeURIComponent(msg()); };
+
+  // Create a tiny short link so WhatsApp stays clean: "History quiz (5)\nhttps://is.gd/xxxx"
+  shortenShareUrl(longUrl).then(short => {
+    shareUrl = short || longUrl;
+    if (inp) inp.value = shareUrl;
+    if (wa) {
+      wa.disabled = false;
+      wa.innerHTML = '<i class="fab fa-whatsapp"></i> WhatsApp';
+    }
+    if (metaEl && shareUrl !== longUrl) {
+      metaEl.textContent = n + (n === 1 ? ' question' : ' questions') + ' · short link ready';
+    }
+  }).catch(() => {
+    if (wa) {
+      wa.disabled = false;
+      wa.innerHTML = '<i class="fab fa-whatsapp"></i> WhatsApp';
+    }
+  });
 }
 
 function stopActiveAssessment() {
