@@ -3,15 +3,27 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover" />
-<title>QuizCraft — Create, Share & Track Quizzes + Video Studio</title>
+<title>QuizCraft — Create Beautiful Quizzes, Mock Tests & Short Videos</title>
+<meta name="description" content="Create interactive quizzes, exam-style mock tests, and stunning short videos in seconds. Free, private, works offline. Share with anyone." />
+<meta name="theme-color" content="#6c5ce7" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;600;700;800;900&family=Bebas+Neue&family=Playfair+Display:wght@700;900&family=Anton&family=Righteous&family=Montserrat:wght@500;700;800;900&family=Oswald:wght@500;700&family=Raleway:wght@600;800;900&family=Roboto:wght@500;700;900&family=Lato:wght@700;900&family=Rubik:wght@600;800;900&family=Barlow:wght@700;800;900&family=Space+Grotesk:wght@600;700&family=DM+Sans:wght@700;900&family=Outfit:wght@600;800;900&family=Nunito:wght@700;900&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--primary:#6c5ce7;--primary-dark:#5a4bd1;--primary-light:#a29bfe;--success:#00b894;--danger:#fd79a8;--warning:#fdcb6e;--bg:#f8f9fe;--card:#ffffff;--text:#2d3436;--text-secondary:#636e72;--border:#e9ecef;--shadow:0 8px 32px rgba(108,92,231,.12);--shadow-hover:0 12px 48px rgba(108,92,231,.20);--radius:20px;--radius-sm:12px;--transition:.35s cubic-bezier(.34,1.56,.64,1)}
-body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);min-height:100vh;color:var(--text);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+:root{
+  --primary:#6c5ce7;--primary-dark:#5a4bd1;--primary-light:#a29bfe;
+  --success:#00b894;--danger:#fd79a8;--warning:#fdcb6e;
+  --bg:#f5f6fb;--card:#ffffff;--text:#1e293b;--text-secondary:#64748b;
+  --border:#e2e8f0;--shadow:0 4px 24px rgba(108,92,231,.10);--shadow-hover:0 12px 40px rgba(108,92,231,.18);
+  --radius:20px;--radius-sm:12px;--transition:.28s cubic-bezier(.34,1.56,.64,1);
+  --focus-ring:0 0 0 3px rgba(108,92,231,.35);
+}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);min-height:100vh;color:var(--text);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;line-height:1.5}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:none;box-shadow:var(--focus-ring)}
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--primary-light);border-radius:10px}
@@ -19,12 +31,25 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:
 @media(min-width:640px){.app-full{max-width:680px;padding:16px 14px}}
 @media(min-width:768px){.app-full{max-width:760px;padding:20px 18px}}
 @media(min-width:1024px){.app-full{max-width:840px;padding:28px 24px}}
-.brand-header{display:flex;align-items:center;gap:12px;padding:8px 4px 16px;border-bottom:2px solid var(--border);margin-bottom:16px}
-.brand-header .logo{display:flex;align-items:center;justify-content:center;width:44px;height:44px;background:linear-gradient(135deg,var(--primary),var(--primary-light));border-radius:14px;color:#fff;font-size:1.4rem;box-shadow:0 4px 16px rgba(108,92,231,.25);flex-shrink:0}
-.brand-header .brand-name{font-size:1.4rem;font-weight:800;color:var(--text);letter-spacing:-.5px}
+.brand-header{display:flex;align-items:center;gap:12px;padding:10px 4px 18px;border-bottom:1px solid var(--border);margin-bottom:18px}
+.brand-header .logo{display:flex;align-items:center;justify-content:center;width:46px;height:46px;background:linear-gradient(135deg,var(--primary),#8b7cf7);border-radius:14px;color:#fff;font-size:1.35rem;box-shadow:0 6px 20px rgba(108,92,231,.28);flex-shrink:0}
+.brand-header .brand-name{font-size:1.45rem;font-weight:800;color:var(--text);letter-spacing:-.6px}
 .brand-header .brand-name span{color:var(--primary)}
-.brand-header .brand-tagline{font-size:.65rem;color:var(--text-secondary);font-weight:500;margin-left:auto;background:#f1f3f5;padding:4px 12px;border-radius:60px;white-space:nowrap}
-@media(max-width:480px){.brand-header .brand-tagline{display:none}.brand-header .brand-name{font-size:1.2rem}.brand-header .logo{width:38px;height:38px;font-size:1.2rem}}
+.brand-header .brand-tagline{font-size:.68rem;color:var(--text-secondary);font-weight:600;margin-left:auto;background:#eef0ff;color:var(--primary);padding:5px 14px;border-radius:60px;white-space:nowrap}
+@media(max-width:480px){.brand-header .brand-tagline{display:none}.brand-header .brand-name{font-size:1.25rem}.brand-header .logo{width:40px;height:40px;font-size:1.2rem}}
+.site-footer{text-align:center;padding:28px 12px 40px;color:var(--text-secondary);font-size:.72rem;line-height:1.6}
+.site-footer a{color:var(--primary);font-weight:600;text-decoration:none}
+.site-footer .privacy{display:inline-flex;align-items:center;gap:6px;background:#eef2ff;color:#4338ca;padding:6px 14px;border-radius:40px;font-size:.68rem;font-weight:600;margin-bottom:10px}
+.feature-pills{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:16px 0 20px}
+.feature-pill{background:#fff;border:1px solid var(--border);padding:6px 12px;border-radius:40px;font-size:.68rem;font-weight:600;color:var(--text-secondary);display:inline-flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(0,0,0,.03)}
+.feature-pill i{color:var(--primary);font-size:.7rem}
+.demo-cta{background:linear-gradient(135deg,#f0fdf4,#ecfdf5);border:1.5px solid #a7f3d0;border-radius:16px;padding:14px 16px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.demo-cta .demo-text{font-size:.82rem;font-weight:600;color:#065f46}
+.demo-cta .demo-text small{display:block;font-weight:500;color:#047857;font-size:.7rem;margin-top:2px}
+.step-indicator{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:14px;font-size:.7rem;font-weight:600;color:var(--text-secondary)}
+.step-indicator .dot{width:8px;height:8px;border-radius:50%;background:var(--border)}
+.step-indicator .dot.on{background:var(--primary);box-shadow:0 0 0 3px rgba(108,92,231,.2)}
+.step-indicator .line{width:24px;height:2px;background:var(--border)}
 @keyframes fadeInUp{from{opacity:0;transform:translateY(24px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes pulseGlow{0%,100%{box-shadow:0 0 0 0 rgba(108,92,231,.3)}50%{box-shadow:0 0 0 12px rgba(108,92,231,0)}}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
@@ -53,8 +78,21 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:
 .input-field{width:100%;padding:11px 16px;border:2px solid var(--border);border-radius:var(--radius-sm);font-size:.9rem;font-family:'Inter',sans-serif;background:#fafbff;color:var(--text)}
 .input-field:focus{outline:none;border-color:var(--primary);background:#fff}
 textarea.input-field{resize:vertical;min-height:80px}
-.quiz-name-input{font-size:1.3rem;font-weight:700;border:none;border-bottom:3px solid var(--border);padding:6px 0;width:100%;outline:none;background:transparent;color:var(--text)}
+.quiz-name-wrap{position:relative;flex:1;min-width:0;overflow:hidden}
+.quiz-name-input{font-size:1.25rem;font-weight:700;border:none;border-bottom:3px solid var(--border);padding:6px 0;width:100%;outline:none;background:transparent;color:var(--text);position:relative;z-index:1}
 .quiz-name-input:focus{border-color:var(--primary)}
+.quiz-name-input::placeholder{color:transparent}
+.quiz-name-marquee{position:absolute;left:0;right:0;top:50%;transform:translateY(-55%);pointer-events:none;overflow:hidden;z-index:0;opacity:1;transition:opacity .2s}
+.quiz-name-wrap.has-value .quiz-name-marquee,
+.quiz-name-wrap.is-focused .quiz-name-marquee{opacity:0}
+.quiz-name-marquee-track{display:inline-flex;white-space:nowrap;animation:quizNameScroll 14s linear infinite;font-size:.92rem;font-weight:700;color:#94a3b8;letter-spacing:0}
+.quiz-name-marquee-track span{padding-right:40px}
+.quiz-name-marquee-track .ex{color:#a5b4fc;font-weight:600}
+@keyframes quizNameScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.created-ready-line{display:flex;align-items:center;justify-content:center;gap:8px;margin:0 0 10px;padding:8px 12px;border-radius:12px;background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;font-size:.78rem;font-weight:600}
+.created-ready-line i{color:#16a34a;font-size:.9rem}
+.created-ready-line b{font-weight:800}
+@media(max-width:480px){.tab-bar .tab-btn .btn-label{display:inline !important;font-size:.62rem}.tab-bar .tab-btn{padding:8px 8px;gap:4px}}
 .csv-helper{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px;font-size:.7rem;color:var(--text-secondary)}
 .csv-helper .format-badge{background:#f1f3f5;padding:2px 10px;border-radius:40px;font-family:monospace;font-size:.65rem}
 .csv-helper .btn-load-example{background:transparent;border:1px solid var(--border);padding:3px 14px;border-radius:40px;font-size:.65rem;cursor:pointer;color:var(--primary);font-weight:600;display:inline-flex;align-items:center;gap:4px}
@@ -75,8 +113,11 @@ textarea.input-field{resize:vertical;min-height:80px}
 .option-row.highlight-correct .option-number{background:var(--success)!important;color:#fff!important}
 .option-row.highlight-correct::after{content:"✓";position:absolute;right:16px;color:var(--success);font-weight:700;font-size:1.1rem}
 .option-row.disabled{pointer-events:none;opacity:.6}
-.progress-bar{background:#f1f3f5;border-radius:100px;height:6px;overflow:hidden;margin:8px 0 4px}
-.progress-fill{background:linear-gradient(90deg,var(--primary),var(--primary-light));border-radius:100px;height:100%;transition:width .6s cubic-bezier(.34,1.56,.64,1)}
+
+/* PROGRESS BAR CONTRAST IMPROVEMENTS */
+.progress-bar{background:#f1f3f5;border-radius:100px;height:8px;overflow:hidden;margin:10px 0 6px;border:1px solid rgba(0,0,0,0.08);box-shadow:inset 0 1px 3px rgba(0,0,0,0.05)}
+.progress-fill{background:linear-gradient(90deg,var(--primary),var(--primary-light));border-radius:100px;height:100%;transition:width .6s cubic-bezier(.34,1.56,.64,1);box-shadow:0 0 10px rgba(108,92,231,0.4)}
+
 .booklet-wrap{position:sticky;top:0;z-index:50;background:var(--card);padding:8px 0;border-bottom:1px solid var(--border);margin-bottom:14px}
 .booklet{display:flex;gap:5px;overflow-x:auto;padding:4px 2px 8px;flex-wrap:nowrap}
 .booklet-btn{min-width:34px;height:34px;border-radius:34px;background:#f1f3f5;border:none;font-weight:600;cursor:pointer;font-size:.7rem;flex-shrink:0;color:var(--text-secondary);display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif}
@@ -127,7 +168,7 @@ textarea.input-field{resize:vertical;min-height:80px}
 .mock-header-sticky{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(108,92,231,.08);border-radius:var(--radius) var(--radius) 0 0;padding:14px 16px 10px;box-shadow:0 4px 20px rgba(0,0,0,.04)}
 @media(max-width:480px){.mock-header-sticky{padding:12px 12px 8px}}
 .mock-header-top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px}
-.mock-header-top .quiz-title{font-weight:700;font-size:1rem;display:flex;align-items:center;gap:8px}
+.mock-header-top .quiz-title{font-weight:800;font-size:1rem;display:flex;align-items:center;gap:8px;color:#1e293b;text-shadow:0 1px 2px rgba(0,0,0,0.05)}
 .mock-header-top .quiz-title img{width:28px;height:28px;border-radius:50%;object-fit:cover;border:2px solid var(--border)}
 .mock-header-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .mock-header-actions .btn-success{background:linear-gradient(135deg,var(--success),#00a381);padding:8px 18px;font-weight:700;font-size:.8rem;border-radius:60px;color:#fff;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:'Inter',sans-serif}
@@ -145,10 +186,10 @@ textarea.input-field{resize:vertical;min-height:80px}
 .empty-state{text-align:center;padding:32px 16px;color:var(--text-secondary)}
 .empty-state i{font-size:3rem;color:var(--primary-light);margin-bottom:12px;display:block;animation:float 3s ease-in-out infinite}
 .empty-state h4{font-size:1.1rem;color:var(--text);margin-bottom:4px}
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--text);color:#fff;padding:12px 24px;border-radius:60px;font-weight:500;font-size:.85rem;z-index:3000;opacity:0;transition:all .4s cubic-bezier(.34,1.56,.64,1);pointer-events:none;max-width:90%;text-align:center}
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:#1e293b;color:#fff;padding:13px 22px;border-radius:60px;font-weight:600;font-size:.84rem;z-index:3000;opacity:0;transition:all .4s cubic-bezier(.34,1.56,.64,1);pointer-events:none;max-width:90%;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.25)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.toast.success{background:var(--success)}
-.toast.error{background:var(--danger)}
+.toast.success{background:linear-gradient(135deg,#059669,#10b981)}
+.toast.error{background:linear-gradient(135deg,#e11d48,#f43f5e)}
 .mt-2{margin-top:10px}.mt-3{margin-top:14px}
 .flex-between{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
 .share-link-wrapper{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
@@ -172,12 +213,22 @@ textarea.input-field{resize:vertical;min-height:80px}
 .tpl-opt span{display:inline-flex;width:12px;height:12px;border-radius:50%;align-items:center;justify-content:center;font-size:6px;flex-shrink:0}
 
 /* ===== HOME MODE CARDS ===== */
-.home-mode-btn { display: flex; align-items: center; padding: 20px; border-radius: 20px; border: 2px solid #e2e8f0; background: #fff; cursor: pointer; transition: all 0.2s; text-align: left; width: 100%; font-family: inherit; }
-.home-mode-btn:hover { border-color: var(--primary); background: #fafbff; transform: translateY(-2px); box-shadow: var(--shadow); }
-.home-mode-btn:active { transform: scale(0.98); }
-.home-mode-btn .icon-wrap { font-size: 2rem; margin-right: 16px; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; background: #f1f3f5; border-radius: 14px; }
-.home-mode-btn .title { font-size: 1.1rem; font-weight: 800; color: var(--text); }
-.home-mode-btn .subtitle { font-size: 0.8rem; font-weight: 500; color: var(--text-secondary); margin-top: 4px; }
+.home-mode-btn { display: flex; align-items: center; padding: 16px 14px; border-radius: 16px; border: 1.5px solid var(--border); background: #fff; cursor: pointer; transition: all 0.22s ease; text-align: left; width: 100%; font-family: inherit; }
+.home-mode-btn:hover { border-color: var(--primary-light); background: #fafbff; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(108,92,231,.12); }
+.home-mode-btn:active { transform: scale(0.985); }
+.home-mode-btn .icon-wrap { font-size: 1.55rem; margin-right: 14px; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; border-radius: 13px; flex-shrink: 0; }
+.home-mode-btn .title { font-size: 1.02rem; font-weight: 800; color: var(--text); }
+.home-mode-btn .subtitle { font-size: 0.76rem; font-weight: 500; color: var(--text-secondary); margin-top: 2px; }
+
+/* ===== LIVE USERS BADGE ===== */
+.live-badge-container { display: flex; justify-content: center; margin-bottom: 20px; margin-top: -10px; }
+.live-badge { display: inline-flex; align-items: center; gap: 8px; background: #e6f9f1; color: #059669; padding: 6px 16px; border-radius: 40px; font-size: 0.75rem; font-weight: 700; border: 1px solid #a7f3d0; box-shadow: 0 4px 10px rgba(16,185,129,0.1); }
+.live-dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; animation: pulse-live 1.5s infinite; }
+
+/* ===== HELP FAB & MODAL ===== */
+.help-fab { position: fixed; bottom: 24px; right: 24px; width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: #fff; border: none; font-size: 1.5rem; cursor: pointer; box-shadow: 0 8px 24px rgba(108,92,231,0.4); z-index: 1500; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
+.help-fab:hover { transform: scale(1.1); box-shadow: 0 12px 32px rgba(108,92,231,0.5); }
+.help-fab:active { transform: scale(0.95); }
 
 /* === TEMPLATE PREVIEW THEMES === */
 .theme-t1{background:linear-gradient(180deg,#5eb3e4 0%,#8bd0f0 100%);padding:10px;border-radius:12px}
@@ -300,6 +351,54 @@ textarea.input-field{resize:vertical;min-height:80px}
 .theme-t30 .tpl-q{background:rgba(30,30,32,.95);border-radius:10px;color:#fbbf24;font-family:'DM Sans',sans-serif;border:1px solid rgba(251,191,36,.3)}
 .theme-t30 .tpl-opt{background:rgba(251,191,36,0.15);color:#e5e7eb;border-radius:8px;border:1px solid rgba(251,191,36,0.4)}
 .theme-t30 .tpl-opt span{background:#fbbf24;color:#111}
+.theme-t31{background:linear-gradient(160deg,#f5f3ff 0%,#ede9fe 50%,#e0e7ff 100%);padding:10px;border-radius:12px}
+.theme-t31 .tpl-q{background:#fff;border-radius:10px;color:#4c1d95;font-family:'Poppins',sans-serif;box-shadow:0 4px 14px rgba(76,29,149,.12)}
+.theme-t31 .tpl-opt{background:#fff;color:#5b21b6;border-radius:8px;border:1px solid #ddd6fe;box-shadow:0 2px 6px rgba(0,0,0,.04)}
+.theme-t31 .tpl-opt span{background:#7c3aed;color:#fff}
+.theme-t32{background:linear-gradient(160deg,#0c4a6e 0%,#0369a1 100%);padding:10px;border-radius:12px}
+.theme-t32 .tpl-q{background:rgba(255,255,255,.96);border-radius:10px;color:#0c4a6e;font-family:'Montserrat',sans-serif;box-shadow:0 6px 18px rgba(0,0,0,.15)}
+.theme-t32 .tpl-opt{background:rgba(255,255,255,.92);color:#0c4a6e;border-radius:8px;border:1px solid rgba(255,255,255,.5)}
+.theme-t32 .tpl-opt span{background:#0ea5e9;color:#fff}
+.theme-t33{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);padding:10px;border-radius:12px}
+.theme-t33 .tpl-q{background:rgba(255,255,255,.06);border:1px solid rgba(251,191,36,.35);border-radius:10px;color:#fbbf24;font-family:'Outfit',sans-serif}
+.theme-t33 .tpl-opt{background:rgba(251,191,36,.12);color:#fef3c7;border-radius:8px;border:1px solid rgba(251,191,36,.25)}
+.theme-t33 .tpl-opt span{background:#f59e0b;color:#111}
+.theme-t34{background:linear-gradient(160deg,#ecfdf5 0%,#d1fae5 100%);padding:10px;border-radius:12px}
+.theme-t34 .tpl-q{background:#fff;border-radius:12px;color:#065f46;font-family:'Nunito',sans-serif;box-shadow:0 4px 16px rgba(6,95,70,.1)}
+.theme-t34 .tpl-opt{background:#fff;color:#047857;border-radius:20px;border:1px solid #a7f3d0}
+.theme-t34 .tpl-opt span{background:#10b981;color:#fff}
+.theme-t35{background:linear-gradient(160deg,#fff7ed 0%,#ffedd5 50%,#fed7aa 100%);padding:10px;border-radius:12px}
+.theme-t35 .tpl-q{background:#fff;border-radius:12px;color:#9a3412;font-family:'Quicksand',sans-serif;box-shadow:0 4px 14px rgba(154,52,18,.1)}
+.theme-t35 .tpl-opt{background:#fff;color:#c2410c;border-radius:10px;border:1px solid #fdba74}
+.theme-t35 .tpl-opt span{background:#f97316;color:#fff}
+.theme-t36{background:linear-gradient(160deg,#f0f9ff 0%,#e0f2fe 50%,#bae6fd 100%);padding:10px;border-radius:12px}
+.theme-t36 .tpl-q{background:rgba(255,255,255,.9);border-radius:12px;color:#0c4a6e;font-family:'Inter',sans-serif;border:1px solid rgba(14,165,233,.2)}
+.theme-t36 .tpl-opt{background:rgba(255,255,255,.85);color:#0369a1;border-radius:10px;border:1px solid #7dd3fc}
+.theme-t36 .tpl-opt span{background:#0ea5e9;color:#fff}
+.theme-t37{background:linear-gradient(145deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);padding:10px;border-radius:12px}
+.theme-t37 .tpl-q{background:rgba(255,255,255,.08);border-radius:12px;color:#e94560;font-family:'Outfit',sans-serif;border:1px solid rgba(233,69,96,.35)}
+.theme-t37 .tpl-opt{background:rgba(255,255,255,.06);color:#e2e8f0;border-radius:10px;border:1px solid rgba(233,69,96,.25)}
+.theme-t37 .tpl-opt span{background:#e94560;color:#fff}
+.theme-t38{background:linear-gradient(160deg,#fdf4ff 0%,#fae8ff 50%,#f5d0fe 100%);padding:10px;border-radius:12px}
+.theme-t38 .tpl-q{background:#fff;border-radius:14px;color:#86198f;font-family:'Quicksand',sans-serif;box-shadow:0 4px 16px rgba(134,25,143,.1)}
+.theme-t38 .tpl-opt{background:#fff;color:#a21caf;border-radius:20px;border:1px solid #f0abfc}
+.theme-t38 .tpl-opt span{background:#d946ef;color:#fff}
+.theme-t39{background:linear-gradient(160deg,#0c0a09 0%,#1c1917 60%,#292524 100%);padding:10px;border-radius:12px}
+.theme-t39 .tpl-q{background:rgba(251,191,36,.1);border-radius:10px;color:#fbbf24;font-family:'Space Grotesk',sans-serif;border:1px solid rgba(251,191,36,.35)}
+.theme-t39 .tpl-opt{background:rgba(255,255,255,.05);color:#f5f5f4;border-radius:8px;border:1px solid rgba(251,191,36,.2)}
+.theme-t39 .tpl-opt span{background:#f59e0b;color:#111}
+.theme-t40{background:linear-gradient(160deg,#ecfeff 0%,#cffafe 50%,#a5f3fc 100%);padding:10px;border-radius:12px}
+.theme-t40 .tpl-q{background:rgba(255,255,255,.95);border-radius:12px;color:#155e75;font-family:'Nunito',sans-serif;box-shadow:0 4px 14px rgba(21,94,117,.1)}
+.theme-t40 .tpl-opt{background:#fff;color:#0e7490;border-radius:12px;border:1px solid #67e8f9}
+.theme-t40 .tpl-opt span{background:#06b6d4;color:#fff}
+.theme-t41{background:linear-gradient(145deg,#3b0764 0%,#581c87 50%,#7e22ce 100%);padding:10px;border-radius:12px}
+.theme-t41 .tpl-q{background:rgba(255,255,255,.12);border-radius:12px;color:#f5d0fe;font-family:'Poppins',sans-serif;border:1px solid rgba(245,208,254,.3)}
+.theme-t41 .tpl-opt{background:rgba(255,255,255,.1);color:#faf5ff;border-radius:10px;border:1px solid rgba(255,255,255,.15)}
+.theme-t41 .tpl-opt span{background:#e879f9;color:#4a044e}
+.theme-t42{background:linear-gradient(160deg,#fff1f2 0%,#ffe4e6 50%,#fecdd3 100%);padding:10px;border-radius:12px}
+.theme-t42 .tpl-q{background:#fff;border-radius:14px;color:#9f1239;font-family:'DM Sans',sans-serif;box-shadow:0 4px 16px rgba(159,18,57,.1)}
+.theme-t42 .tpl-opt{background:#fff;color:#be123c;border-radius:12px;border:1px solid #fda4af}
+.theme-t42 .tpl-opt span{background:#f43f5e;color:#fff}
 
 /* Inner themes for Quiz Mode */
 .theme-t1 .question-card{background:#fff;border:4px solid #000;box-shadow:6px 6px 0 #000;border-radius:8px;padding:20px}
@@ -422,22 +521,82 @@ textarea.input-field{resize:vertical;min-height:80px}
 .theme-t30 h3{color:#fbbf24!important;font-family:'DM Sans',sans-serif!important;margin-bottom:15px}
 .theme-t30 .option-row{background:rgba(251,191,36,0.15);color:#e5e7eb;border-radius:10px;border:1px solid rgba(251,191,36,0.4);font-weight:600}
 .theme-t30 .option-number{background:#fbbf24;color:#111}
+.theme-t31 .question-card{background:#fff;border-radius:18px;padding:22px;box-shadow:0 8px 28px rgba(76,29,149,.12)}
+.theme-t31 h3{color:#4c1d95!important;font-family:'Poppins',sans-serif!important;margin-bottom:14px}
+.theme-t31 .option-row{background:#fff;color:#5b21b6;border-radius:12px;border:1.5px solid #ddd6fe;font-weight:600}
+.theme-t31 .option-number{background:#7c3aed;color:#fff}
+.theme-t32 .question-card{background:rgba(255,255,255,.96);border-radius:16px;padding:22px}
+.theme-t32 h3{color:#0c4a6e!important;font-family:'Montserrat',sans-serif!important;margin-bottom:14px}
+.theme-t32 .option-row{background:rgba(255,255,255,.92);color:#0c4a6e;border-radius:10px;font-weight:600}
+.theme-t32 .option-number{background:#0ea5e9;color:#fff}
+.theme-t33 .question-card{background:rgba(255,255,255,.06);border:1px solid rgba(251,191,36,.35);border-radius:16px;padding:22px}
+.theme-t33 h3{color:#fbbf24!important;font-family:'Outfit',sans-serif!important;margin-bottom:14px}
+.theme-t33 .option-row{background:rgba(251,191,36,.12);color:#fef3c7;border-radius:10px;border:1px solid rgba(251,191,36,.25);font-weight:600}
+.theme-t33 .option-number{background:#f59e0b;color:#111}
+.theme-t34 .question-card{background:#fff;border-radius:18px;padding:22px;box-shadow:0 8px 24px rgba(6,95,70,.1)}
+.theme-t34 h3{color:#065f46!important;font-family:'Nunito',sans-serif!important;margin-bottom:14px}
+.theme-t34 .option-row{background:#fff;color:#047857;border-radius:50px;border:1.5px solid #a7f3d0;font-weight:600}
+.theme-t34 .option-number{background:#10b981;color:#fff}
+.theme-t35 .question-card{background:#fff;border-radius:18px;padding:22px;box-shadow:0 8px 24px rgba(154,52,18,.1)}
+.theme-t35 h3{color:#9a3412!important;font-family:'Quicksand',sans-serif!important;margin-bottom:14px}
+.theme-t35 .option-row{background:#fff;color:#c2410c;border-radius:12px;border:1.5px solid #fdba74;font-weight:600}
+.theme-t35 .option-number{background:#f97316;color:#fff}
+.theme-t36 .question-card{background:rgba(255,255,255,.92);border-radius:16px;padding:22px;border:1px solid rgba(14,165,233,.2)}
+.theme-t36 h3{color:#0c4a6e!important;font-family:'Inter',sans-serif!important;margin-bottom:14px}
+.theme-t36 .option-row{background:rgba(255,255,255,.9);color:#0369a1;border-radius:12px;border:1px solid #7dd3fc;font-weight:600}
+.theme-t36 .option-number{background:#0ea5e9;color:#fff}
+.theme-t37 .question-card{background:rgba(255,255,255,.08);border-radius:16px;padding:22px;border:1px solid rgba(233,69,96,.35)}
+.theme-t37 h3{color:#e94560!important;font-family:'Outfit',sans-serif!important;margin-bottom:14px}
+.theme-t37 .option-row{background:rgba(255,255,255,.06);color:#e2e8f0;border-radius:12px;border:1px solid rgba(233,69,96,.25);font-weight:600}
+.theme-t37 .option-number{background:#e94560;color:#fff}
+.theme-t38 .question-card{background:#fff;border-radius:18px;padding:22px;box-shadow:0 6px 20px rgba(134,25,143,.1)}
+.theme-t38 h3{color:#86198f!important;font-family:'Quicksand',sans-serif!important;margin-bottom:14px}
+.theme-t38 .option-row{background:#fff;color:#a21caf;border-radius:24px;border:1px solid #f0abfc;font-weight:600}
+.theme-t38 .option-number{background:#d946ef;color:#fff}
+.theme-t39 .question-card{background:rgba(251,191,36,.1);border-radius:14px;padding:22px;border:1px solid rgba(251,191,36,.35)}
+.theme-t39 h3{color:#fbbf24!important;font-family:'Space Grotesk',sans-serif!important;margin-bottom:14px}
+.theme-t39 .option-row{background:rgba(255,255,255,.05);color:#f5f5f4;border-radius:10px;border:1px solid rgba(251,191,36,.2);font-weight:600}
+.theme-t39 .option-number{background:#f59e0b;color:#111}
+.theme-t40 .question-card{background:rgba(255,255,255,.95);border-radius:16px;padding:22px;box-shadow:0 6px 18px rgba(21,94,117,.1)}
+.theme-t40 h3{color:#155e75!important;font-family:'Nunito',sans-serif!important;margin-bottom:14px}
+.theme-t40 .option-row{background:#fff;color:#0e7490;border-radius:14px;border:1px solid #67e8f9;font-weight:600}
+.theme-t40 .option-number{background:#06b6d4;color:#fff}
+.theme-t41 .question-card{background:rgba(255,255,255,.12);border-radius:16px;padding:22px;border:1px solid rgba(245,208,254,.3)}
+.theme-t41 h3{color:#f5d0fe!important;font-family:'Poppins',sans-serif!important;margin-bottom:14px}
+.theme-t41 .option-row{background:rgba(255,255,255,.1);color:#faf5ff;border-radius:12px;border:1px solid rgba(255,255,255,.15);font-weight:600}
+.theme-t41 .option-number{background:#e879f9;color:#4a044e}
+.theme-t42 .question-card{background:#fff;border-radius:18px;padding:22px;box-shadow:0 6px 20px rgba(159,18,57,.1)}
+.theme-t42 h3{color:#9f1239!important;font-family:'DM Sans',sans-serif!important;margin-bottom:14px}
+.theme-t42 .option-row{background:#fff;color:#be123c;border-radius:14px;border:1px solid #fda4af;font-weight:600}
+.theme-t42 .option-number{background:#f43f5e;color:#fff}
 
 /* VIDEO STUDIO */
-.vm-shell{position:relative;display:grid;grid-template-columns:74px 1fr 74px;gap:6px;height:calc(100vh - 74px);min-height:480px;padding:6px;background:#fff;border-radius:16px;box-shadow:0 6px 22px rgba(0,0,0,.08);overflow:hidden}
-.vm-rail{display:flex;flex-direction:column;gap:4px;padding:5px 3px;background:linear-gradient(180deg,#f8fafc,#eef2ff);border:1px solid #e2e8f0;border-radius:12px;overflow-y:auto;scrollbar-width:none}
+.vm-shell{position:relative;display:flex;flex-direction:column;gap:6px;height:calc(100vh - 56px);min-height:520px;padding:4px;background:#f8fafc;border-radius:14px;box-shadow:0 4px 24px rgba(15,23,42,.08);overflow:hidden;border:1px solid #e2e8f0}
+.vm-workspace{display:grid;grid-template-columns:58px 1fr 58px;gap:4px;flex:1;min-height:0;position:relative}
+.vm-rail{display:flex;flex-direction:column;gap:2px;padding:4px 2px;background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;overflow-y:auto;scrollbar-width:none;box-shadow:0 1px 3px rgba(0,0,0,.04);min-height:0;align-self:stretch}
 .vm-rail::-webkit-scrollbar{display:none}
-.vm-rail-btn{background:transparent;border:none;border-radius:10px;padding:6px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;color:#475569;min-height:54px;flex-shrink:0;font-family:inherit}
-.vm-rail-btn:hover{background:#dbeafe;color:#1e40af}
-.vm-rail-btn.active{background:linear-gradient(135deg,#1a73e8,#2563eb);color:#fff}
-.vm-rail-btn .ri{font-size:22px;line-height:1}
-.vm-rail-btn .rt{font-size:.48rem;font-weight:800;text-transform:uppercase;text-align:center;padding:0 2px}
-.vm-center{display:flex;flex-direction:column;gap:6px;min-width:0;min-height:0}
-.vm-canvas-controls{position:absolute;top:14px;left:88px;right:14px;display:flex;flex-wrap:wrap;gap:6px;z-index:20;align-items:center;pointer-events:none}
+.vm-rail-btn{background:transparent;border:none;border-radius:10px;padding:5px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;color:#64748b;min-height:44px;flex-shrink:0;font-family:inherit;transition:all .18s ease}
+.vm-rail-btn:hover{background:#f1f5f9;color:#334155}
+.vm-rail-btn.active{background:linear-gradient(145deg,#6366f1,#4f46e5);color:#fff;box-shadow:0 3px 10px rgba(79,70,229,.3)}
+.vm-rail-btn .ri{font-size:13px;line-height:1;width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:#f1f5f9;color:#475569;transition:all .18s}
+.vm-rail-btn:hover .ri{background:#e2e8f0}
+.vm-rail-btn.active .ri{background:rgba(255,255,255,.22);color:#fff}
+.vm-rail-btn .rt{font-size:.45rem;font-weight:700;text-transform:uppercase;text-align:center;padding:0 1px;letter-spacing:.01em;line-height:1.1}
+.vm-center{display:flex;flex-direction:column;gap:0;min-width:0;min-height:0}
+.vm-footer{display:flex;flex-direction:column;gap:5px;flex-shrink:0;padding:0 2px 2px}
+.app-full.vm-expanded{max-width:980px;padding:4px 4px}
+.app-full.vm-expanded .brand-header{padding:4px 2px 6px;margin-bottom:4px}
+.app-full.vm-expanded .brand-header .logo{width:32px;height:32px;font-size:1rem;border-radius:10px}
+.app-full.vm-expanded .brand-header .brand-name{font-size:1.1rem}
+.app-full.vm-expanded .brand-header .brand-tagline{display:none}
+.app-full.vm-expanded #createdArea{padding:8px 4px;margin-bottom:0;border-radius:14px}
+.help-fab.vm-hidden{display:none !important}
+.vm-canvas-controls{position:absolute;top:10px;left:10px;right:10px;display:flex;flex-wrap:wrap;gap:6px;z-index:20;align-items:center;pointer-events:none}
 .vm-canvas-controls>*{pointer-events:auto}
 .vm-orient{display:flex;gap:4px;background:rgba(15,23,42,.72);backdrop-filter:blur(10px);padding:4px;border-radius:50px}
-.vm-orient-btn{background:transparent;border:none;color:#cbd5e1;padding:6px 12px;border-radius:50px;font-family:inherit;font-size:.62rem;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:4px;text-transform:uppercase}
-.vm-orient-btn.active{background:#fff;color:#1a73e8}
+.vm-orient-btn{background:transparent;border:none;color:#94a3b8;padding:7px 13px;border-radius:50px;font-family:inherit;font-size:.62rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;text-transform:uppercase;transition:all .15s}
+.vm-orient-btn:hover{color:#e2e8f0}
+.vm-orient-btn.active{background:#fff;color:#4f46e5;box-shadow:0 2px 8px rgba(0,0,0,.15)}
 .vm-right-controls{display:flex;gap:6px;margin-left:auto}
 .vm-intro-toggle{background:rgba(15,23,42,.72);color:#fff;padding:6px 14px;border-radius:50px;border:none;font-family:inherit;font-size:.62rem;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:6px;text-transform:uppercase}
 .vm-intro-toggle .sw-mini{width:26px;height:14px;border-radius:8px;background:#64748b;position:relative;transition:.2s;flex-shrink:0}
@@ -446,7 +605,7 @@ textarea.input-field{resize:vertical;min-height:80px}
 .vm-intro-toggle.on .sw-mini::after{transform:translateX(12px)}
 .vm-mute-btn{background:rgba(15,23,42,.72);color:#fff;padding:0 14px;height:32px;min-width:44px;border-radius:50px;border:none;font-family:inherit;font-size:15px;font-weight:800;cursor:pointer}
 .vm-mute-btn.muted{background:linear-gradient(135deg,#ef4444,#dc2626)}
-.vm-canvas-wrap{flex:1;background:radial-gradient(circle at 50% 30%,#1a2544,#06080f 85%);border-radius:14px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;min-height:0;padding:8px}
+.vm-canvas-wrap{flex:1;background:radial-gradient(circle at 50% 30%,#1a2544,#06080f 85%);border-radius:12px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;min-height:0;padding:4px}
 #vmCanvas{display:block;max-width:100%;max-height:100%;background:#000;border-radius:10px;object-fit:contain}
 .vm-live-badge{position:absolute;top:14px;right:14px;background:rgba(34,197,94,.94);color:#fff;padding:4px 10px;border-radius:20px;font-size:.55rem;font-weight:800;display:none;align-items:center;gap:4px;z-index:5}
 .vm-live-badge.on{display:inline-flex}
@@ -457,25 +616,30 @@ textarea.input-field{resize:vertical;min-height:80px}
 .vm-rec-dot{width:6px;height:6px;border-radius:50%;background:#ff3b30;animation:pulse-rec 1s infinite}
 @keyframes pulse-rec{0%,100%{opacity:1}50%{opacity:.35}}
 .vm-bottom-bar{display:flex;gap:6px;flex-shrink:0}
-.vm-bottom-bar .btn{justify-content:center;padding:11px 14px;font-size:.76rem;font-weight:800;border-radius:12px;flex:1}
-.vm-bottom-bar .btn-success{flex:1.6}
-.vm-progress-wrap{background:#1e293b;height:12px;border-radius:8px;position:relative;overflow:hidden;display:none;flex-shrink:0}
+.vm-bottom-bar .btn{justify-content:center;padding:10px 14px;font-size:.76rem;font-weight:700;border-radius:11px;flex:1;letter-spacing:.01em}
+.vm-bottom-bar .btn-success{flex:1.6;box-shadow:0 4px 14px rgba(16,185,129,.3)}
+.vm-bottom-bar .btn-outline{background:#fff;border:1.5px solid #e2e8f0}
+.vm-progress-wrap{background:#0f172a;height:14px;border-radius:8px;position:relative;overflow:hidden;display:none;flex-shrink:0;border:1px solid rgba(255,255,255,0.15);box-shadow:inset 0 1px 4px rgba(0,0,0,0.45)}
 .vm-progress-wrap.on{display:block}
-.vm-progress-fill{width:0%;height:100%;background:linear-gradient(90deg,#0f9d58,#1a73e8);transition:width .2s}
-.vm-progress-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.58rem;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.7)}
+.vm-progress-fill{width:0%;height:100%;background:linear-gradient(90deg,#10b981,#3b82f6,#8b5cf6);transition:width .2s;box-shadow:0 0 12px rgba(59,130,246,0.55)}
+.vm-progress-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.85);letter-spacing:0.3px}
 .vm-status-line{font-size:.6rem;color:#64748b;text-align:center;padding:2px 6px;flex-shrink:0}
-.vm-flyout{position:absolute;top:50%;width:380px;max-height:calc(100% - 12px);background:rgba(255,255,255,.92);backdrop-filter:blur(15px);border:1px solid rgba(255,255,255,.65);border-radius:16px;box-shadow:0 24px 70px rgba(0,0,0,.35);display:flex;flex-direction:column;z-index:100;overflow:hidden;visibility:hidden;transition:transform .3s,opacity .25s}
-.vm-flyout.left{left:88px;transform:translate(-20px,-50%);opacity:0}
-.vm-flyout.right{right:88px;transform:translate(20px,-50%);opacity:0}
+.vm-flyout{position:absolute;top:50%;width:340px;max-height:calc(100% - 12px);background:#ffffff;backdrop-filter:blur(20px);border:1px solid #e2e8f0;border-radius:16px;box-shadow:0 20px 60px rgba(15,23,42,.22);display:flex;flex-direction:column;z-index:100;overflow:hidden;visibility:hidden;transition:transform .28s ease,opacity .22s ease}
+.vm-flyout.left{left:66px;transform:translate(-12px,-50%);opacity:0}
+.vm-flyout.right{right:66px;transform:translate(12px,-50%);opacity:0}
 .vm-flyout.open{visibility:visible;transform:translate(0,-50%);opacity:1}
-.vm-flyout-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.55);background:linear-gradient(135deg,rgba(240,247,255,.55),rgba(255,255,255,.35));flex-shrink:0}
-.vm-flyout-title{font-size:.85rem;font-weight:900;color:#1a73e8;display:flex;align-items:center;gap:8px}
-.vm-flyout-close{background:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.7);width:26px;height:26px;border-radius:50%;cursor:pointer;color:#475569;font-size:.85rem}
-.vm-flyout-body{overflow-y:auto;padding:12px;flex:0 1 auto;min-height:0}
-.vm-tool-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.vm-tool{display:flex;align-items:center;gap:8px;padding:9px 11px;background:rgba(255,255,255,.72);border:1px solid rgba(255,255,255,.78);border-radius:10px;font-family:inherit;font-size:.72rem;font-weight:700;color:#334155;cursor:pointer;text-align:left;min-height:44px}
-.vm-tool.active{background:linear-gradient(135deg,#1a73e8,#2563eb);color:#fff;border-color:transparent}
-.vm-tool .ti{font-size:17px;flex-shrink:0;width:22px;text-align:center}
+.vm-flyout-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #f1f5f9;background:#fafbfc;flex-shrink:0}
+.vm-flyout-title{font-size:.82rem;font-weight:800;color:#1e293b;display:flex;align-items:center;gap:8px}
+.vm-flyout-title .ti{width:28px;height:28px;border-radius:8px;background:linear-gradient(145deg,#6366f1,#4f46e5);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px}
+.vm-flyout-close{background:#f1f5f9;border:none;width:28px;height:28px;border-radius:8px;cursor:pointer;color:#64748b;font-size:.85rem;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.vm-flyout-close:hover{background:#e2e8f0;color:#334155}
+.vm-flyout-body{overflow-y:auto;padding:14px;flex:0 1 auto;min-height:0}
+.vm-tool-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.vm-tool{display:flex;align-items:center;gap:8px;padding:10px 12px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:11px;font-family:inherit;font-size:.72rem;font-weight:650;color:#334155;cursor:pointer;text-align:left;min-height:44px;transition:all .15s}
+.vm-tool:hover{border-color:#c7d2fe;background:#f5f3ff}
+.vm-tool.active{background:linear-gradient(145deg,#6366f1,#4f46e5);color:#fff;border-color:transparent;box-shadow:0 3px 10px rgba(79,70,229,.3)}
+.vm-tool .ti{font-size:14px;flex-shrink:0;width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;background:#fff;border:1px solid #e2e8f0}
+.vm-tool.active .ti{background:rgba(255,255,255,.2);border-color:transparent;color:#fff}
 .vm-row{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.72);border:1px solid rgba(255,255,255,.78);border-radius:10px;padding:8px 11px;margin-bottom:7px;font-size:.72rem;font-weight:700;color:#334155}
 .vm-row input[type=number]{width:56px;border:none;background:transparent;font-family:inherit;font-size:.86rem;font-weight:800;color:#1a73e8;outline:none;text-align:right}
 .vm-row select{border:none;background:transparent;font-family:inherit;font-size:.76rem;font-weight:700;color:#1a73e8;outline:none;cursor:pointer;max-width:180px}
@@ -534,13 +698,15 @@ textarea.input-field{resize:vertical;min-height:80px}
 .qc-toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,22px);background:rgba(15,23,42,.95);color:#fff;padding:12px 22px;border-radius:50px;font-size:.82rem;font-weight:700;z-index:9000;opacity:0;pointer-events:none;transition:.3s;max-width:88vw;text-align:center;display:flex;align-items:center;gap:8px}
 .qc-toast.show{opacity:1;transform:translate(-50%,0)}
 @media(max-width:900px){
-  .vm-shell{grid-template-columns:58px 1fr 58px;gap:4px;height:calc(100vh - 68px);padding:4px}
-  .vm-rail-btn{min-height:48px;padding:5px 1px}
-  .vm-rail-btn .ri{font-size:20px}
-  .vm-rail-btn .rt{font-size:.42rem}
-  .vm-canvas-controls{top:8px;left:66px;right:8px;gap:4px}
-  .vm-flyout,.vm-flyout.left,.vm-flyout.right{position:fixed;top:auto;bottom:0;left:0;right:0;width:100%;max-height:78vh;border-radius:22px 22px 0 0;transform:translateY(110%);background:rgba(255,255,255,.95)}
+  .vm-shell{height:calc(100vh - 48px);min-height:420px;padding:2px;border-radius:10px}
+  .vm-workspace{grid-template-columns:48px 1fr 48px;gap:2px}
+  .vm-rail-btn{min-height:40px;padding:4px 1px}
+  .vm-rail-btn .ri{font-size:12px;width:24px;height:24px}
+  .vm-rail-btn .rt{font-size:.38rem}
+  .vm-canvas-controls{top:6px;left:4px;right:4px;gap:4px}
+  .vm-flyout,.vm-flyout.left,.vm-flyout.right{position:fixed;top:auto;bottom:0;left:0;right:0;width:100%;max-height:72vh;border-radius:18px 18px 0 0;transform:translateY(110%);background:#fff}
   .vm-flyout.open{transform:translateY(0)}
+  .app-full.vm-expanded{max-width:100%;padding:4px}
 }
 .dl-modal{position:fixed;inset:0;background:rgba(6,20,15,.88);backdrop-filter:blur(14px);display:flex;align-items:center;justify-content:center;z-index:5000;visibility:hidden;opacity:0;transition:.3s;padding:14px}
 .dl-modal.active{visibility:visible;opacity:1}
@@ -561,43 +727,82 @@ textarea.input-field{resize:vertical;min-height:80px}
   <div class="brand-header">
     <div class="logo"><i class="fas fa-pen-fancy"></i></div>
     <div class="brand-name">Quiz<span>Craft</span></div>
-    <span class="brand-tagline"><i class="fas fa-bolt"></i> Create. Share. Learn.</span>
+    <span class="brand-tagline"><i class="fas fa-bolt"></i> Quizzes · Mock Tests · Videos</span>
   </div>
   <div id="toast" class="toast"></div>
 
   <!-- HOME VIEW: Mode Selection -->
-  <div id="stepHome" class="card animate-in" style="display:none; text-align:center; padding: 30px 20px;">
-    <h2 style="font-size:1.6rem; font-weight:900; color:var(--text); margin-bottom: 8px;">What do you want to make?</h2>
-    <p style="color:var(--text-secondary); font-size:.9rem; margin-bottom: 24px;">Choose a mode to get started</p>
-    <div style="display:flex; flex-direction:column; gap:12px;">
-      <button class="home-mode-btn" data-mode="quiz">
-        <div class="icon-wrap">📝</div>
-        <div>
+  <div id="stepHome" class="card animate-in" style="display:none; text-align:center; padding: 28px 18px 24px;">
+    <div class="live-badge-container" style="margin-top:-4px;margin-bottom:14px;">
+      <div class="live-badge">
+        <div class="live-dot"></div>
+        <span id="liveUsersText">-- people using today</span>
+      </div>
+    </div>
+
+    <h2 style="font-size:1.45rem; font-weight:900; color:var(--text); margin-bottom:6px; letter-spacing:-0.3px;">What do you want to make?</h2>
+    <p style="color:var(--text-secondary); font-size:.88rem; margin-bottom:16px;">Choose a mode to get started</p>
+
+    <div class="demo-cta" style="margin-bottom:16px;">
+      <div class="demo-text">
+        New here? Try a sample quiz
+        <small>No signup needed</small>
+      </div>
+      <button class="btn btn-success btn-sm" id="tryDemoBtn" style="white-space:nowrap; padding:9px 16px; border-radius:50px;">
+        <i class="fas fa-play"></i> Try Demo
+      </button>
+    </div>
+    
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <button class="home-mode-btn" data-mode="quiz" type="button">
+        <div class="icon-wrap" style="background:linear-gradient(135deg,#ede9fe,#e0e7ff);">📝</div>
+        <div style="flex:1; text-align:left;">
           <div class="title">Quiz Mode</div>
-          <div class="subtitle">Classic one-by-one question format</div>
+          <div class="subtitle">One question at a time • Instant feedback</div>
         </div>
+        <i class="fas fa-chevron-right" style="color:#cbd5e1; font-size:.8rem;"></i>
       </button>
-      <button class="home-mode-btn" data-mode="mock">
-        <div class="icon-wrap">⏱️</div>
-        <div>
-          <div class="title">Mocktest</div>
-          <div class="subtitle">Exam-style all questions at once</div>
+      <button class="home-mode-btn" data-mode="mock" type="button">
+        <div class="icon-wrap" style="background:linear-gradient(135deg,#ecfdf5,#d1fae5);">⏱️</div>
+        <div style="flex:1; text-align:left;">
+          <div class="title">Mock Test</div>
+          <div class="subtitle">All questions at once • Exam style</div>
         </div>
+        <i class="fas fa-chevron-right" style="color:#cbd5e1; font-size:.8rem;"></i>
       </button>
-      <button class="home-mode-btn" data-mode="video">
-        <div class="icon-wrap">🎬</div>
-        <div>
+      <button class="home-mode-btn" data-mode="video" type="button">
+        <div class="icon-wrap" style="background:linear-gradient(135deg,#fef3c7,#fde68a);">🎬</div>
+        <div style="flex:1; text-align:left;">
           <div class="title">Video Maker</div>
-          <div class="subtitle">Render your quiz as a short video</div>
+          <div class="subtitle">Turn any quiz into a short video</div>
         </div>
+        <i class="fas fa-chevron-right" style="color:#cbd5e1; font-size:.8rem;"></i>
       </button>
+    </div>
+    
+    <button class="btn btn-outline" style="margin-top:16px; width:100%; border-radius:14px; padding:13px; border-width:1.5px; font-weight:600;" onclick="navigateTo('dashboard')" type="button">
+      <i class="fas fa-chart-pie"></i> My Dashboard &amp; Results
+    </button>
+
+    <div id="homeRecentWrap" style="display:none; margin-top:18px; text-align:left;">
+      <p style="font-size:.72rem; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.6px; margin-bottom:8px;">Recent quizzes</p>
+      <div id="homeRecentList"></div>
     </div>
   </div>
 
   <!-- STEP 1: UPLOAD -->
   <div id="stepUpload" class="card" style="display:none;">
-    <div class="flex-between" style="margin-bottom:4px;">
-      <input type="text" id="quizNameInput" class="quiz-name-input" placeholder="Quiz Title" value="My Custom Quiz" />
+    <div class="step-indicator">
+      <span class="dot on"></span><span class="line"></span>
+      <span class="dot"></span><span class="line"></span>
+      <span class="dot"></span>
+      <span style="margin-left:8px;">Step 1 of 2 — Questions</span>
+    </div>
+    <div class="flex-between" style="margin-bottom:0;">
+      <div class="quiz-name-wrap" id="quizNameWrap">
+        <div class="quiz-name-marquee" aria-hidden="true"><div class="quiz-name-marquee-track"><span>Add your quiz name</span><span>Add your quiz name</span><span>Add your quiz name</span><span>Add your quiz name</span></div></div>
+        <input type="text" id="quizNameInput" class="quiz-name-input" placeholder="" value="" maxlength="80" autocomplete="off" aria-label="Quiz name" />
+      </div>
       <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
         <label for="logoUpload" style="cursor:pointer;font-size:.7rem;color:var(--text-secondary);"><i class="fas fa-camera"></i> Logo</label>
         <input type="file" id="logoUpload" accept="image/*" style="display:none" />
@@ -608,13 +813,14 @@ textarea.input-field{resize:vertical;min-height:80px}
       <label class="input-label"><i class="fas fa-upload"></i> Bulk Upload Questions</label>
       <div class="upload-area" id="dropzone">
         <span class="icon"><i class="fas fa-cloud-upload-alt"></i></span>
-        <p style="font-size:.75rem;">Drag &amp; drop or click to upload (.csv, .xlsx, .txt)</p>
+        <p style="font-size:.78rem;font-weight:500;color:var(--text);">Drop a spreadsheet or text file here</p>
+        <p style="font-size:.7rem;margin-top:2px;">Supports .csv, .xlsx, .txt</p>
         <input type="file" id="fileInput" accept=".csv,.xlsx,.txt" style="display:none" />
-        <button class="btn btn-outline btn-sm" id="chooseFileBtn" style="margin-top:6px;"><i class="fas fa-folder-open"></i> Browse</button>
+        <button class="btn btn-outline btn-sm" id="chooseFileBtn" style="margin-top:8px;"><i class="fas fa-folder-open"></i> Browse files</button>
       </div>
     </div>
     <div class="input-group">
-      <label class="input-label"><i class="fas fa-paste"></i> Paste CSV</label>
+      <label class="input-label"><i class="fas fa-paste"></i> Or paste questions</label>
       <textarea id="bulkTextArea" class="input-field" rows="3" placeholder="question, option A, option B, option C, option D, correct answer"></textarea>
       <div class="csv-helper">
         <span><i class="fas fa-info-circle"></i> Format: <span class="format-badge">Q, A, B, C, D, Correct</span></span>
@@ -623,12 +829,18 @@ textarea.input-field{resize:vertical;min-height:80px}
     </div>
     <div id="validationErrors"></div>
     <div id="parsedPreview"></div>
-    <button id="nextToTypeBtn" class="btn btn-primary btn-block btn-glow" style="margin-top:10px;" disabled>Next: Choose Template →</button>
+    <button id="nextToTypeBtn" class="btn btn-primary btn-block btn-glow" style="margin-top:12px;" disabled>Continue to Templates →</button>
     <button id="cancelCreateBtn" class="btn btn-outline btn-block mt-2"><i class="fas fa-arrow-left"></i> Back to Home</button>
   </div>
 
   <!-- STEP 2: TEMPLATE + TIMER -->
   <div id="stepType" style="display:none;" class="card">
+    <div class="step-indicator">
+      <span class="dot on"></span><span class="line" style="background:var(--primary);"></span>
+      <span class="dot on"></span><span class="line"></span>
+      <span class="dot"></span>
+      <span style="margin-left:8px;">Step 2 of 2 — Style &amp; Timer</span>
+    </div>
     <div class="template-gallery-section">
       <div class="template-gallery-header">
         <h3>🎨 Choose Template</h3>
@@ -647,12 +859,16 @@ textarea.input-field{resize:vertical;min-height:80px}
       </div>
       <small style="color:var(--text-secondary);font-size:.65rem;">Total time = seconds × questions (ignored in Video mode)</small>
     </div>
-    <button id="finalCreateBtn" class="btn btn-success btn-block btn-glow"><i class="fas fa-check-circle"></i> Create Assessment</button>
-    <button id="backFromTypeBtn" class="btn btn-outline btn-block mt-2"><i class="fas fa-arrow-left"></i> Back</button>
+    <button id="finalCreateBtn" class="btn btn-success btn-block btn-glow"><i class="fas fa-check-circle"></i> Create &amp; Continue</button>
+    <button id="backFromTypeBtn" class="btn btn-outline btn-block mt-2"><i class="fas fa-arrow-left"></i> Back to questions</button>
   </div>
 
   <!-- STEP 3: PLAY / SHARE / STATS -->
   <div id="createdArea" style="display:none;" class="card">
+    <div class="created-ready-line" id="createdReadyLine" style="display:none;">
+      <i class="fas fa-check-circle"></i>
+      <span id="createdReadyText">Ready — use <b>Play</b> or <b>Share</b></span>
+    </div>
     <div class="tab-bar" id="tabBar">
       <button class="tab-btn active" data-tab="play"><i class="fas fa-play"></i> <span class="btn-label">Play</span></button>
       <button class="tab-btn" data-tab="share"><i class="fas fa-link"></i> <span class="btn-label">Share</span></button>
@@ -661,23 +877,77 @@ textarea.input-field{resize:vertical;min-height:80px}
     </div>
     <div class="tab-panel active" id="panelPlay"><div id="renderZone" style="margin-top:3px;width:100%;"></div></div>
     <div class="tab-panel" id="panelShare">
-      <div style="text-align:center;padding:16px 0;">
-        <i class="fas fa-share-alt" style="font-size:2.5rem;color:var(--primary);margin-bottom:8px;display:block;"></i>
-        <h4 style="margin-bottom:6px;font-size:1rem;">Share Your Quiz</h4>
-        <p style="font-size:.8rem;color:var(--text-secondary);margin-bottom:14px;">Anyone with this link can take your quiz</p>
+      <div style="text-align:center;padding:18px 8px;">
+        <div style="width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,#ede9fe,#e0e7ff);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:1.6rem;">🔗</div>
+        <h4 style="margin-bottom:6px;font-size:1.05rem;font-weight:800;">Share your quiz</h4>
+        <p style="font-size:.82rem;color:var(--text-secondary);margin-bottom:16px;max-width:300px;margin-left:auto;margin-right:auto;">Anyone with this link can open and take the quiz — no account needed.</p>
         <div class="share-link-wrapper">
           <input type="text" id="shareLinkInput" readonly />
           <button class="btn btn-primary" id="copyLinkBtn"><i class="fas fa-copy"></i> Copy</button>
         </div>
-        <div style="margin-top:12px;display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">
+        <div style="margin-top:14px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
           <button class="btn btn-outline btn-sm" id="shareWhatsApp"><i class="fab fa-whatsapp"></i> WhatsApp</button>
-          <button class="btn btn-outline btn-sm" id="shareTwitter"><i class="fab fa-twitter"></i> Twitter</button>
+          <button class="btn btn-outline btn-sm" id="shareTwitter"><i class="fab fa-twitter"></i> X / Twitter</button>
           <button class="btn btn-outline btn-sm" id="shareEmail"><i class="fas fa-envelope"></i> Email</button>
         </div>
+        <p style="font-size:.68rem;color:#94a3b8;margin-top:16px;">Tip: results are saved on the device that takes the quiz.</p>
       </div>
     </div>
     <div class="tab-panel" id="panelDashboard"><div id="dashboardContent"></div></div>
     <div class="tab-panel" id="panelCreate"></div>
+  </div>
+
+  <div class="site-footer" id="siteFooter">
+    <div class="privacy"><i class="fas fa-shield-alt"></i> Your data stays on this device — we never upload quizzes</div>
+    <div>Made with care for teachers, creators &amp; learners</div>
+    <div style="margin-top:6px;">
+      <a href="mailto:narayanbarman3210@gmail.com">Contact</a> · 
+      <a href="https://wa.me/918101565420" target="_blank" rel="noopener">WhatsApp</a> · 
+      <button type="button" onclick="document.getElementById('helpFab').click()" style="background:none;border:none;color:var(--primary);font-weight:600;cursor:pointer;font-size:inherit;font-family:inherit;padding:0;">Feedback</button>
+    </div>
+  </div>
+</div>
+
+<!-- HELP FAB -->
+<button class="help-fab" id="helpFab" title="Help & Support"><i class="fas fa-headset"></i></button>
+
+<!-- HELP MODAL -->
+<div class="modal-overlay" id="helpModal">
+  <div class="modal-card" style="text-align:left; padding:20px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+      <h3 style="font-size:1.1rem; color:var(--text); margin:0;"><i class="fas fa-headset" style="color:var(--primary);"></i> Support & Feedback</h3>
+      <button id="closeHelpBtn" style="background:none; border:none; font-size:1.2rem; color:#94a3b8; cursor:pointer;">✕</button>
+    </div>
+    <p style="font-size:0.8rem; margin-bottom:12px; color:var(--text-secondary);">Questions, issues, or feedback? We read every message and love hearing how QuizCraft is working for you.</p>
+    <div class="input-group">
+      <label class="input-label">Type</label>
+      <select id="helpType" class="input-field" style="cursor:pointer;">
+        <option value="Feedback">💚 Feedback / Love the app</option>
+        <option value="Suggestion">💡 Suggestion</option>
+        <option value="Issue">🐛 Bug / Issue</option>
+        <option value="Support">❓ Support Question</option>
+      </select>
+    </div>
+    <div class="input-group">
+      <label class="input-label">Your Name</label>
+      <input type="text" id="helpName" class="input-field" placeholder="John Doe">
+    </div>
+    <div class="input-group">
+      <label class="input-label">Your Email</label>
+      <input type="email" id="helpEmail" class="input-field" placeholder="john@example.com">
+    </div>
+    <div class="input-group">
+      <label class="input-label">Message</label>
+      <textarea id="helpMessage" class="input-field" rows="3" placeholder="Tell us what you love, what needs fixing, or any idea..."></textarea>
+    </div>
+    <button id="sendHelpBtn" class="btn btn-primary btn-block"><i class="fas fa-paper-plane"></i> Send Message</button>
+    <div style="text-align:center; margin-top:14px; padding-top:10px; border-top:1px solid var(--border);">
+      <div style="font-size:0.72rem; color:#64748b; margin-bottom:6px;">Prefer chat? Reach me directly:</div>
+      <a href="https://wa.me/918101565420" target="_blank" style="font-size:0.8rem; color:#25D366; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:6px;"><i class="fab fa-whatsapp" style="font-size:1.1rem;"></i> WhatsApp: 8101565420</a>
+      <div style="margin-top:6px;">
+        <a href="mailto:narayanbarman3210@gmail.com" style="font-size:0.75rem; color:var(--primary); font-weight:600; text-decoration:none;"><i class="fas fa-envelope"></i> narayanbarman3210@gmail.com</a>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -689,7 +959,12 @@ textarea.input-field{resize:vertical;min-height:80px}
 window.addEventListener('error', function(e){ console.error('GLOBAL ERROR:', e.error || e.message); });
 
 const CANVA_TEMPLATES = [
-  { id:'t25', name:'Cool White' }, { id:'t26', name:'Purple Gradient' }, { id:'t27', name:'Ocean Breeze' },
+  { id:'t25', name:'Cool White' },
+  { id:'t37', name:'Neon Rouge' }, { id:'t38', name:'Blush Pink' }, { id:'t39', name:'Obsidian Gold' },
+  { id:'t40', name:'Aqua Fresh' }, { id:'t41', name:'Royal Violet' }, { id:'t42', name:'Rose Blush' },
+  { id:'t31', name:'Soft Lavender' }, { id:'t32', name:'Corporate Blue' }, { id:'t33', name:'Gold Night' },
+  { id:'t34', name:'Fresh Mint' }, { id:'t35', name:'Warm Peach' }, { id:'t36', name:'Arctic Ice' },
+  { id:'t26', name:'Purple Gradient' }, { id:'t27', name:'Ocean Breeze' },
   { id:'t28', name:'Emerald Pro' }, { id:'t29', name:'Rose Gold' }, { id:'t30', name:'Midnight Amber' },
   { id:'t21', name:'Minimalist' }, { id:'t19', name:'Glassmorphism' }, { id:'t20', name:'Neon Cyberpunk' },
   { id:'t22', name:'Elegant Dark' }, { id:'t23', name:'Retro Wave' }, { id:'t24', name:'Pastel Dream' },
@@ -705,7 +980,7 @@ let questionsBank = [];
 let currentMode = null;
 let selectedTemplate = CANVA_TEMPLATES[0];
 let timerEnabled = true, timerSeconds = 10;
-let quizLogo = null, quizTitle = "My Custom Quiz";
+let quizLogo = null, quizTitle = "";
 let currentShortId = "", currentQuizData = null;
 let timerInterval = null, timeRemaining = 0;
 let isQuizActive = false, isQuizStarted = false;
@@ -746,6 +1021,47 @@ function showConfirmModal(message, onConfirm) {
   };
 }
 
+/* Live Users Simulator */
+function initLiveUsers() {
+  const baseRealUsers = Math.floor(Math.random() * 30) + 5; // 5 to 35 real users
+  const extraFake = 93;
+  let displayCount = baseRealUsers + extraFake;
+  
+  const updateCounter = () => {
+    const el = document.getElementById('liveUsersText');
+    if (el) el.textContent = `${displayCount} people using today`;
+  };
+  
+  updateCounter();
+  
+  // Slight fluctuation to simulate live traffic
+  setInterval(() => {
+    const change = Math.floor(Math.random() * 5) - 2; 
+    displayCount += change;
+    if (displayCount < extraFake + 2) displayCount = extraFake + 2;
+    updateCounter();
+  }, 8000);
+}
+
+/* Help System */
+document.getElementById('helpFab').onclick = () => document.getElementById('helpModal').classList.add('active');
+document.getElementById('closeHelpBtn').onclick = () => document.getElementById('helpModal').classList.remove('active');
+document.getElementById('helpModal').addEventListener('click', (e) => {
+  if (e.target.id === 'helpModal') document.getElementById('helpModal').classList.remove('active');
+});
+document.getElementById('sendHelpBtn').onclick = () => {
+  const name = document.getElementById('helpName').value || 'Anonymous';
+  const email = document.getElementById('helpEmail').value || 'No Email';
+  const msg = document.getElementById('helpMessage').value;
+  const type = document.getElementById('helpType') ? document.getElementById('helpType').value : 'Feedback';
+  if (!msg) return showToast("Please enter a message", "error");
+  
+  const body = `Type: ${type}%0D%0AName: ${name}%0D%0AEmail: ${email}%0D%0A%0D%0AMessage:%0D%0A${msg}`;
+  window.location.href = `mailto:narayanbarman3210@gmail.com?subject=QuizCraft ${type} from ${name}&body=${body}`;
+  document.getElementById('helpModal').classList.remove('active');
+  showToast("Opening email client...", "success");
+};
+
 function getAllQuizzes() { try { return JSON.parse(localStorage.getItem("quizCraftData") || "{}"); } catch { return {}; } }
 function saveQuizData(id, data) { try { const all = getAllQuizzes(); all[id] = data; localStorage.setItem("quizCraftData", JSON.stringify(all)); } catch (e) { console.error(e); } }
 function getQuizData(id) { return getAllQuizzes()[id] || null; }
@@ -767,6 +1083,42 @@ function addQuizPlay(id, result) {
   } catch (e) {}
 }
 function generateId() { return Math.random().toString(36).substring(2, 10); }
+function getQuizNameHintPhrase() {
+  if (currentMode === 'mock' || currentMode === 'mocktest') {
+    return 'Add your mock test name  ·  e.g. Class 10 Science Final';
+  }
+  if (currentMode === 'video') {
+    return 'Add your video quiz name  ·  e.g. GK Shorts Quiz';
+  }
+  return 'Add your quiz name  ·  e.g. Science Quiz — Class 8';
+}
+function syncQuizNameHint() {
+  const wrap = document.getElementById('quizNameWrap');
+  const input = document.getElementById('quizNameInput');
+  if (!wrap || !input) return;
+  wrap.classList.toggle('has-value', !!(input.value || '').trim());
+  wrap.classList.toggle('is-focused', document.activeElement === input);
+  const track = wrap.querySelector('.quiz-name-marquee-track');
+  if (track) {
+    const phrase = getQuizNameHintPhrase();
+    const parts = phrase.split('  ·  ');
+    const main = parts[0] || phrase;
+    const example = parts[1] ? `  ·  <span class="ex">${parts[1]}</span>` : '';
+    const unit = `<span>${main}${example}</span>`;
+    track.innerHTML = unit + unit + unit + unit;
+  }
+  const isMock = currentMode === 'mock' || currentMode === 'mocktest';
+  input.setAttribute('aria-label', isMock ? 'Mock test name' : currentMode === 'video' ? 'Video quiz name' : 'Quiz name');
+}
+function initQuizNameHint() {
+  const input = document.getElementById('quizNameInput');
+  if (!input || input.dataset.hintBound) return;
+  input.dataset.hintBound = '1';
+  input.addEventListener('focus', syncQuizNameHint);
+  input.addEventListener('blur', syncQuizNameHint);
+  input.addEventListener('input', () => { quizTitle = (input.value || '').trim(); syncQuizNameHint(); saveState(); });
+  syncQuizNameHint();
+}
 
 function parseBulkToQuestions(raw) {
   const lines = raw.split(/\r?\n/), qs = [], errors = [];
@@ -785,18 +1137,55 @@ function parseBulkToQuestions(raw) {
 function renderPreview(questions) {
   const div = document.getElementById("parsedPreview");
   if (!questions.length) { div.innerHTML = `<div style="background:#fafbff;border-radius:var(--radius-sm);padding:10px;text-align:center;color:var(--text-secondary);font-size:.8rem;"><i class="fas fa-info-circle"></i> No questions loaded yet.</div>`; return; }
-  let html = `<div style="max-height:140px;overflow:auto;background:#fafbff;border-radius:var(--radius-sm);padding:8px;"><strong style="font-size:.85rem;color:var(--text);">✅ ${questions.length} questions loaded</strong><br/>`;
+  let html = `<div style="max-height:160px;overflow:auto;background:#fafbff;border-radius:var(--radius-sm);padding:8px;"><strong style="font-size:.85rem;color:var(--text);">✅ ${questions.length} questions loaded</strong><br/>`;
   questions.forEach((q, idx) => {
-    html += `<div style="background:#fff;border-radius:10px;padding:4px 12px;margin:4px 0;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--border);font-size:.8rem;"><span><b>${idx+1}.</b> ${q.text.substring(0,50)}${q.text.length>50?'…':''}</span><button class="btn btn-outline btn-sm addImgBtn" data-idx="${idx}" style="padding:1px 10px;font-size:.65rem;"><i class="fas fa-image"></i></button></div>`;
+    const hasImg = !!(q.image);
+    html += `<div style="background:#fff;border-radius:10px;padding:5px 10px;margin:4px 0;display:flex;justify-content:space-between;align-items:center;gap:8px;border:1px solid var(--border);font-size:.8rem;">
+      <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><b>${idx+1}.</b> ${q.text.substring(0,48)}${q.text.length>48?'…':''}</span>
+      <div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">
+        ${hasImg ? `<img src="${q.image}" alt="" style="width:28px;height:28px;object-fit:cover;border-radius:6px;border:1px solid var(--border);">` : ''}
+        <button type="button" class="btn btn-outline btn-sm addImgBtn" data-idx="${idx}" title="Add image" style="padding:3px 8px;font-size:.65rem;${hasImg?'border-color:var(--success);color:var(--success);':''}"><i class="fas fa-image"></i></button>
+        ${hasImg ? `<button type="button" class="btn btn-outline btn-sm rmImgBtn" data-idx="${idx}" title="Remove image" style="padding:3px 6px;font-size:.65rem;color:var(--danger);border-color:#fde8ef;"><i class="fas fa-times"></i></button>` : ''}
+      </div>
+    </div>`;
   });
   html += `</div>`;
   div.innerHTML = html;
+
   document.querySelectorAll('.addImgBtn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const idx = parseInt(btn.dataset.idx);
-      const url = prompt("Image URL (jpg/png):");
-      if (url) questions[idx].image = url;
-      renderPreview(questions);
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const idx = parseInt(btn.dataset.idx, 10);
+      if (isNaN(idx) || !questionsBank[idx]) return;
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.style.display = 'none';
+      document.body.appendChild(input);
+      input.onchange = () => {
+        const file = input.files && input.files[0];
+        document.body.removeChild(input);
+        if (!file) return;
+        if (file.size > 4 * 1024 * 1024) { showToast('Image too large (max 4MB)', 'error'); return; }
+        const reader = new FileReader();
+        reader.onload = () => {
+          questionsBank[idx].image = reader.result;
+          renderPreview(questionsBank);
+          showToast('Image added', 'success');
+        };
+        reader.onerror = () => showToast('Could not read image', 'error');
+        reader.readAsDataURL(file);
+      };
+      input.click();
+    });
+  });
+  document.querySelectorAll('.rmImgBtn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const idx = parseInt(btn.dataset.idx, 10);
+      if (questionsBank[idx]) { delete questionsBank[idx].image; renderPreview(questionsBank); showToast('Image removed', 'success'); }
     });
   });
 }
@@ -813,7 +1202,11 @@ function processBulk() {
     document.getElementById("nextToTypeBtn").disabled = true;
   }
 }
-const EXAMPLE_DATA = `What is the capital of France? ,Paris,London,Berlin,Madrid,Paris\nWho wrote Hamlet? ,Shakespeare,Dickens,Hemingway,Tolstoy,Shakespeare\nWhat is 2+2? ,3,4,5,6,4`;
+const EXAMPLE_DATA = `What is the capital of France?,Paris,London,Berlin,Madrid,Paris
+Who wrote Hamlet?,Shakespeare,Dickens,Hemingway,Tolstoy,Shakespeare
+What is 2 + 2?,3,4,5,6,4
+Which planet is known as the Red Planet?,Venus,Mars,Jupiter,Saturn,Mars
+What does HTML stand for?,Hyper Text Markup Language,High Tech Modern Language,Home Tool Markup Language,Hyperlinks Text Markup Language,Hyper Text Markup Language`;
 document.getElementById("loadExampleBtn").addEventListener('click', function() {
   const ta = document.getElementById("bulkTextArea");
   if (exampleLoaded) { ta.value = ''; this.innerHTML = '<i class="fas fa-file-alt"></i> Load Example'; this.classList.remove('loaded'); exampleLoaded = false; }
@@ -833,7 +1226,7 @@ function restoreState() {
     selectedTemplate = (s.selectedTemplate && s.selectedTemplate.id) ? s.selectedTemplate : CANVA_TEMPLATES[0];
     timerEnabled = s.timerEnabled !== undefined ? s.timerEnabled : true;
     timerSeconds = s.timerSeconds || 10;
-    quizTitle = s.quizTitle || 'My Custom Quiz';
+    quizTitle = s.quizTitle || '';
     quizLogo = s.quizLogo || null;
     currentMode = s.currentMode || null;
     if (s.questionsBank && s.questionsBank.length) questionsBank = s.questionsBank;
@@ -867,14 +1260,80 @@ function ensurePlayZone() {
 }
 
 function showHomeView() {
+  exitVideoLayout();
   document.getElementById("stepHome").style.display = "block";
   document.getElementById("stepUpload").style.display = "none";
   document.getElementById("stepType").style.display = "none";
   document.getElementById("createdArea").style.display = "none";
+  const ft = document.getElementById('siteFooter'); if (ft) ft.style.display = 'block';
   currentMode = null;
   currentView = 'home';
   pushState('home', null);
+  renderHomeRecent();
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderHomeRecent() {
+  const wrap = document.getElementById('homeRecentWrap');
+  const list = document.getElementById('homeRecentList');
+  if (!wrap || !list) return;
+  const all = getAllQuizzes();
+  const ids = Object.keys(all).sort((a, b) => (all[b].createdAt || 0) - (all[a].createdAt || 0)).slice(0, 4);
+  if (!ids.length) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  list.innerHTML = ids.map(id => {
+    const q = all[id];
+    const n = (q.questions && q.questions.length) || 0;
+    const modeLabel = q.mode === 'mock' ? 'Mock' : (q.mode === 'video' ? 'Video' : 'Quiz');
+    return `<div class="quiz-list-item" style="cursor:pointer;" onclick="openRecentQuiz('${id}')">
+      <div><div class="ql-title">${(q.title || 'Untitled').substring(0, 42)}</div>
+      <div class="ql-meta"><span>${n} Qs</span><span>${modeLabel}</span></div></div>
+      <i class="fas fa-play" style="color:var(--primary);font-size:.75rem;"></i>
+    </div>`;
+  }).join('');
+}
+
+window.openRecentQuiz = function(id) {
+  const data = getQuizData(id);
+  if (!data) return showToast('Quiz not found', 'error');
+  currentShortId = id;
+  currentQuizData = data;
+  navigateTo('play', data);
+};
+
+function startDemoQuiz() {
+  const demoQs = [
+    { text: 'What is the capital of France?', options: ['Madrid', 'Paris', 'Berlin', 'Rome'], correct: 'Paris' },
+    { text: 'Which planet is known as the Red Planet?', options: ['Venus', 'Jupiter', 'Mars', 'Saturn'], correct: 'Mars' },
+    { text: 'What is 12 × 8?', options: ['84', '96', '108', '88'], correct: '96' },
+    { text: 'Who painted the Mona Lisa?', options: ['Van Gogh', 'Picasso', 'Da Vinci', 'Monet'], correct: 'Da Vinci' },
+    { text: 'What does HTML stand for?', options: ['Hyper Text Markup Language', 'High Tech Modern Language', 'Home Tool Markup Language', 'Hyperlinks and Text Markup Language'], correct: 'Hyper Text Markup Language' }
+  ];
+  const id = 'demo_' + Date.now().toString(36);
+  const data = {
+    title: 'QuizCraft Demo Quiz',
+    questions: demoQs,
+    mode: 'quiz',
+    templateId: 't25',
+    logo: null,
+    timerEnabled: true,
+    timerSeconds: 15,
+    createdAt: Date.now()
+  };
+  saveQuizData(id, data);
+  currentShortId = id;
+  currentQuizData = data;
+  showToast('Demo loaded — good luck! 🍀', 'success');
+  navigateTo('play', data);
+}
+
+function hideSiteFooter() { const ft = document.getElementById('siteFooter'); if (ft) ft.style.display = 'none'; }
+function exitVideoLayout() {
+  try { if (typeof vmStopAll === 'function') vmStopAll(); } catch (e) {}
+  const appEl = document.getElementById('app');
+  if (appEl) appEl.classList.remove('vm-expanded');
+  const helpFab = document.getElementById('helpFab');
+  if (helpFab) helpFab.classList.remove('vm-hidden');
 }
 
 function showDashboardView() {
@@ -882,6 +1341,7 @@ function showDashboardView() {
   document.getElementById("stepUpload").style.display = "none";
   document.getElementById("stepType").style.display = "none";
   document.getElementById("createdArea").style.display = "block";
+  hideSiteFooter();
   document.getElementById("tabBar").style.display = "flex";
   document.querySelectorAll("#tabBar .tab-btn").forEach(b => b.classList.remove("active"));
   const db = document.querySelector("#tabBar .tab-btn[data-tab='dashboard']"); if (db) db.classList.add("active");
@@ -893,8 +1353,21 @@ function showDashboardView() {
 function renderFullDashboard() {
   const container = document.getElementById("dashboardContent");
   const all = getAllQuizzes(), ids = Object.keys(all);
-  if (!ids.length) { container.innerHTML = `<div class="empty-state"><i class="fas fa-clipboard-list"></i><h4>No quizzes yet</h4><p class="sub">Click <strong>+ New</strong> to create your first quiz</p><button class="btn btn-primary mt-3" onclick="navigateTo('home')"><i class="fas fa-plus"></i> Create New Quiz</button></div>`; return; }
-  let html = `<div style="margin-bottom:10px;"><h4 style="font-size:.95rem;color:var(--text);">📚 Your Quizzes</h4></div>`;
+  if (!ids.length) {
+    container.innerHTML = `<div class="empty-state">
+      <i class="fas fa-clipboard-list"></i>
+      <h4>No quizzes yet</h4>
+      <p style="font-size:.85rem;max-width:280px;margin:0 auto 14px;">Create your first quiz, mock test, or short video — it only takes a minute.</p>
+      <button class="btn btn-primary" onclick="navigateTo('home')"><i class="fas fa-plus"></i> Create New</button>
+      <button class="btn btn-outline mt-2" onclick="startDemoQuiz()"><i class="fas fa-play"></i> Try the Demo</button>
+    </div>`;
+    return;
+  }
+  const playsCount = ids.reduce((s, id) => s + getQuizPlays(id).length, 0);
+  let html = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+    <h4 style="font-size:1rem;color:var(--text);margin:0;">📚 Your Quizzes <span style="font-size:.75rem;font-weight:600;color:var(--text-secondary);">(${ids.length})</span></h4>
+    <span style="font-size:.7rem;background:#eef2ff;color:#4338ca;padding:4px 10px;border-radius:20px;font-weight:600;">${playsCount} total play${playsCount===1?'':'s'}</span>
+  </div>`;
   ids.forEach(id => {
     const q = all[id], plays = getQuizPlays(id), total = plays.length;
     let avg = 0, pass = 0;
@@ -911,12 +1384,19 @@ window.deleteQuiz = function(id) { if (!confirm("Delete this quiz and all its da
 
 function showCreateView() {
   if (!currentMode) { showHomeView(); return; }
+  exitVideoLayout();
+  hideCreatedReadyLine();
   document.getElementById("stepHome").style.display = "none";
   document.getElementById("stepUpload").style.display = "block";
   document.getElementById("stepType").style.display = "none";
   document.getElementById("createdArea").style.display = "none";
+  hideSiteFooter();
   document.getElementById("tabBar").style.display = "flex";
-  document.getElementById("quizNameInput").value = quizTitle || "My Custom Quiz";
+  const nameInput = document.getElementById("quizNameInput");
+  if (nameInput) {
+    nameInput.value = quizTitle || "";
+    syncQuizNameHint();
+  }
   document.getElementById("bulkTextArea").value = '';
   document.getElementById("logoPreview").innerHTML = quizLogo ? `<img src="${quizLogo}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--border);">` : "";
   questionsBank = [];
@@ -933,6 +1413,7 @@ function showCreateView() {
 function showShareView() {
   document.getElementById("stepHome").style.display = "none";
   document.getElementById("createdArea").style.display = "block";
+  hideSiteFooter();
   document.getElementById("tabBar").style.display = "flex";
   document.querySelectorAll("#tabBar .tab-btn").forEach(b => b.classList.remove("active"));
   const sb = document.querySelector("#tabBar .tab-btn[data-tab='share']"); if (sb) sb.classList.add("active");
@@ -944,6 +1425,7 @@ function showShareView() {
 function showPlayView(data) {
   document.getElementById("stepHome").style.display = "none";
   document.getElementById("createdArea").style.display = "block";
+  hideSiteFooter();
   document.getElementById("tabBar").style.display = "flex";
   document.querySelectorAll("#tabBar .tab-btn").forEach(b => b.classList.remove("active"));
   const pb = document.querySelector("#tabBar .tab-btn[data-tab='play']"); if (pb) pb.classList.add("active");
@@ -1023,9 +1505,10 @@ function buildQuizHtml(data, tplId) {
   const questions = data.questions;
   let timerHtml = '';
   if (data.timerEnabled) timerHtml = `<div class="timer-badge total-timer" id="quizTotalTimer"><i class="fas fa-clock"></i> ${formatTime(data.timerSeconds * questions.length)}</div>`;
+  // Note: Added explicit text-shadow and color to title for better contrast
   return `<div class="theme-${tplId}" style="border-radius:var(--radius);padding:14px;">
-    <div class="flex-between" style="margin-bottom:8px;background:rgba(255,255,255,.82);backdrop-filter:blur(8px);border-radius:60px;padding:6px 14px;">
-      <div style="display:flex;align-items:center;gap:8px;">${data.logo ? `<img src="${data.logo}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;" />` : ''}<span style="font-weight:700;color:#2d3436;font-size:.85rem;">${data.title}</span></div>
+    <div class="flex-between" style="margin-bottom:8px;background:rgba(255,255,255,.82);backdrop-filter:blur(8px);border-radius:60px;padding:6px 14px;box-shadow:0 2px 10px rgba(0,0,0,0.05);">
+      <div style="display:flex;align-items:center;gap:8px;">${data.logo ? `<img src="${data.logo}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;" />` : ''}<span style="font-weight:800;color:#1e293b;font-size:.85rem;text-shadow:0 1px 2px rgba(0,0,0,0.1);">${data.title}</span></div>
       ${timerHtml}
     </div>
     <div class="booklet-wrap" style="background:transparent;"><div class="booklet" id="quizBookNav"></div></div>
@@ -1034,7 +1517,7 @@ function buildQuizHtml(data, tplId) {
     <div class="quiz-footer">
       <div class="nav-row">
         <button id="quizPrevBtn" class="btn btn-outline btn-sm"><i class="fas fa-chevron-left"></i> Prev</button>
-        <span id="quizCounter" style="font-size:.75rem;color:var(--text-secondary);">1 / ${questions.length}</span>
+        <span id="quizCounter" style="font-size:.75rem;color:var(--text-secondary);font-weight:600;">1 / ${questions.length}</span>
         <button id="quizNextBtn" class="btn btn-primary btn-sm">Next <i class="fas fa-chevron-right"></i></button>
       </div>
       <div class="submit-row"><button id="submitQuizBtn" class="btn-submit"><i class="fas fa-check-double"></i> Submit Quiz</button></div>
@@ -1335,6 +1818,7 @@ document.querySelectorAll(".home-mode-btn").forEach(btn => {
   btn.addEventListener("click", function() {
     currentMode = this.dataset.mode;
     navigateTo('create');
+    syncQuizNameHint();
   });
 });
 
@@ -1391,7 +1875,7 @@ document.getElementById("timerSeconds").onchange = function() { timerSeconds = p
 
 document.getElementById("nextToTypeBtn").onclick = () => {
   if (questionsBank.length === 0) return showToast("Please add some questions first", 'error');
-  quizTitle = document.getElementById("quizNameInput").value || "My Quiz";
+  quizTitle = (document.getElementById("quizNameInput").value || '').trim();
   document.getElementById("stepUpload").style.display = "none";
   document.getElementById("stepType").style.display = "block";
   renderTemplateGallery(); saveState();
@@ -1400,10 +1884,23 @@ document.getElementById("nextToTypeBtn").onclick = () => {
 document.getElementById("backFromTypeBtn").onclick = () => { document.getElementById("stepType").style.display = "none"; document.getElementById("stepUpload").style.display = "block"; saveState(); window.scrollTo({ top: 0, behavior: 'smooth' }); };
 document.getElementById("cancelCreateBtn").onclick = () => navigateTo('home');
 
+function showCreatedReadyLine(mode) {
+  const line = document.getElementById('createdReadyLine');
+  const text = document.getElementById('createdReadyText');
+  if (!line) return;
+  const label = (mode === 'mocktest' || mode === 'mock') ? 'Mock test ready' : 'Quiz ready';
+  if (text) text.innerHTML = label + ' — use <b>Play</b> or <b>Share</b>';
+  line.style.display = 'flex';
+}
+function hideCreatedReadyLine() {
+  const line = document.getElementById('createdReadyLine');
+  if (line) line.style.display = 'none';
+}
+
 document.getElementById("finalCreateBtn").onclick = () => {
   try {
     if (questionsBank.length === 0) return showToast("Please load questions first", 'error');
-    quizTitle = document.getElementById("quizNameInput").value || "My Quiz";
+    quizTitle = (document.getElementById("quizNameInput").value || '').trim();
     timerEnabled = document.getElementById("enableTimerCheck").checked;
     timerSeconds = parseInt(document.getElementById("timerSeconds").value) || 10;
     
@@ -1417,8 +1914,8 @@ document.getElementById("finalCreateBtn").onclick = () => {
       document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
       const pp = document.getElementById('panelPlay');
       pp.classList.add('active');
-      pp.innerHTML = `<div class="flex-between" style="margin-bottom:8px;"><button class="btn btn-outline btn-sm" id="videoBackBtn"><i class="fas fa-arrow-left"></i> Back</button><span style="font-size:.72rem;color:var(--text-secondary);">🎬 Video Studio</span></div><div id="renderZone" style="width:100%;"></div>`;
-      document.getElementById('videoBackBtn').onclick = () => showCreateView();
+      pp.innerHTML = `<div class="flex-between" style="margin-bottom:4px;padding:0 2px;"><button class="btn btn-outline btn-sm" id="videoBackBtn" style="padding:5px 12px;"><i class="fas fa-arrow-left"></i> Back</button><span style="font-size:.7rem;font-weight:700;color:var(--text-secondary);"><i class="fas fa-video"></i> Video Studio</span></div><div id="renderZone" style="width:100%;"></div>`;
+      document.getElementById('videoBackBtn').onclick = () => { try { vmStopAll(); } catch (e) {} showCreateView(); };
       renderVideoStudio({ q: questionsBank, quizTitle: quizTitle, quizLogo: quizLogo });
       pushState('video', null);
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1446,13 +1943,20 @@ document.getElementById("finalCreateBtn").onclick = () => {
     document.getElementById("shareTwitter").onclick = () => window.open(`https://twitter.com/intent/tweet?text=Take my quiz!&url=${encodeURIComponent(`${window.location.origin}${window.location.pathname}?q=${id}`)}`, '_blank');
     document.getElementById("shareEmail").onclick = () => { window.location.href = `mailto:?subject=Quiz Invitation&body=Take my quiz: ${window.location.origin}${window.location.pathname}?q=${id}`; };
     renderAssessmentFromData(data);
-    showToast("✅ Quiz created! Share the link.", 'success');
     pushState('play', { id });
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    showCreatedReadyLine(currentMode);
+    showToast(((currentMode === 'mocktest' || currentMode === 'mock') ? 'Mock test' : 'Quiz') + ' created!', 'success');
   } catch (err) { console.error('CREATE ERROR:', err); showToast('Error: ' + err.message, 'error', 5000); }
 };
 
 window.onload = function() {
+  initLiveUsers();
+  initQuizNameHint();
+
+  const demoBtn = document.getElementById('tryDemoBtn');
+  if (demoBtn) demoBtn.onclick = startDemoQuiz;
+  
   const hasShared = resolveSharedQuiz();
   if (!hasShared) {
     const restored = restoreState();
@@ -1561,6 +2065,19 @@ function vmEaseOutBack(p) { const c1 = 1.1, c3 = c1 + 1; return 1 + c3 * Math.po
 function vmFormatTime(sec) { const m = Math.floor(sec / 60); const s = Math.floor(sec % 60); return `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`; }
 function estimateSpeechDuration(text, rate) { if (!text) return 0; const s = String(text), r = (rate && rate > 0) ? rate : 1.0; let cps = 13; if (/[\u0980-\u09FF\u0900-\u097F\u0B80-\u0BFF\u0C00-\u0C7F\u0C80-\u0CFF\u0D00-\u0D7F\u0A80-\u0AFF\u0A00-\u0A7F\u0600-\u06FF]/.test(s)) cps = 9; if (/[\u4E00-\u9FFF\u3040-\u30FF\uAC00-\uD7AF]/.test(s)) cps = 4; return (s.length / (cps * r)) + 0.5; }
 
+// Helper for safe contrast text
+function getSafeTextColor(hex, defaultHex = '#1e293b') {
+  if (!hex) return defaultHex;
+  let h = hex.replace('#', '');
+  if (h.length === 3) h = h.split('').map(c => c + c).join('');
+  if (!/^[0-9a-fA-F]{6}$/.test(h)) return defaultHex;
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+  return brightness > 180 ? '#1e293b' : (brightness < 50 ? '#ffffff' : hex);
+}
+
 const vmThemes = [
   { name: 'Clean',  bg: ['#ffffff','#f8fafc'], accent: '#2563eb', accent2: '#0891b2', text: '#0f172a', sub: '#475569', light: true },
   { name: 'Neon',   bg: ['#0f0c29','#302b63'], accent: '#00e0ff', accent2: '#ff2d95', text: '#ffffff', sub: '#c7d2fe', light: false },
@@ -1606,7 +2123,19 @@ const VM_TPL_COLOR_MAP = {
   't27': { bg:['#2193b0','#6dd5ed'], accent:'rgba(255,255,255,0.4)', accent2:'#0c4a6e', text:'#0c4a6e', sub:'#0c4a6e', light:true },
   't28': { bg:['#134e5e','#71b280'], accent:'rgba(255,255,255,0.4)', accent2:'#064e3b', text:'#064e3b', sub:'#064e3b', light:true },
   't29': { bg:['#ee9ca7','#ffdde1'], accent:'#fff', accent2:'#be185d', text:'#831843', sub:'#831843', light:true },
-  't30': { bg:['#232526','#414345'], accent:'rgba(251,191,36,0.2)', accent2:'rgba(251,191,36,0.3)', text:'#fbbf24', sub:'#fbbf24', light:false }
+  't30': { bg:['#232526','#414345'], accent:'rgba(251,191,36,0.2)', accent2:'rgba(251,191,36,0.3)', text:'#fbbf24', sub:'#fbbf24', light:false },
+  't31': { bg:['#f5f3ff','#e0e7ff'], accent:'#7c3aed', accent2:'#a78bfa', text:'#4c1d95', sub:'#6d28d9', light:true },
+  't32': { bg:['#0c4a6e','#0369a1'], accent:'#0ea5e9', accent2:'#38bdf8', text:'#0c4a6e', sub:'#0369a1', light:false },
+  't33': { bg:['#1a1a2e','#0f3460'], accent:'#f59e0b', accent2:'#fbbf24', text:'#fbbf24', sub:'#fef3c7', light:false },
+  't34': { bg:['#ecfdf5','#d1fae5'], accent:'#10b981', accent2:'#34d399', text:'#065f46', sub:'#047857', light:true },
+  't35': { bg:['#fff7ed','#fed7aa'], accent:'#f97316', accent2:'#fb923c', text:'#9a3412', sub:'#c2410c', light:true },
+  't36': { bg:['#f0f9ff','#bae6fd'], accent:'#0ea5e9', accent2:'#38bdf8', text:'#0c4a6e', sub:'#0369a1', light:true },
+  't37': { bg:['#1a1a2e','#0f3460'], accent:'#e94560', accent2:'#ff6b81', text:'#e94560', sub:'#e2e8f0', light:false },
+  't38': { bg:['#fdf4ff','#f5d0fe'], accent:'#d946ef', accent2:'#e879f9', text:'#86198f', sub:'#a21caf', light:true },
+  't39': { bg:['#0c0a09','#292524'], accent:'#f59e0b', accent2:'#fbbf24', text:'#fbbf24', sub:'#f5f5f4', light:false },
+  't40': { bg:['#ecfeff','#a5f3fc'], accent:'#06b6d4', accent2:'#22d3ee', text:'#155e75', sub:'#0e7490', light:true },
+  't41': { bg:['#3b0764','#7e22ce'], accent:'#e879f9', accent2:'#f0abfc', text:'#f5d0fe', sub:'#faf5ff', light:false },
+  't42': { bg:['#fff1f2','#fecdd3'], accent:'#f43f5e', accent2:'#fb7185', text:'#9f1239', sub:'#be123c', light:true }
 };
 
 const VM_TEMPLATE_PRESETS = {
@@ -1639,7 +2168,19 @@ const VM_TEMPLATE_PRESETS = {
   't27': { font:'Raleway', qSize:92, oSize:44, optionShape:'rounded', optionStyle:'solid', questionBox:'rounded', timerStyle:'bar', bgStyle:'none', qColor:'#ffffff', oColor:'#0c4a6e', optionColor:'rgba(255,255,255,0.95)', optionBorderColor:'rgba(255,255,255,0.6)', bgColor:null, qAnim:'slideUp', oAnim:'cascade', aEff:'confetti' },
   't28': { font:'Montserrat', qSize:92, oSize:42, optionShape:'rounded', optionStyle:'solid', questionBox:'rounded', timerStyle:'bar', bgStyle:'none', qColor:'#ffffff', oColor:'#064e3b', optionColor:'rgba(255,255,255,0.94)', optionBorderColor:'rgba(255,255,255,0.5)', bgColor:null, qAnim:'fade', oAnim:'cascade', aEff:'sparkle' },
   't29': { font:'Playfair', qSize:94, oSize:44, optionShape:'rounded', optionStyle:'solid', questionBox:'rounded', timerStyle:'bar', bgStyle:'none', qColor:'#831843', oColor:'#831843', optionColor:'#ffffff', optionBorderColor:'#fecdd3', bgColor:null, qAnim:'fade', oAnim:'cascade', aEff:'sparkle' },
-  't30': { font:'DM Sans', qSize:92, oSize:44, optionShape:'rounded', optionStyle:'outline', questionBox:'dark', timerStyle:'bar', bgStyle:'none', qColor:'#fbbf24', oColor:'#e5e7eb', optionColor:'rgba(251,191,36,0.15)', optionBorderColor:'rgba(251,191,36,0.2)', bgColor:'#232526', qAnim:'slideUp', oAnim:'cascade', aEff:'glow' }
+  't30': { font:'DM Sans', qSize:92, oSize:44, optionShape:'rounded', optionStyle:'outline', questionBox:'dark', timerStyle:'bar', bgStyle:'none', qColor:'#fbbf24', oColor:'#e5e7eb', optionColor:'rgba(251,191,36,0.15)', optionBorderColor:'rgba(251,191,36,0.2)', bgColor:'#232526', qAnim:'slideUp', oAnim:'cascade', aEff:'glow' },
+  't31': { font:'Poppins', qSize:94, oSize:44, optionShape:'rounded', optionStyle:'soft', questionBox:'soft', timerStyle:'ring', bgStyle:'none', qColor:'#4c1d95', oColor:'#5b21b6', optionColor:'#ffffff', optionBorderColor:'#ddd6fe', bgColor:null, qAnim:'slideUp', oAnim:'cascade', aEff:'sparkle' },
+  't32': { font:'Montserrat', qSize:96, oSize:44, optionShape:'rounded', optionStyle:'solid', questionBox:'rounded', timerStyle:'bar', bgStyle:'none', qColor:'#0c4a6e', oColor:'#0c4a6e', optionColor:'rgba(255,255,255,0.95)', optionBorderColor:null, bgColor:null, qAnim:'fade', oAnim:'slideUp', aEff:'confetti' },
+  't33': { font:'Outfit', qSize:94, oSize:44, optionShape:'rounded', optionStyle:'outline', questionBox:'dark', timerStyle:'pie', bgStyle:'none', qColor:'#fbbf24', oColor:'#fef3c7', optionColor:'rgba(251,191,36,0.12)', optionBorderColor:'rgba(251,191,36,0.3)', bgColor:'#1a1a2e', qAnim:'zoom', oAnim:'cascade', aEff:'glow' },
+  't34': { font:'Nunito', qSize:94, oSize:44, optionShape:'pill', optionStyle:'soft', questionBox:'soft', timerStyle:'ring', bgStyle:'none', qColor:'#065f46', oColor:'#047857', optionColor:'#ffffff', optionBorderColor:'#a7f3d0', bgColor:null, qAnim:'slideUp', oAnim:'cascade', aEff:'confetti' },
+  't35': { font:'Quicksand', qSize:94, oSize:44, optionShape:'rounded', optionStyle:'solid', questionBox:'rounded', timerStyle:'bar', bgStyle:'none', qColor:'#9a3412', oColor:'#c2410c', optionColor:'#ffffff', optionBorderColor:'#fdba74', bgColor:null, qAnim:'pop', oAnim:'bounce', aEff:'sparkle' },
+  't36': { font:'Inter', qSize:92, oSize:44, optionShape:'rounded', optionStyle:'glass', questionBox:'glass', timerStyle:'pie', bgStyle:'none', qColor:'#0c4a6e', oColor:'#0369a1', optionColor:null, optionBorderColor:null, bgColor:null, qAnim:'fade', oAnim:'stagger', aEff:'confetti' },
+  't37': { font:'Outfit', qSize:94, oSize:44, optionShape:'rounded', optionStyle:'neon', questionBox:'dark', timerStyle:'ring', bgStyle:'none', qColor:'#e94560', oColor:'#e2e8f0', optionColor:null, optionBorderColor:null, bgColor:null, qAnim:'zoom', oAnim:'cascade', aEff:'pulse' },
+  't38': { font:'Quicksand', qSize:90, oSize:42, optionShape:'pill', optionStyle:'soft', questionBox:'soft', timerStyle:'bar', bgStyle:'none', qColor:'#86198f', oColor:'#a21caf', optionColor:null, optionBorderColor:null, bgColor:null, qAnim:'slideUp', oAnim:'bounce', aEff:'confetti' },
+  't39': { font:'Space Grotesk', qSize:94, oSize:44, optionShape:'square', optionStyle:'bordered', questionBox:'accent', timerStyle:'pie', bgStyle:'none', qColor:'#fbbf24', oColor:'#f5f5f4', optionColor:null, optionBorderColor:null, bgColor:null, qAnim:'typewriter', oAnim:'slideLeft', aEff:'glow' },
+  't40': { font:'Nunito', qSize:92, oSize:44, optionShape:'rounded', optionStyle:'glass', questionBox:'glass', timerStyle:'ring', bgStyle:'none', qColor:'#155e75', oColor:'#0e7490', optionColor:null, optionBorderColor:null, bgColor:null, qAnim:'fade', oAnim:'stagger', aEff:'confetti' },
+  't41': { font:'Poppins', qSize:94, oSize:44, optionShape:'rounded', optionStyle:'gradient', questionBox:'gradient', timerStyle:'bar', bgStyle:'none', qColor:'#f5d0fe', oColor:'#faf5ff', optionColor:null, optionBorderColor:null, bgColor:null, qAnim:'pop', oAnim:'cascade', aEff:'pulse' },
+  't42': { font:'DM Sans', qSize:90, oSize:42, optionShape:'rounded', optionStyle:'soft', questionBox:'soft', timerStyle:'line', bgStyle:'none', qColor:'#9f1239', oColor:'#be123c', optionColor:null, optionBorderColor:null, bgColor:null, qAnim:'slideUp', oAnim:'elastic', aEff:'confetti' }
 };
 
 const VM_TEMPLATE_BG = {
@@ -1672,7 +2213,19 @@ const VM_TEMPLATE_BG = {
   't27': { type:'gradient-diag', colors:['#2193b0','#6dd5ed'] },
   't28': { type:'gradient-diag', colors:['#134e5e','#71b280'] },
   't29': { type:'gradient-diag', colors:['#ee9ca7','#ffdde1'] },
-  't30': { type:'gradient-diag', colors:['#232526','#414345'] }
+  't30': { type:'gradient-diag', colors:['#232526','#414345'] },
+  't31': { type:'gradient-diag', colors:['#f5f3ff','#e0e7ff'] },
+  't32': { type:'gradient-diag', colors:['#0c4a6e','#0369a1'] },
+  't33': { type:'gradient-diag', colors:['#1a1a2e','#0f3460'] },
+  't34': { type:'gradient-diag', colors:['#ecfdf5','#d1fae5'] },
+  't35': { type:'gradient-diag', colors:['#fff7ed','#fed7aa'] },
+  't36': { type:'gradient-diag', colors:['#f0f9ff','#bae6fd'] },
+  't37': { type:'gradient-diag', colors:['#1a1a2e','#0f3460'] },
+  't38': { type:'gradient-diag', colors:['#fdf4ff','#f5d0fe'] },
+  't39': { type:'gradient-diag', colors:['#0c0a09','#292524'] },
+  't40': { type:'gradient-diag', colors:['#ecfeff','#a5f3fc'] },
+  't41': { type:'gradient-diag', colors:['#3b0764','#7e22ce'] },
+  't42': { type:'gradient-diag', colors:['#fff1f2','#fecdd3'] }
 };
 
 let vmCurrentTemplateBg = null;
@@ -1765,7 +2318,7 @@ function vmApplyTemplate(tplId) {
   setSw('vmQColorPreview', vmQColor, th.text); setSw('vmOColorPreview', vmOColor, th.text);
 }
 
-let vmQuestions = [], vmImages = {}, vmLogoImg = null, vmLogoData = null, vmTitle = 'My Quiz';
+let vmQuestions = [], vmImages = {}, vmLogoImg = null, vmLogoData = null, vmTitle = '';
 let vmThemeIdx = 0, vmCustomTheme = null, vmOrientation = 'portrait';
 let vmSecPerQManual = 5, vmRevealSecManual = 3, vmSecPerQ = 5, vmRevealSec = 3, vmIntroSec = 3;
 let vmShowIntro = true, vmShowReveal = true, vmShowTimerBar = true, vmShowWatermark = true;
@@ -1784,7 +2337,7 @@ function vmFontStack() { const f = vmFontOptions.find(x => x.name === vmFontFami
 function vmHexA(hex, a) { if (!hex) return `rgba(255,255,255,${a})`; if (hex.startsWith('rgb')) return hex; let h = hex.replace('#', ''); if (h.length === 3) h = h.split('').map(c => c + c).join(''); const n = parseInt(h, 16); return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`; }
 function vmRR(ctx, x, y, w, h, r) { r = Math.min(r, w / 2, h / 2); ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
 function vmGetOptionRadius(shape, h) { switch (shape) { case 'pill': return h / 2; case 'rounded': return Math.min(h * 0.28, 40); case 'soft': return Math.min(h * 0.4, 60); case 'rect': return 0; case 'soft2': return Math.min(h * 0.5, 70); default: return h / 2; } }
-function vmGetQuestionRadius(box, h) { switch (box) { case 'rect': return 12; case 'rounded': return 28; case 'pill': return h / 2; case 'glass': return 24; case 'gradient': return 28; case 'dark': return 20; default: return 0; } }
+function vmGetQuestionRadius(box, h) { switch (box) { case 'rect': return 12; case 'rounded': return 28; case 'pill': return h / 2; case 'glass': return 24; case 'gradient': return 28; case 'dark': return 20; case 'soft': return 32; case 'outline': return 22; case 'shadow': return 26; case 'accent': return 20; default: return 0; } }
 function vmWrap(ctx, text, maxW) { const words = String(text).split(/\s+/), lines = []; let cur = ''; for (const w of words) { const test = cur ? cur + ' ' + w : w; if (ctx.measureText(test).width > maxW && cur) { lines.push(cur); cur = w; } else cur = test; } if (cur) lines.push(cur); return lines.length ? lines : ['']; }
 function vmFitFont(ctx, text, maxW, maxH, maxSize, minSize, weight, lineHeight, maxLines) { maxLines = maxLines || 6; let size = maxSize, lines; const fam = vmFontStack(); while (size > minSize) { ctx.font = `${weight} ${size}px ${fam}`; lines = vmWrap(ctx, text, maxW); if (lines.length <= maxLines && lines.length * size * lineHeight <= maxH) return { size, lines }; size -= 2; } ctx.font = `${weight} ${minSize}px ${fam}`; lines = vmWrap(ctx, text, maxW); return { size: minSize, lines: lines.slice(0, maxLines) }; }
 function vmRoundImage(ctx, img, x, y, w, h, r) { ctx.save(); vmRR(ctx, x, y, w, h, r); ctx.clip(); ctx.drawImage(img, x, y, w, h); ctx.restore(); }
@@ -1796,24 +2349,44 @@ function vmQuestionAnimParams(progress, style) {
   switch (style) {
     case 'fade': out.alpha = p; break;
     case 'slideUp': out.alpha = vmEaseOutQuart(p); out.offsetY = (1 - vmEaseOutQuart(p)) * 80; break;
+    case 'slideDown': out.alpha = vmEaseOutQuart(p); out.offsetY = -(1 - vmEaseOutQuart(p)) * 80; break;
+    case 'slideLeft': out.alpha = vmEaseOutCubic(p); out.offsetX = (1 - vmEaseOutCubic(p)) * 120; break;
+    case 'slideRight': out.alpha = vmEaseOutCubic(p); out.offsetX = -(1 - vmEaseOutCubic(p)) * 120; break;
     case 'zoom': out.alpha = vmEaseOutCubic(p); out.scale = 0.82 + 0.18 * vmEaseOutBack(p); break;
     case 'bounce3d': out.alpha = vmEaseOutCubic(Math.min(1, p * 1.4)); out.offsetY = -(1 - vmEaseOutBack(p)) * 100; out.scale = 0.7 + 0.3 * vmEaseOutQuart(p); break;
+    case 'pop': out.alpha = vmEaseOutCubic(p); out.scale = 0.5 + 0.5 * vmEaseOutBack(p); break;
+    case 'flip': out.alpha = p; out.scale = 0.6 + 0.4 * vmEaseOutBack(p); out.rotate = (1 - p) * 12; break;
+    case 'blurIn': out.alpha = vmEaseOutCubic(p); out.scale = 1.08 - 0.08 * vmEaseOutCubic(p); break;
+    case 'typewriter': out.alpha = 1; out.typewriter = p; break;
+    case 'none': out.alpha = 1; break;
     default: out.alpha = p;
   }
   return out;
 }
 function vmOptionAnimParams(progress, style) {
   const p = vmClamp(progress, 0, 1), alphaRamp = vmClamp(p * 1.4, 0, 1);
-  const out = { offsetX: 0, offsetY: 0, scaleX: 1, scaleY: 1, alpha: 1, rotate: 0, shine: 0 };
+  const out = { offsetX: 0, offsetY: 0, scaleX: 1, scaleY: 1, alpha: 1, rotate: 0, shine: 0, typewriter: 1 };
   switch (style) {
     case 'fade': out.alpha = vmEaseOutCubic(p); break;
     case 'slideUp': out.alpha = alphaRamp; out.offsetY = (1 - vmEaseOutQuart(p)) * 110; break;
+    case 'slideDown': out.alpha = alphaRamp; out.offsetY = -(1 - vmEaseOutQuart(p)) * 90; break;
+    case 'slideLeft': out.alpha = alphaRamp; out.offsetX = (1 - vmEaseOutCubic(p)) * 140; break;
     case 'cascade': out.alpha = alphaRamp; out.offsetY = (1 - vmEaseOutQuint(p)) * 130; out.scaleX = 0.88 + 0.12 * vmEaseOutQuart(p); out.scaleY = out.scaleX; break;
     case 'bounce': out.alpha = alphaRamp; out.offsetY = (1 - vmEaseOutBack(p)) * 150; out.scaleY = 0.85 + 0.15 * vmEaseOutQuart(p); break;
     case 'zoom': out.alpha = vmEaseOutCubic(p); out.scaleX = 0.4 + 0.6 * vmEaseOutBack(p); out.scaleY = out.scaleX; break;
+    case 'pop': out.alpha = alphaRamp; out.scaleX = 0.55 + 0.45 * vmEaseOutBack(p); out.scaleY = out.scaleX; break;
+    case 'elastic': out.alpha = alphaRamp; out.offsetY = (1 - vmEaseOutBack(p)) * 100; out.scaleX = 0.75 + 0.25 * vmEaseOutBack(p); out.scaleY = out.scaleX; break;
+    case 'stagger': out.alpha = alphaRamp; out.offsetX = (1 - vmEaseOutCubic(p)) * 60; out.offsetY = (1 - vmEaseOutQuart(p)) * 40; break;
+    case 'typewriter': out.alpha = 1; out.typewriter = p; break;
+    case 'none': out.alpha = 1; break;
     default: out.alpha = p;
   }
   return out;
+}
+function vmApplyTypewriter(text, progress) {
+  if (progress >= 0.999) return text;
+  const n = Math.max(0, Math.floor(String(text).length * progress));
+  return String(text).substring(0, n);
 }
 async function vmPreloadImages(force) {
   if (vmImagesPreloaded && !force) return;
@@ -1941,6 +2514,35 @@ function vmDrawOptionBg(ctx, x, y, w, h, th, isCorrect, isHighlight) {
       vmRR(ctx, x, y, w, h, radius); ctx.fill(); ctx.shadowBlur = 0;
       return { textColor: '#ffffff', letterBg: 'rgba(255,255,255,0.88)', letterText: th.accent };
     }
+    case 'soft': {
+      ctx.fillStyle = th.light ? 'rgba(248,250,252,0.98)' : 'rgba(30,41,59,0.7)';
+      ctx.shadowColor = 'rgba(0,0,0,0.08)'; ctx.shadowBlur = 16 * sc; ctx.shadowOffsetY = 4 * sc;
+      vmRR(ctx, x, y, w, h, radius); ctx.fill();
+      ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+      ctx.strokeStyle = th.light ? 'rgba(15,23,42,0.08)' : 'rgba(255,255,255,0.12)';
+      ctx.lineWidth = 1.5 * sc; vmRR(ctx, x, y, w, h, radius); ctx.stroke();
+      return { textColor: vmGetOColor(), letterBg: vmHexA(th.accent, 0.12), letterText: th.accent };
+    }
+    case 'shadow': {
+      ctx.fillStyle = th.light ? '#ffffff' : 'rgba(30,41,59,0.95)';
+      ctx.shadowColor = 'rgba(15,23,42,0.22)'; ctx.shadowBlur = 20 * sc; ctx.shadowOffsetY = 8 * sc;
+      vmRR(ctx, x, y, w, h, radius); ctx.fill();
+      ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+      return { textColor: vmGetOColor(), letterBg: th.accent, letterText: '#ffffff' };
+    }
+    case 'pastel': {
+      const grad = ctx.createLinearGradient(x, y, x + w, y + h);
+      grad.addColorStop(0, vmHexA(th.accent, 0.18)); grad.addColorStop(1, vmHexA(th.accent2 || th.accent, 0.08));
+      ctx.fillStyle = grad; vmRR(ctx, x, y, w, h, radius); ctx.fill();
+      ctx.strokeStyle = vmHexA(th.accent, 0.25); ctx.lineWidth = 1.5 * sc; vmRR(ctx, x, y, w, h, radius); ctx.stroke();
+      return { textColor: vmGetOColor(), letterBg: vmHexA(th.accent, 0.22), letterText: th.accent };
+    }
+    case 'bordered': {
+      ctx.fillStyle = th.light ? '#ffffff' : 'rgba(15,23,42,0.85)';
+      vmRR(ctx, x, y, w, h, radius); ctx.fill();
+      ctx.strokeStyle = th.accent; ctx.lineWidth = 4 * sc; vmRR(ctx, x, y, w, h, radius); ctx.stroke();
+      return { textColor: vmGetOColor(), letterBg: th.accent, letterText: '#ffffff' };
+    }
     default: {
       ctx.fillStyle = th.light ? 'rgba(255,255,255,0.95)' : 'rgba(30,41,59,0.75)';
       ctx.shadowColor = 'rgba(0,0,0,0.10)'; ctx.shadowBlur = 12 * sc; ctx.shadowOffsetY = 3 * sc;
@@ -1979,6 +2581,35 @@ function vmDrawQuestionBox(ctx, boxX, boxY, boxW, boxH, th) {
     case 'glass': { ctx.fillStyle = th.light ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.08)'; vmRR(ctx, boxX, boxY, boxW, boxH, radius); ctx.fill(); ctx.shadowBlur = 0; ctx.shadowOffsetY = 0; ctx.strokeStyle = th.light ? 'rgba(15,23,42,0.15)' : 'rgba(255,255,255,0.22)'; ctx.lineWidth = 2; vmRR(ctx, boxX, boxY, boxW, boxH, radius); ctx.stroke(); break; }
     case 'gradient': { const g = ctx.createLinearGradient(boxX, boxY, boxX + boxW, boxY + boxH); g.addColorStop(0, th.accent); g.addColorStop(1, th.accent2 || th.accent); ctx.fillStyle = g; vmRR(ctx, boxX, boxY, boxW, boxH, radius); ctx.fill(); ctx.shadowBlur = 0; ctx.shadowOffsetY = 0; break; }
     case 'dark': { ctx.fillStyle = 'rgba(15,23,42,0.85)'; vmRR(ctx, boxX, boxY, boxW, boxH, radius); ctx.fill(); ctx.shadowBlur = 0; ctx.shadowOffsetY = 0; ctx.strokeStyle = vmHexA(th.accent, 0.5); ctx.lineWidth = 2; vmRR(ctx, boxX, boxY, boxW, boxH, radius); ctx.stroke(); break; }
+    case 'soft': {
+      ctx.fillStyle = th.light ? 'rgba(255,255,255,0.92)' : 'rgba(30,41,59,0.65)';
+      ctx.shadowColor = 'rgba(0,0,0,0.12)'; ctx.shadowBlur = 28; ctx.shadowOffsetY = 8;
+      vmRR(ctx, boxX, boxY, boxW, boxH, radius); ctx.fill();
+      ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+      break;
+    }
+    case 'outline': {
+      ctx.fillStyle = 'transparent';
+      ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+      ctx.strokeStyle = th.accent; ctx.lineWidth = 4;
+      vmRR(ctx, boxX, boxY, boxW, boxH, radius); ctx.stroke();
+      break;
+    }
+    case 'shadow': {
+      ctx.fillStyle = th.light ? '#ffffff' : 'rgba(15,23,42,0.92)';
+      ctx.shadowColor = 'rgba(15,23,42,0.28)'; ctx.shadowBlur = 32; ctx.shadowOffsetY = 12;
+      vmRR(ctx, boxX, boxY, boxW, boxH, radius); ctx.fill();
+      ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+      break;
+    }
+    case 'accent': {
+      const g = ctx.createLinearGradient(boxX, boxY, boxX, boxY + boxH);
+      g.addColorStop(0, vmHexA(th.accent, 0.95)); g.addColorStop(1, vmHexA(th.accent2 || th.accent, 0.85));
+      ctx.fillStyle = g;
+      vmRR(ctx, boxX, boxY, boxW, boxH, radius); ctx.fill();
+      ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+      break;
+    }
   }
   ctx.restore();
 }
@@ -1986,41 +2617,262 @@ function vmDrawQuestionBox(ctx, boxX, boxY, boxW, boxH, th) {
 function vmDrawTimer(ctx, cx, topY, t, th, u, sceneDur) {
   if (!vmShowTimerBar || vmTimerStyle === 'none' || !sceneDur || sceneDur <= 0) return;
   const tR = vmClamp(1 - (t / sceneDur), 0, 1);
+  const timeLeft = Math.max(0, Math.ceil(sceneDur - t));
+  const timeStr = timeLeft.toString().padStart(2, '0');
+
+  const baseCol = th.accent;
+  // Stronger contrast on light/white backgrounds
+  const bgCol = th.light ? 'rgba(15,23,42,0.18)' : 'rgba(255,255,255,0.22)';
+  const trackStroke = th.light ? 'rgba(15,23,42,0.28)' : 'rgba(255,255,255,0.35)';
+  const trackFill = th.light ? 'rgba(15,23,42,0.08)' : 'rgba(255,255,255,0.12)';
+
   if (vmTimerStyle === 'bar') {
-    const tbH = 8 * u, tbW = 1080 * u * 0.60, tbX = cx - tbW / 2;
+    const tbH = 10 * u, tbW = 1080 * u * 0.62, tbX = cx - tbW / 2;
+    // Track with border for visibility on white
     vmRR(ctx, tbX, topY, tbW, tbH, tbH / 2);
-    ctx.fillStyle = th.light ? 'rgba(15,23,42,0.10)' : 'rgba(255,255,255,0.15)'; ctx.fill();
-    if (tR > 0) { vmRR(ctx, tbX, topY, tbW * tR, tbH, tbH / 2); const tg = ctx.createLinearGradient(tbX, 0, tbX + tbW, 0); tg.addColorStop(0, th.accent); tg.addColorStop(1, th.accent2 || th.accent); ctx.fillStyle = tg; ctx.fill(); }
+    ctx.fillStyle = trackFill; ctx.fill();
+    ctx.strokeStyle = trackStroke; ctx.lineWidth = 1.5 * u; ctx.stroke();
+    if (tR > 0) {
+      vmRR(ctx, tbX, topY, Math.max(tbH, tbW * tR), tbH, tbH / 2);
+      const tg = ctx.createLinearGradient(tbX, 0, tbX + tbW, 0);
+      tg.addColorStop(0, baseCol); tg.addColorStop(1, th.accent2 || baseCol);
+      ctx.fillStyle = tg; ctx.fill();
+      // subtle highlight
+      ctx.fillStyle = 'rgba(255,255,255,0.25)';
+      vmRR(ctx, tbX, topY, Math.max(tbH, tbW * tR), tbH * 0.4, tbH / 2); ctx.fill();
+    }
+  } else if (vmTimerStyle === 'thickbar') {
+    const tbH = 16 * u, tbW = 1080 * u * 0.58, tbX = cx - tbW / 2;
+    vmRR(ctx, tbX, topY, tbW, tbH, tbH / 2);
+    ctx.fillStyle = trackFill; ctx.fill();
+    ctx.strokeStyle = trackStroke; ctx.lineWidth = 2 * u; ctx.stroke();
+    if (tR > 0) {
+      vmRR(ctx, tbX, topY, Math.max(tbH, tbW * tR), tbH, tbH / 2);
+      const tg = ctx.createLinearGradient(tbX, 0, tbX + tbW, 0);
+      tg.addColorStop(0, baseCol); tg.addColorStop(1, th.accent2 || baseCol);
+      ctx.fillStyle = tg; ctx.fill();
+    }
+    // time text inside thick bar
+    ctx.fillStyle = getSafeTextColor(baseCol, th.light ? '#0f172a' : '#ffffff');
+    ctx.font = `800 ${13 * u}px ${vmFontStack()}`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(timeStr + 's', cx, topY + tbH / 2 + 1);
+  } else if (vmTimerStyle === 'dualbar') {
+    const gap = 5 * u, h1 = 6 * u, h2 = 6 * u, tbW = 1080 * u * 0.60, tbX = cx - tbW / 2;
+    // top track
+    vmRR(ctx, tbX, topY, tbW, h1, h1 / 2);
+    ctx.fillStyle = trackFill; ctx.fill();
+    if (tR > 0) {
+      vmRR(ctx, tbX, topY, Math.max(h1, tbW * tR), h1, h1 / 2);
+      ctx.fillStyle = baseCol; ctx.fill();
+    }
+    // bottom track (slightly delayed look or same)
+    vmRR(ctx, tbX, topY + h1 + gap, tbW, h2, h2 / 2);
+    ctx.fillStyle = trackFill; ctx.fill();
+    if (tR > 0) {
+      vmRR(ctx, tbX, topY + h1 + gap, Math.max(h2, tbW * tR), h2, h2 / 2);
+      ctx.fillStyle = th.accent2 || baseCol; ctx.fill();
+    }
+  } else if (vmTimerStyle === 'segmented') {
+    const segs = 10, gap = 4 * u, tbH = 12 * u, totalW = 1080 * u * 0.58, tbX = cx - totalW / 2;
+    const segW = (totalW - gap * (segs - 1)) / segs;
+    const filled = Math.ceil(tR * segs);
+    for (let i = 0; i < segs; i++) {
+      const sx = tbX + i * (segW + gap);
+      vmRR(ctx, sx, topY, segW, tbH, 4 * u);
+      if (i < filled) {
+        const tg = ctx.createLinearGradient(sx, 0, sx + segW, 0);
+        tg.addColorStop(0, baseCol); tg.addColorStop(1, th.accent2 || baseCol);
+        ctx.fillStyle = tg;
+      } else {
+        ctx.fillStyle = trackFill;
+      }
+      ctx.fill();
+      ctx.strokeStyle = trackStroke; ctx.lineWidth = 1.2 * u; ctx.stroke();
+    }
+  } else if (vmTimerStyle === 'ring') {
+    const r = 26 * u, ringCX = cx, ringCY = topY + r;
+    const thWidth = 7 * u;
+    // background ring with stronger contrast
+    ctx.beginPath();
+    ctx.arc(ringCX, ringCY, r, 0, Math.PI * 2);
+    ctx.strokeStyle = trackStroke;
+    ctx.lineWidth = thWidth;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(ringCX, ringCY, r, 0, Math.PI * 2);
+    ctx.strokeStyle = trackFill;
+    ctx.lineWidth = thWidth - 2 * u;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(ringCX, ringCY, r, -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * tR));
+    ctx.strokeStyle = baseCol;
+    ctx.lineWidth = thWidth;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+
+    ctx.fillStyle = getSafeTextColor(baseCol, th.light ? '#0f172a' : '#ffffff');
+    ctx.font = `800 ${17 * u}px ${vmFontStack()}`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(timeStr, ringCX, ringCY + 1);
+  } else if (vmTimerStyle === 'text') {
+    const pillW = 68 * u, pillH = 38 * u, pX = cx - pillW / 2, pY = topY;
+    vmRR(ctx, pX, pY, pillW, pillH, pillH / 2);
+    ctx.fillStyle = th.light ? 'rgba(255,255,255,0.92)' : 'rgba(15,23,42,0.88)';
+    ctx.fill();
+    ctx.strokeStyle = trackStroke; ctx.lineWidth = 2 * u; ctx.stroke();
+    ctx.fillStyle = getSafeTextColor(baseCol, th.light ? '#0f172a' : '#ffffff');
+    ctx.font = `900 ${20 * u}px ${vmFontStack()}`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(timeStr + 's', cx, pY + pillH / 2 + 1);
+  } else if (vmTimerStyle === 'pie') {
+    const r = 36 * u, pX = cx, pY = topY + r + 4 * u;
+    const ringW = 9 * u;
+    // Soft outer glow
+    ctx.beginPath();
+    ctx.arc(pX, pY, r + 6 * u, 0, Math.PI * 2);
+    const glow = ctx.createRadialGradient(pX, pY, r * 0.5, pX, pY, r + 8 * u);
+    glow.addColorStop(0, vmHexA(baseCol, 0.25));
+    glow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = glow; ctx.fill();
+
+    // Track ring (full circle, high contrast)
+    ctx.beginPath();
+    ctx.arc(pX, pY, r, 0, Math.PI * 2);
+    ctx.strokeStyle = th.light ? 'rgba(15,23,42,0.12)' : 'rgba(255,255,255,0.18)';
+    ctx.lineWidth = ringW;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+
+    // Colorful progress arc
+    if (tR > 0.005) {
+      const start = -Math.PI / 2;
+      const end = start + (Math.PI * 2 * tR);
+      // Color shifts: green → yellow → orange → red as time runs out
+      let c1 = '#22c55e', c2 = '#84cc16';
+      if (tR < 0.35) { c1 = '#ef4444'; c2 = '#f97316'; }
+      else if (tR < 0.55) { c1 = '#f59e0b'; c2 = '#eab308'; }
+      else if (tR < 0.75) { c1 = '#84cc16'; c2 = '#22c55e'; }
+      else { c1 = baseCol; c2 = th.accent2 || baseCol; }
+
+      ctx.beginPath();
+      ctx.arc(pX, pY, r, start, end);
+      ctx.strokeStyle = c1;
+      ctx.lineWidth = ringW;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+
+      // Inner accent stroke for polish
+      ctx.beginPath();
+      ctx.arc(pX, pY, r, start, end);
+      ctx.strokeStyle = c2;
+      ctx.lineWidth = ringW * 0.45;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+    }
+
+    // Center disc
+    ctx.beginPath();
+    ctx.arc(pX, pY, r - ringW * 0.75, 0, Math.PI * 2);
+    ctx.fillStyle = th.light ? 'rgba(255,255,255,0.97)' : 'rgba(15,23,42,0.92)';
+    ctx.fill();
+    ctx.strokeStyle = th.light ? 'rgba(15,23,42,0.08)' : 'rgba(255,255,255,0.12)';
+    ctx.lineWidth = 1.5 * u;
+    ctx.stroke();
+
+    // Time number — large & bold
+    const numColor = tR < 0.35 ? '#ef4444' : (tR < 0.55 ? '#f59e0b' : (th.light ? '#0f172a' : '#ffffff'));
+    ctx.fillStyle = numColor;
+    ctx.font = `900 ${22 * u}px ${vmFontStack()}`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(timeStr, pX, pY + 1 * u);
+  } else if (vmTimerStyle === 'line') {
+    // Minimal thin line with end cap
+    const tbH = 5 * u, tbW = 1080 * u * 0.65, tbX = cx - tbW / 2;
+    ctx.beginPath();
+    ctx.moveTo(tbX, topY + tbH / 2);
+    ctx.lineTo(tbX + tbW, topY + tbH / 2);
+    ctx.strokeStyle = trackStroke;
+    ctx.lineWidth = tbH;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+    if (tR > 0) {
+      ctx.beginPath();
+      ctx.moveTo(tbX, topY + tbH / 2);
+      ctx.lineTo(tbX + Math.max(tbH, tbW * tR), topY + tbH / 2);
+      ctx.strokeStyle = baseCol;
+      ctx.lineWidth = tbH + 1 * u;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+    }
   }
 }
 
 function vmDrawQuestion(ctx, W, H, t, th, q, idx, total, reveal, sceneDur) {
   const u = Math.min(W, H) / 1080, pad = W * 0.075, maxW = W - pad * 2, cx = W / 2;
   const prog = (idx + (reveal ? 1 : 0.55)) / total;
-  ctx.fillStyle = th.light ? 'rgba(15,23,42,0.08)' : 'rgba(255,255,255,0.13)'; ctx.fillRect(0, 0, W, 9 * u);
-  const pg = ctx.createLinearGradient(0, 0, W, 0); pg.addColorStop(0, th.accent); pg.addColorStop(1, th.accent2 || th.accent); ctx.fillStyle = pg; ctx.fillRect(0, 0, W * vmClamp(prog, 0, 1), 9 * u);
+  // Stronger track for visibility on white / light backgrounds
+  ctx.fillStyle = th.light ? 'rgba(15,23,42,0.14)' : 'rgba(255,255,255,0.18)'; ctx.fillRect(0, 0, W, 10 * u);
+  ctx.fillStyle = th.light ? 'rgba(15,23,42,0.06)' : 'rgba(0,0,0,0.15)'; ctx.fillRect(0, 10 * u, W, 1.5 * u);
+  const pg = ctx.createLinearGradient(0, 0, W, 0); pg.addColorStop(0, th.accent); pg.addColorStop(1, th.accent2 || th.accent); ctx.fillStyle = pg; ctx.fillRect(0, 0, W * vmClamp(prog, 0, 1), 10 * u);
+  // slight shine on progress
+  if (prog > 0.02) {
+    ctx.fillStyle = 'rgba(255,255,255,0.22)';
+    ctx.fillRect(0, 0, W * vmClamp(prog, 0, 1), 3.5 * u);
+  }
+  
   const pillH = 58 * u; ctx.font = `800 ${26 * u}px ${vmFontStack()}`;
   const label = reveal ? `ANSWER  ${idx + 1} / ${total}` : `QUESTION  ${idx + 1} / ${total}`;
   const pillW = ctx.measureText(label).width + 74 * u;
-  vmRR(ctx, cx - pillW / 2, 42 * u, pillW, pillH, pillH / 2); ctx.fillStyle = th.light ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.1)'; ctx.fill(); ctx.strokeStyle = th.light ? 'rgba(15,23,42,0.12)' : 'rgba(255,255,255,0.22)'; ctx.lineWidth = 2 * u; ctx.stroke();
-  ctx.fillStyle = reveal ? '#22c55e' : th.accent; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(label, cx, 42 * u + pillH / 2 + 1);
+  
+  // FIXED: Use robust contrasting colors for the pill
+  const pillBg = th.light ? 'rgba(255,255,255,0.95)' : 'rgba(15,23,42,0.85)';
+  const pillStroke = th.light ? 'rgba(15,23,42,0.15)' : 'rgba(255,255,255,0.25)';
+  const pillText = reveal ? '#22c55e' : getSafeTextColor(th.accent, th.light ? '#1e293b' : '#ffffff');
+  
+  vmRR(ctx, cx - pillW / 2, 42 * u, pillW, pillH, pillH / 2); 
+  ctx.fillStyle = pillBg; ctx.fill(); 
+  ctx.strokeStyle = pillStroke; ctx.lineWidth = 2 * u; ctx.stroke();
+  
+  ctx.fillStyle = pillText; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; 
+  ctx.shadowColor = th.light ? 'rgba(0,0,0,0.05)' : 'rgba(0,0,0,0.4)';
+  ctx.shadowBlur = 4 * u;
+  ctx.fillText(label, cx, 42 * u + pillH / 2 + 1);
+  ctx.shadowBlur = 0;
+
   if (!reveal) vmDrawTimer(ctx, cx, 42 * u + pillH + 12 * u, t, th, u, sceneDur);
+  
   const imgObj = q.image ? vmImages[q.image] : null, hasImg = !!imgObj;
-  const qAnim = reveal ? { offsetX: 0, offsetY: 0, scale: 1, alpha: 1 } : vmQuestionAnimParams(t / 0.65, vmQuestionAnim);
+  const qAnimDur = (vmQuestionAnim === 'typewriter') ? 1.35 : 0.65;
+  const qAnim = reveal ? { offsetX: 0, offsetY: 0, scale: 1, alpha: 1, typewriter: 1 } : vmQuestionAnimParams(t / qAnimDur, vmQuestionAnim);
   if (hasImg) { const iTop = H * 0.145, iMaxH = H * 0.155, ratio = imgObj.width / imgObj.height; let ih = iMaxH, iw = ih * ratio; const maxIW = W * 0.62; if (iw > maxIW) { iw = maxIW; ih = iw / ratio; } ctx.save(); ctx.globalAlpha = qAnim.alpha; ctx.shadowColor = 'rgba(0,0,0,.3)'; ctx.shadowBlur = 34 * u; vmRoundImage(ctx, imgObj, cx - iw / 2 + qAnim.offsetX * u, iTop + qAnim.offsetY * u, iw, ih, 26 * u); ctx.restore(); }
   const qTop = hasImg ? H * 0.315 : H * 0.155, qMaxH = hasImg ? H * 0.155 : H * 0.26;
+  const qDisplayText = (qAnim.typewriter !== undefined && qAnim.typewriter < 1) ? vmApplyTypewriter(q.text, qAnim.typewriter) : q.text;
   const qFit = vmFitFont(ctx, q.text, maxW - 40 * u, qMaxH, vmQFontSize * u, 26 * u, 900, 1.2, hasImg ? 3 : 4);
   const boxPadY = 22 * u, boxY = qTop - boxPadY, boxH = qMaxH + boxPadY * 2, boxX = pad + 10 * u, boxW = maxW - 20 * u;
   ctx.save(); ctx.globalAlpha = reveal ? 1 : qAnim.alpha; vmDrawQuestionBox(ctx, boxX, boxY, boxW, boxH, th); ctx.restore();
-  ctx.save(); ctx.globalAlpha = qAnim.alpha; ctx.translate(cx + qAnim.offsetX * u, qTop + qMaxH / 2 + qAnim.offsetY * u); ctx.scale(qAnim.scale, qAnim.scale); ctx.translate(-cx, -(qTop + qMaxH / 2)); ctx.font = `900 ${qFit.size}px ${vmFontStack()}`; const useWhite = vmQuestionBox === 'gradient' || vmQuestionBox === 'dark'; ctx.fillStyle = useWhite ? '#ffffff' : vmGetQColor(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.shadowColor = useWhite ? 'rgba(0,0,0,.5)' : (th.light ? 'rgba(15,23,42,.18)' : 'rgba(0,0,0,.55)'); ctx.shadowBlur = 20 * u; const lh = qFit.size * 1.2; qFit.lines.forEach((l, i) => ctx.fillText(l, cx, qTop + qMaxH / 2 - (qFit.lines.length - 1) * lh / 2 + i * lh)); ctx.restore();
+  ctx.save(); ctx.globalAlpha = qAnim.alpha; ctx.translate(cx + qAnim.offsetX * u, qTop + qMaxH / 2 + qAnim.offsetY * u); ctx.scale(qAnim.scale, qAnim.scale); if (qAnim.rotate) ctx.rotate(qAnim.rotate * Math.PI / 180); ctx.translate(-cx, -(qTop + qMaxH / 2)); ctx.font = `900 ${qFit.size}px ${vmFontStack()}`; const useWhite = vmQuestionBox === 'gradient' || vmQuestionBox === 'dark' || vmQuestionBox === 'accent'; ctx.fillStyle = useWhite ? '#ffffff' : vmGetQColor(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.shadowColor = useWhite ? 'rgba(0,0,0,.5)' : (th.light ? 'rgba(15,23,42,.18)' : 'rgba(0,0,0,.55)'); ctx.shadowBlur = 20 * u; const lh = qFit.size * 1.2;
+  // Typewriter: re-wrap visible portion so text grows naturally
+  const qLines = (qAnim.typewriter !== undefined && qAnim.typewriter < 1) ? vmWrap(ctx, qDisplayText, maxW - 40 * u) : qFit.lines;
+  qLines.forEach((l, i) => ctx.fillText(l, cx, qTop + qMaxH / 2 - (Math.max(qLines.length, 1) - 1) * lh / 2 + i * lh));
+  // Cursor blink while typing
+  if (!reveal && qAnim.typewriter !== undefined && qAnim.typewriter < 0.98) {
+    const last = qLines[qLines.length - 1] || '';
+    const cursorX = cx + (ctx.measureText(last).width / 2) + 6 * u;
+    const cursorY = qTop + qMaxH / 2 - (Math.max(qLines.length, 1) - 1) * lh / 2 + (qLines.length - 1) * lh;
+    if (Math.floor(t * 4) % 2 === 0) { ctx.fillStyle = useWhite ? '#ffffff' : vmGetQColor(); ctx.fillRect(cursorX, cursorY - qFit.size * 0.4, 3 * u, qFit.size * 0.8); }
+  }
+  ctx.restore();
   const optTop = hasImg ? H * 0.51 : H * 0.47, bottomPad = H * 0.07, n = q.options.length, gap = 22 * u, avail = H - optTop - bottomPad, oh = Math.min(178 * u, (avail - gap * (n - 1)) / n), blockH = n * oh + (n - 1) * gap, y0 = optTop + Math.max(0, (avail - blockH) / 2);
   let correctRect = null;
   for (let i = 0; i < n; i++) {
     const opt = q.options[i], isCorrect = (opt === q.correct);
     const sD = 0.55 + 0.18 * i;
-    const appear = reveal ? 1 : vmClamp((t - sD) / 0.75, 0, 1);
-    const a = reveal ? { offsetX: 0, offsetY: 0, scaleX: 1, scaleY: 1, alpha: 1 } : vmOptionAnimParams(appear, vmOptionAnim);
-    if (a.alpha <= 0.001) continue;
+    const oAnimDur = (vmOptionAnim === 'typewriter') ? 1.0 : 0.75;
+    const appear = reveal ? 1 : vmClamp((t - sD) / oAnimDur, 0, 1);
+    const a = reveal ? { offsetX: 0, offsetY: 0, scaleX: 1, scaleY: 1, alpha: 1, typewriter: 1 } : vmOptionAnimParams(appear, vmOptionAnim);
+    if (a.alpha <= 0.001 && !(a.typewriter !== undefined && a.typewriter > 0)) continue;
     const dim = reveal && !isCorrect && t > 0.35, hl = reveal && isCorrect && t > 0.35, hp = vmClamp((t - 0.35) / 0.5, 0, 1);
     let pulse = 1; if (hl) { if (vmAnswerEffect === 'pulse') pulse = 1 + 0.1 * Math.sin(hp * Math.PI * 2); else if (vmAnswerEffect === 'bounce') pulse = 1 + 0.08 * Math.abs(Math.sin(hp * Math.PI * 3)); else pulse = 1 + 0.06 * Math.sin(hp * Math.PI); }
     const oy = y0 + i * (oh + gap) + a.offsetY * u, ox = a.offsetX * u;
@@ -2034,7 +2886,10 @@ function vmDrawQuestion(ctx, W, H, t, th, q, idx, total, reveal, sceneDur) {
     ctx.fillStyle = si.letterText; ctx.font = `900 ${cr * 1.05}px ${vmFontStack()}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('ABCDEFGH'[i] || (i + 1), bx, by + 1);
     const rP = hl ? oh * 0.95 : oh * 0.5, tX = pad + oh * 1.02 + lOff, tW = maxW - oh * 1.02 - rP - lOff;
     const oFit = vmFitFont(ctx, opt, tW, oh * 0.72, vmOFontSize * u, 18 * u, 700, 1.15, 2);
-    ctx.font = `700 ${oFit.size}px ${vmFontStack()}`; ctx.fillStyle = si.textColor; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; const tlh = oFit.size * 1.15; oFit.lines.forEach((l, k) => ctx.fillText(l, tX, by - (oFit.lines.length - 1) * tlh / 2 + k * tlh));
+    ctx.font = `700 ${oFit.size}px ${vmFontStack()}`; ctx.fillStyle = si.textColor; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; const tlh = oFit.size * 1.15;
+    const oText = (a.typewriter !== undefined && a.typewriter < 1) ? vmApplyTypewriter(opt, a.typewriter) : opt;
+    const oLines = (a.typewriter !== undefined && a.typewriter < 1) ? vmWrap(ctx, oText, tW) : oFit.lines;
+    oLines.forEach((l, k) => ctx.fillText(l, tX, by - (Math.max(oLines.length, 1) - 1) * tlh / 2 + k * tlh));
     if (hl) { const cxp = pad + maxW - oh * 0.46; ctx.beginPath(); ctx.arc(cxp, by, oh * 0.25, 0, 7); ctx.fillStyle = 'rgba(255,255,255,0.98)'; ctx.fill(); ctx.strokeStyle = '#15803d'; ctx.lineWidth = oh * 0.08; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(cxp - oh * 0.115, by); ctx.lineTo(cxp - oh * 0.028, by + oh * 0.09); ctx.lineTo(cxp + oh * 0.125, by - oh * 0.09); ctx.stroke(); }
     ctx.restore();
   }
@@ -2223,9 +3078,11 @@ async function vmStartRender() {
 }
 function vmStopAll() {
   vmStopFlag = true;
-  if (vmRaf) cancelAnimationFrame(vmRaf);
+  if (vmRaf) { try { cancelAnimationFrame(vmRaf); } catch (e) {} vmRaf = null; }
+  if (vmAutoPreviewTimeout) { clearTimeout(vmAutoPreviewTimeout); vmAutoPreviewTimeout = null; }
   if (vmAudioEl) { try { vmAudioEl.pause(); vmAudioEl.currentTime = 0; } catch (e) {} }
-  TTS.stop();
+  try { if (typeof TTS !== 'undefined' && TTS.stop) TTS.stop(); } catch (e) {}
+  try { if (typeof SE !== 'undefined' && SE.stopAll) SE.stopAll(); } catch (e) {}
   if (vmMediaRec && vmMediaRec.state !== 'inactive') { try { vmMediaRec.stop(); } catch (e) {} }
   const pBtn = document.getElementById('vmPreviewBtn'), rBtn = document.getElementById('vmRenderBtn'), sBtn = document.getElementById('vmStopBtn');
   if (pBtn) pBtn.disabled = false;
@@ -2275,12 +3132,12 @@ function vmOpenFlyout(side, key) {
   else { flyout.classList.add('open'); if (window.innerWidth <= 900) document.getElementById('vmBackdrop').classList.add('on'); }
 }
 function vmCloseAllFlyouts() { document.querySelectorAll('.vm-flyout').forEach(f => f.classList.remove('open')); document.querySelectorAll('.vm-rail-btn').forEach(t => t.classList.remove('active')); const bd = document.getElementById('vmBackdrop'); if (bd) bd.classList.remove('on'); }
-function vmToggleMute() { vmMuted = !vmMuted; SE.setMasterMute(vmMuted); const mb = document.getElementById('vmMuteBtn'); if (mb) { mb.textContent = vmMuted ? '🔕' : '🔊'; mb.classList.toggle('muted', vmMuted); } vmSetStatusDefault(); }
+function vmToggleMute() { vmMuted = !vmMuted; SE.setMasterMute(vmMuted); const mb = document.getElementById('vmMuteBtn'); if (mb) { mb.innerHTML = vmMuted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>'; mb.classList.toggle('muted', vmMuted); } vmSetStatusDefault(); }
 
 /* ═══════ VIDEO STUDIO — UI ═══════ */
 function renderVideoStudio(data) {
   vmQuestions = data.q || [];
-  vmTitle = data.quizTitle || 'My Quiz';
+  vmTitle = (data.quizTitle || '').trim();
   vmLogoData = data.quizLogo || null;
   vmSecPerQManual = 5; vmRevealSecManual = 3; vmSecPerQ = 5; vmRevealSec = 3;
   vmShowIntro = true; vmShowReveal = true; vmShowTimerBar = true; vmShowWatermark = true;
@@ -2294,63 +3151,67 @@ function renderVideoStudio(data) {
   vmSound = { ttsEnabled: false, ttsReadQ: true, ttsReadO: true, ttsReadA: true, ttsVoice: null, ttsRate: 1.0, ttsPitch: 1.0, qSfx: 'q_chime', oSfx: 'o_bubble', aSfx: 'a_tada', sfxVolume: 0.8, musicVolume: 0.4 };
 
   const container = document.getElementById('renderZone');
+  // Expand app width + hide help FAB so it doesn't cover panels
+  const appEl = document.getElementById('app');
+  if (appEl) appEl.classList.add('vm-expanded');
+  const helpFab = document.getElementById('helpFab');
+  if (helpFab) helpFab.classList.add('vm-hidden');
+
   container.innerHTML = `
-  <div class="card" style="padding:0;background:transparent;box-shadow:none;margin-bottom:10px;">
+  <div class="card" style="padding:0;background:transparent;box-shadow:none;margin-bottom:0;border:none;">
     <div class="vm-shell" id="vmShell">
-      <div class="vm-rail" id="vmRailLeft">
-        <button class="vm-rail-btn" data-key="template" data-side="left"><span class="ri">📱</span><span class="rt">Template</span></button>
-        <button class="vm-rail-btn" data-key="optionstyle" data-side="left"><span class="ri">🎯</span><span class="rt">Opt BG</span></button>
-        <button class="vm-rail-btn" data-key="optshape" data-side="left"><span class="ri">🔲</span><span class="rt">Opt Shape</span></button>
-        <button class="vm-rail-btn" data-key="sound" data-side="left"><span class="ri">🔊</span><span class="rt">Sound</span></button>
-        <button class="vm-rail-btn" data-key="music" data-side="left"><span class="ri">🎵</span><span class="rt">Music</span></button>
-      </div>
-      <div class="vm-center">
-        <div class="vm-canvas-wrap" id="vmCanvasWrap">
-          <div class="vm-canvas-controls">
-            <div class="vm-orient">
-              <button class="vm-orient-btn active" data-ori="portrait"><span class="ic">📱</span> Portrait</button>
-              <button class="vm-orient-btn" data-ori="landscape"><span class="ic">🖥️</span> Landscape</button>
+      <div class="vm-workspace">
+        <div class="vm-rail" id="vmRailLeft">
+          <button class="vm-rail-btn" data-key="template" data-side="left"><span class="ri"><i class="fas fa-palette"></i></span><span class="rt">Theme</span></button>
+          <button class="vm-rail-btn" data-key="optionstyle" data-side="left"><span class="ri"><i class="fas fa-fill-drip"></i></span><span class="rt">Opt BG</span></button>
+          <button class="vm-rail-btn" data-key="optshape" data-side="left"><span class="ri"><i class="fas fa-shapes"></i></span><span class="rt">Shape</span></button>
+          <button class="vm-rail-btn" data-key="sound" data-side="left"><span class="ri"><i class="fas fa-volume-up"></i></span><span class="rt">Sound</span></button>
+          <button class="vm-rail-btn" data-key="music" data-side="left"><span class="ri"><i class="fas fa-music"></i></span><span class="rt">Music</span></button>
+        </div>
+        <div class="vm-center">
+          <div class="vm-canvas-wrap" id="vmCanvasWrap">
+            <div class="vm-canvas-controls">
+              <div class="vm-orient">
+                <button class="vm-orient-btn active" data-ori="portrait"><i class="fas fa-mobile-alt"></i> Portrait</button>
+                <button class="vm-orient-btn" data-ori="landscape"><i class="fas fa-desktop"></i> Landscape</button>
+              </div>
+              <div class="vm-right-controls">
+                <button class="vm-mute-btn" id="vmMuteBtn" title="Mute"><i class="fas fa-volume-up"></i></button>
+                <button class="vm-intro-toggle on" id="introToggleBtn"><span class="sw-mini"></span><span>Intro</span></button>
+              </div>
             </div>
-            <div class="vm-right-controls">
-              <button class="vm-mute-btn" id="vmMuteBtn">🔊</button>
-              <button class="vm-intro-toggle on" id="introToggleBtn"><span class="sw-mini"></span><span>🎬 Intro</span></button>
-            </div>
+            <div class="vm-live-badge" id="vmLiveBadge"><span class="vm-live-dot"></span>LIVE</div>
+            <div class="vm-rec-badge" id="vmRecBadge"><div class="vm-rec-dot"></div><span>REC</span><span id="vmRecTime">00:00</span>/<span id="vmRecTotal">00:00</span></div>
+            <canvas id="vmCanvas"></canvas>
           </div>
-          <div class="vm-live-badge" id="vmLiveBadge"><span class="vm-live-dot"></span>LIVE</div>
-          <div class="vm-rec-badge" id="vmRecBadge"><div class="vm-rec-dot"></div><span>REC</span><span id="vmRecTime">00:00</span>/<span id="vmRecTotal">00:00</span></div>
-          <canvas id="vmCanvas"></canvas>
         </div>
-        <div class="vm-progress-wrap" id="vmProgressWrap"><div class="vm-progress-fill" id="vmRenderProgress" style="width:0%"></div><div class="vm-progress-text" id="vmRenderProgressText">0%</div></div>
-        <div class="vm-bottom-bar">
-          <button id="vmPreviewBtn" class="btn btn-outline">▶ Preview</button>
-          <button id="vmRenderBtn" class="btn btn-success">⬇ Render & Download</button>
-          <button id="vmStopBtn" class="btn" style="display:none;background:#d93025;color:#fff;flex:0 0 auto;max-width:60px;">⏹</button>
+        <div class="vm-rail" id="vmRailRight">
+          <button class="vm-rail-btn" data-key="qanim" data-side="right"><span class="ri"><i class="fas fa-magic"></i></span><span class="rt">Q Anim</span></button>
+          <button class="vm-rail-btn" data-key="oanim" data-side="right"><span class="ri"><i class="fas fa-layer-group"></i></span><span class="rt">Opt Anim</span></button>
+          <button class="vm-rail-btn" data-key="aeff" data-side="right"><span class="ri"><i class="fas fa-star"></i></span><span class="rt">Effect</span></button>
+          <button class="vm-rail-btn" data-key="qbox" data-side="right"><span class="ri"><i class="fas fa-square"></i></span><span class="rt">Q Box</span></button>
+          <button class="vm-rail-btn" data-key="timer" data-side="right"><span class="ri"><i class="fas fa-clock"></i></span><span class="rt">Timer</span></button>
+          <button class="vm-rail-btn" data-key="text" data-side="right"><span class="ri"><i class="fas fa-font"></i></span><span class="rt">Text</span></button>
+          <button class="vm-rail-btn" data-key="timing" data-side="right"><span class="ri"><i class="fas fa-stopwatch"></i></span><span class="rt">Timing</span></button>
+          <button class="vm-rail-btn" data-key="layout" data-side="right"><span class="ri"><i class="fas fa-th-large"></i></span><span class="rt">Layout</span></button>
         </div>
-        <div id="vmStatus" class="vm-status-line">Ready</div>
-      </div>
-      <div class="vm-rail" id="vmRailRight">
-        <button class="vm-rail-btn" data-key="qanim" data-side="right"><span class="ri">📝</span><span class="rt">Question<br>Anim</span></button>
-        <button class="vm-rail-btn" data-key="oanim" data-side="right"><span class="ri">🔤</span><span class="rt">Option<br>Anim</span></button>
-        <button class="vm-rail-btn" data-key="aeff" data-side="right"><span class="ri">✅</span><span class="rt">Answer<br>Effect</span></button>
-        <button class="vm-rail-btn" data-key="qbox" data-side="right"><span class="ri">📦</span><span class="rt">Question<br>Box</span></button>
-        <button class="vm-rail-btn" data-key="timer" data-side="right"><span class="ri">⌛</span><span class="rt">Timer<br>Style</span></button>
-        <button class="vm-rail-btn" data-key="text" data-side="right"><span class="ri">🔠</span><span class="rt">Text &<br>Font</span></button>
-        <button class="vm-rail-btn" data-key="timing" data-side="right"><span class="ri">⏱️</span><span class="rt">Timing</span></button>
-        <button class="vm-rail-btn" data-key="layout" data-side="right"><span class="ri">📐</span><span class="rt">Layout</span></button>
-      </div>
-      <div class="vm-backdrop" id="vmBackdrop"></div>
+        <div class="vm-backdrop" id="vmBackdrop"></div>
 
       <div class="vm-flyout left" data-key="template"><div class="vm-flyout-head"><div class="vm-flyout-title"><span class="ti">📱</span> Templates</div><button class="vm-flyout-close" data-close>✕</button></div><div class="vm-flyout-body"><div class="template-grid" id="vmTemplateGrid" style="grid-template-columns:repeat(2,1fr);gap:10px;"></div></div></div>
 
       <div class="vm-flyout left" data-key="optionstyle"><div class="vm-flyout-head"><div class="vm-flyout-title"><span class="ti">🎯</span> Option Background</div><button class="vm-flyout-close" data-close>✕</button></div><div class="vm-flyout-body">
-        <div style="font-size:.58rem;font-weight:900;color:#475569;text-transform:uppercase;margin:0 0 6px;">Style</div>
+        <div class="vm-section-label" style="margin-top:0;">Style</div>
         <div class="vm-tool-grid">
           <button class="vm-tool active" data-style="glass"><span class="ti">🔮</span><span class="tt">Glass</span></button>
           <button class="vm-tool" data-style="solid"><span class="ti">⬛</span><span class="tt">Solid</span></button>
+          <button class="vm-tool" data-style="soft"><span class="ti">🫧</span><span class="tt">Soft</span></button>
           <button class="vm-tool" data-style="gradient"><span class="ti">🌈</span><span class="tt">Gradient</span></button>
+          <button class="vm-tool" data-style="pastel"><span class="ti">🎨</span><span class="tt">Pastel</span></button>
           <button class="vm-tool" data-style="outline"><span class="ti">⬜</span><span class="tt">Outline</span></button>
-          <button class="vm-tool" data-style="neon"><span class="ti">🌟</span><span class="tt">Neon Glow</span></button>
+          <button class="vm-tool" data-style="bordered"><span class="ti">▭</span><span class="tt">Bordered</span></button>
+          <button class="vm-tool" data-style="neon"><span class="ti">🌟</span><span class="tt">Neon</span></button>
           <button class="vm-tool" data-style="filled"><span class="ti">💎</span><span class="tt">Filled</span></button>
+          <button class="vm-tool" data-style="shadow"><span class="ti">🌑</span><span class="tt">Shadow</span></button>
         </div>
         <div class="vm-color-row"><div class="crl"><i class="fas fa-palette"></i> Option Color</div><div class="crt"><button class="vm-color-reset-chip" id="vmOptReset">↺</button><button class="vm-swatch-btn" id="vmOptSwatch"><span class="vm-swatch-fill" id="vmOptPreview"></span><span class="vm-swatch-ic"><i class="fas fa-palette"></i></span></button></div></div>
       </div></div>
@@ -2418,11 +3279,76 @@ function renderVideoStudio(data) {
         <div class="vm-slider-row"><input type="range" id="musicVolSlider" min="0" max="1" step="0.05" value="0.4" style="flex:1;"><span class="vm-slider-val" id="musicVolVal">40%</span></div>
       </div></div>
 
-      <div class="vm-flyout right" data-key="qanim"><div class="vm-flyout-head"><div class="vm-flyout-title"><span class="ti">📝</span> Question Animation</div><button class="vm-flyout-close" data-close>✕</button></div><div class="vm-flyout-body"><div class="vm-tool-grid"><button class="vm-tool" data-anim="fade"><span class="ti">✨</span><span class="tt">Fade In</span></button><button class="vm-tool active" data-anim="slideUp"><span class="ti">⬆️</span><span class="tt">Slide Up</span></button><button class="vm-tool" data-anim="zoom"><span class="ti">🔍</span><span class="tt">Zoom In</span></button><button class="vm-tool" data-anim="bounce3d"><span class="ti">🏀</span><span class="tt">Bounce 3D</span></button></div></div></div>
-      <div class="vm-flyout right" data-key="oanim"><div class="vm-flyout-head"><div class="vm-flyout-title"><span class="ti">🔤</span> Option Animation</div><button class="vm-flyout-close" data-close>✕</button></div><div class="vm-flyout-body"><div class="vm-tool-grid"><button class="vm-tool" data-oanim="fade"><span class="ti">✨</span><span class="tt">Fade</span></button><button class="vm-tool" data-oanim="slideUp"><span class="ti">⬆️</span><span class="tt">Slide Up</span></button><button class="vm-tool active" data-oanim="cascade"><span class="ti">🎯</span><span class="tt">Cascade</span></button><button class="vm-tool" data-oanim="bounce"><span class="ti">🏀</span><span class="tt">Bounce</span></button><button class="vm-tool" data-oanim="zoom"><span class="ti">🔍</span><span class="tt">Zoom</span></button></div></div></div>
+      <div class="vm-flyout right" data-key="qanim"><div class="vm-flyout-head"><div class="vm-flyout-title"><span class="ti">📝</span> Question Animation</div><button class="vm-flyout-close" data-close>✕</button></div><div class="vm-flyout-body">
+        <div class="vm-section-label" style="margin-top:0;">Entrance</div>
+        <div class="vm-tool-grid">
+          <button class="vm-tool" data-anim="fade"><span class="ti">✨</span><span class="tt">Fade In</span></button>
+          <button class="vm-tool active" data-anim="slideUp"><span class="ti">⬆️</span><span class="tt">Slide Up</span></button>
+          <button class="vm-tool" data-anim="slideDown"><span class="ti">⬇️</span><span class="tt">Slide Down</span></button>
+          <button class="vm-tool" data-anim="slideLeft"><span class="ti">⬅️</span><span class="tt">Slide Left</span></button>
+          <button class="vm-tool" data-anim="slideRight"><span class="ti">➡️</span><span class="tt">Slide Right</span></button>
+          <button class="vm-tool" data-anim="zoom"><span class="ti">🔍</span><span class="tt">Zoom In</span></button>
+          <button class="vm-tool" data-anim="pop"><span class="ti">💥</span><span class="tt">Pop</span></button>
+          <button class="vm-tool" data-anim="bounce3d"><span class="ti">🏀</span><span class="tt">Bounce 3D</span></button>
+          <button class="vm-tool" data-anim="flip"><span class="ti">🔄</span><span class="tt">Flip</span></button>
+          <button class="vm-tool" data-anim="blurIn"><span class="ti">🌫️</span><span class="tt">Blur In</span></button>
+          <button class="vm-tool" data-anim="typewriter"><span class="ti">⌨️</span><span class="tt">Typewriter</span></button>
+          <button class="vm-tool" data-anim="none"><span class="ti">🚫</span><span class="tt">None</span></button>
+        </div>
+      </div></div>
+      <div class="vm-flyout right" data-key="oanim"><div class="vm-flyout-head"><div class="vm-flyout-title"><span class="ti">🔤</span> Option Animation</div><button class="vm-flyout-close" data-close>✕</button></div><div class="vm-flyout-body">
+        <div class="vm-section-label" style="margin-top:0;">Entrance</div>
+        <div class="vm-tool-grid">
+          <button class="vm-tool" data-oanim="fade"><span class="ti">✨</span><span class="tt">Fade</span></button>
+          <button class="vm-tool" data-oanim="slideUp"><span class="ti">⬆️</span><span class="tt">Slide Up</span></button>
+          <button class="vm-tool" data-oanim="slideDown"><span class="ti">⬇️</span><span class="tt">Slide Down</span></button>
+          <button class="vm-tool" data-oanim="slideLeft"><span class="ti">⬅️</span><span class="tt">Slide Left</span></button>
+          <button class="vm-tool active" data-oanim="cascade"><span class="ti">🎯</span><span class="tt">Cascade</span></button>
+          <button class="vm-tool" data-oanim="stagger"><span class="ti">📐</span><span class="tt">Stagger</span></button>
+          <button class="vm-tool" data-oanim="bounce"><span class="ti">🏀</span><span class="tt">Bounce</span></button>
+          <button class="vm-tool" data-oanim="elastic"><span class="ti">🫧</span><span class="tt">Elastic</span></button>
+          <button class="vm-tool" data-oanim="zoom"><span class="ti">🔍</span><span class="tt">Zoom</span></button>
+          <button class="vm-tool" data-oanim="pop"><span class="ti">💥</span><span class="tt">Pop</span></button>
+          <button class="vm-tool" data-oanim="typewriter"><span class="ti">⌨️</span><span class="tt">Typewriter</span></button>
+          <button class="vm-tool" data-oanim="none"><span class="ti">🚫</span><span class="tt">None</span></button>
+        </div>
+      </div></div>
       <div class="vm-flyout right" data-key="aeff"><div class="vm-flyout-head"><div class="vm-flyout-title"><span class="ti">✅</span> Answer Effect</div><button class="vm-flyout-close" data-close>✕</button></div><div class="vm-flyout-body"><div class="vm-tool-grid"><button class="vm-tool" data-eff="none"><span class="ti">⬜</span><span class="tt">None</span></button><button class="vm-tool active" data-eff="confetti"><span class="ti">🎉</span><span class="tt">Confetti</span></button><button class="vm-tool" data-eff="sparkle"><span class="ti">✨</span><span class="tt">Sparkles</span></button><button class="vm-tool" data-eff="glow"><span class="ti">💚</span><span class="tt">Green Glow</span></button><button class="vm-tool" data-eff="pulse"><span class="ti">💓</span><span class="tt">Pulse</span></button><button class="vm-tool" data-eff="bounce"><span class="ti">🏀</span><span class="tt">Bounce</span></button></div></div></div>
-      <div class="vm-flyout right" data-key="qbox"><div class="vm-flyout-head"><div class="vm-flyout-title"><span class="ti">📦</span> Question Box</div><button class="vm-flyout-close" data-close>✕</button></div><div class="vm-flyout-body"><div class="vm-tool-grid"><button class="vm-tool" data-qbox="none"><span class="ti">⬜</span><span class="tt">No Box</span></button><button class="vm-tool" data-qbox="rect"><span class="ti">🔲</span><span class="tt">Rectangle</span></button><button class="vm-tool active" data-qbox="rounded"><span class="ti">🟦</span><span class="tt">Rounded</span></button><button class="vm-tool" data-qbox="glass"><span class="ti">🧊</span><span class="tt">Glass Card</span></button><button class="vm-tool" data-qbox="gradient"><span class="ti">🌈</span><span class="tt">Gradient</span></button><button class="vm-tool" data-qbox="dark"><span class="ti">🌑</span><span class="tt">Dark Panel</span></button></div></div></div>
-      <div class="vm-flyout right" data-key="timer"><div class="vm-flyout-head"><div class="vm-flyout-title"><span class="ti">⌛</span> Timer Style</div><button class="vm-flyout-close" data-close>✕</button></div><div class="vm-flyout-body"><div class="vm-tool-grid"><button class="vm-tool active" data-timer="bar"><span class="ti">▬</span><span class="tt">Linear Bar</span></button><button class="vm-tool" data-timer="none"><span class="ti">🚫</span><span class="tt">No Timer</span></button></div></div></div>
+      <div class="vm-flyout right" data-key="qbox"><div class="vm-flyout-head"><div class="vm-flyout-title"><span class="ti">📦</span> Question Box</div><button class="vm-flyout-close" data-close>✕</button></div><div class="vm-flyout-body">
+        <div class="vm-section-label" style="margin-top:0;">Background</div>
+        <div class="vm-tool-grid">
+          <button class="vm-tool" data-qbox="none"><span class="ti">⬜</span><span class="tt">No Box</span></button>
+          <button class="vm-tool" data-qbox="rect"><span class="ti">🔲</span><span class="tt">Rectangle</span></button>
+          <button class="vm-tool active" data-qbox="rounded"><span class="ti">🟦</span><span class="tt">Rounded</span></button>
+          <button class="vm-tool" data-qbox="soft"><span class="ti">🫧</span><span class="tt">Soft</span></button>
+          <button class="vm-tool" data-qbox="glass"><span class="ti">🧊</span><span class="tt">Glass</span></button>
+          <button class="vm-tool" data-qbox="shadow"><span class="ti">🌑</span><span class="tt">Shadow</span></button>
+          <button class="vm-tool" data-qbox="outline"><span class="ti">▭</span><span class="tt">Outline</span></button>
+          <button class="vm-tool" data-qbox="gradient"><span class="ti">🌈</span><span class="tt">Gradient</span></button>
+          <button class="vm-tool" data-qbox="accent"><span class="ti">💎</span><span class="tt">Accent</span></button>
+          <button class="vm-tool" data-qbox="dark"><span class="ti">⬛</span><span class="tt">Dark</span></button>
+        </div>
+      </div></div>
+      <div class="vm-flyout right" data-key="timer">
+        <div class="vm-flyout-head"><div class="vm-flyout-title"><span class="ti">⌛</span> Timer Style</div><button class="vm-flyout-close" data-close>✕</button></div>
+        <div class="vm-flyout-body">
+          <div class="vm-section-label" style="margin-top:0;">Line / Bar</div>
+          <div class="vm-tool-grid">
+            <button class="vm-tool active" data-timer="bar"><span class="ti">▬</span><span class="tt">Linear Bar</span></button>
+            <button class="vm-tool" data-timer="thickbar"><span class="ti">➖</span><span class="tt">Thick Bar</span></button>
+            <button class="vm-tool" data-timer="dualbar"><span class="ti">≡</span><span class="tt">Dual Line</span></button>
+            <button class="vm-tool" data-timer="segmented"><span class="ti">▮▮</span><span class="tt">Segmented</span></button>
+            <button class="vm-tool" data-timer="line"><span class="ti">─</span><span class="tt">Thin Line</span></button>
+          </div>
+          <div class="vm-section-label">Circle / Other</div>
+          <div class="vm-tool-grid">
+            <button class="vm-tool" data-timer="ring"><span class="ti">⏱️</span><span class="tt">Circle Ring</span></button>
+            <button class="vm-tool" data-timer="pie"><span class="ti">🍕</span><span class="tt">Pie Chart</span></button>
+            <button class="vm-tool" data-timer="text"><span class="ti">🔢</span><span class="tt">Digital Text</span></button>
+            <button class="vm-tool" data-timer="none"><span class="ti">🚫</span><span class="tt">No Timer</span></button>
+          </div>
+        </div>
+      </div>
       <div class="vm-flyout right" data-key="text"><div class="vm-flyout-head"><div class="vm-flyout-title"><span class="ti">🔠</span> Text & Font</div><button class="vm-flyout-close" data-close>✕</button></div><div class="vm-flyout-body">
         <div class="vm-section-label">🌐 Global Font</div>
         <div class="vm-row"><span>🔤 Font Family</span><select id="vmFontFamily">${vmFontOptions.map(f => `<option value="${f.name}" ${f.name === 'Inter' ? 'selected' : ''}>${f.name}</option>`).join('')}</select></div>
@@ -2447,6 +3373,16 @@ function renderVideoStudio(data) {
         <div class="vm-toggle-row on" id="toggleTimerBar"><span>⏱️ Show Timer Bar</span><div class="sw"></div></div>
         <div class="vm-toggle-row on" id="toggleWatermark"><span>💧 Show Watermark</span><div class="sw"></div></div>
       </div></div>
+      </div>
+      <div class="vm-footer">
+        <div class="vm-progress-wrap" id="vmProgressWrap"><div class="vm-progress-fill" id="vmRenderProgress" style="width:0%"></div><div class="vm-progress-text" id="vmRenderProgressText">0%</div></div>
+        <div class="vm-bottom-bar">
+          <button id="vmPreviewBtn" class="btn btn-outline"><i class="fas fa-play"></i> Preview</button>
+          <button id="vmRenderBtn" class="btn btn-success"><i class="fas fa-download"></i> Render &amp; Download</button>
+          <button id="vmStopBtn" class="btn" style="display:none;background:#dc2626;color:#fff;flex:0 0 auto;min-width:48px;border-radius:12px;"><i class="fas fa-stop"></i></button>
+        </div>
+        <div id="vmStatus" class="vm-status-line">Ready</div>
+      </div>
     </div>
   </div>`;
 
@@ -2598,7 +3534,7 @@ function renderVideoStudio(data) {
     vmFitCanvas();
     vmRefreshIdle();
     refreshTimingUI();
-    const mb = document.getElementById('vmMuteBtn'); if (mb) { mb.textContent = vmMuted ? '🔕' : '🔊'; mb.classList.toggle('muted', vmMuted); }
+    const mb = document.getElementById('vmMuteBtn'); if (mb) { mb.innerHTML = vmMuted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>'; mb.classList.toggle('muted', vmMuted); }
   });
 }
 </script>
