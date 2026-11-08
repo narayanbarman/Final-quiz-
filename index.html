@@ -3,8 +3,14 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover" />
-<title>QuizCraft — Create Beautiful Quizzes, Mock Tests & Short Videos</title>
-<meta name="description" content="Create interactive quizzes, exam-style mock tests, and stunning short videos in seconds. Free, private, works offline. Share with anyone." />
+<title>Quiz</title>
+<meta name="description" content="" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Quiz" />
+<meta property="og:description" content="" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Quiz" />
+<meta name="twitter:description" content="" />
 <meta name="theme-color" content="#6c5ce7" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -880,17 +886,11 @@ textarea.input-field{resize:vertical;min-height:80px}
     <div class="tab-panel active" id="panelPlay"><div id="renderZone" style="margin-top:3px;width:100%;"></div></div>
     <div class="tab-panel" id="panelShare">
       <div style="text-align:center;padding:18px 8px;">
-        <div style="width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,#ede9fe,#e0e7ff);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:1.55rem;color:#6366f1;"><i class="fas fa-link"></i></div>
-        <h4 id="shareHeading" style="margin-bottom:4px;font-size:1.05rem;font-weight:800;">Share your quiz</h4>
-        <p id="shareMetaText" style="font-size:.82rem;color:var(--text-secondary);margin-bottom:14px;max-width:300px;margin-left:auto;margin-right:auto;">Anyone with this link can play — no account needed.</p>
+        <h4 id="shareHeading" style="margin-bottom:18px;font-size:1.08rem;font-weight:800;">My quiz (5 questions)</h4>
+        <div style="text-align:left;max-width:520px;margin:0 auto 7px;font-size:.88rem;font-weight:700;color:var(--text);">Link</div>
         <div class="share-link-wrapper">
           <input type="text" id="shareLinkInput" readonly placeholder="Creating short link…" />
           <button class="btn btn-primary" id="copyLinkBtn" type="button"><i class="fas fa-copy"></i> Copy</button>
-        </div>
-        <div style="margin-top:14px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
-          <button class="btn btn-outline btn-sm" id="shareWhatsApp" type="button"><i class="fab fa-whatsapp"></i> WhatsApp</button>
-          <button class="btn btn-outline btn-sm" id="shareTwitter" type="button"><i class="fab fa-twitter"></i> X / Twitter</button>
-          <button class="btn btn-outline btn-sm" id="shareEmail" type="button"><i class="fas fa-envelope"></i> Email</button>
         </div>
       </div>
     </div>
@@ -1125,7 +1125,7 @@ function shareLabel(data) {
   const d = data || {};
   const title = (d.title || '').trim() || 'My Quiz';
   const n = (d.questions && d.questions.length) || 0;
-  return { title, n, line: title + ' (' + n + ')' };
+  return { title, n, line: title + ' (' + n + ' ' + (n === 1 ? 'question' : 'questions') + ')' };
 }
 function getShareBase() {
   return window.location.href.split('?')[0].split('#')[0];
@@ -1199,10 +1199,8 @@ function wireShareButtons(id, data) {
   const d = data || getQuizData(id) || currentQuizData || {};
   const { title, n, line } = shareLabel(d);
   const heading = document.getElementById('shareHeading');
-  const metaEl = document.getElementById('shareMetaText');
   const inp = document.getElementById('shareLinkInput');
-  if (heading) heading.textContent = 'Share your quiz';
-  if (metaEl) metaEl.textContent = title + ' · ' + n + (n === 1 ? ' question' : ' questions');
+  if (heading) heading.textContent = title + ' (' + n + ' ' + (n === 1 ? 'question' : 'questions') + ')';
   if (inp) { inp.value = ''; inp.placeholder = 'Uploading quiz and creating short link…'; }
 
   let shareUrl = makeShareUrl(id, d);
