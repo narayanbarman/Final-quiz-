@@ -1029,9 +1029,10 @@ textarea.input-field{resize:vertical;min-height:80px}
       </div>
       <div class="flex-between" style="margin-top:8px;">
         <label style="font-size:.8rem;font-weight:500;">Seconds per question:</label>
-        <input type="number" id="timerSeconds" value="10" min="3" max="120" style="width:80px;border-radius:60px;padding:4px 10px;border:2px solid var(--border);font-size:.8rem;background:#fff;" />
+        <input type="number" id="timerSeconds" value="36" min="3" max="120" style="width:80px;border-radius:60px;padding:4px 10px;border:2px solid var(--border);font-size:.8rem;background:#fff;" />
       </div>
       <small style="color:var(--text-secondary);font-size:.65rem;">Total time = seconds × questions (ignored in Video mode)</small>
+      <div id="timerTotalSummary" style="margin-top:8px;padding:8px 10px;border-radius:9px;background:#eef2ff;color:#3730a3;font-size:.78rem;font-weight:600;">Load questions to calculate total time.</div>
     </div>
     <button id="finalCreateBtn" class="btn btn-success btn-block btn-glow"><i class="fas fa-check-circle"></i> Create &amp; Continue</button>
     <button id="backFromTypeBtn" class="btn btn-outline btn-block mt-2"><i class="fas fa-arrow-left"></i> Back to questions</button>
@@ -1039,10 +1040,6 @@ textarea.input-field{resize:vertical;min-height:80px}
 
   <!-- STEP 3: PLAY / SHARE / STATS -->
   <div id="createdArea" style="display:none;" class="card">
-    <div class="created-ready-line" id="createdReadyLine" style="display:none;">
-      <i class="fas fa-check-circle"></i>
-      <span id="createdReadyText">Ready — use <b>Play</b> or <b>Share</b></span>
-    </div>
     <div class="tab-bar" id="tabBar">
       <button class="tab-btn active" data-tab="play"><i class="fas fa-play"></i> <span class="btn-label">Play</span></button>
       <button class="tab-btn" data-tab="share"><i class="fas fa-link"></i> <span class="btn-label">Share</span></button>
@@ -1183,7 +1180,7 @@ const CANVA_TEMPLATES = [
 let questionsBank = [];
 let currentMode = null;
 let selectedTemplate = CANVA_TEMPLATES[0];
-let timerEnabled = true, timerSeconds = 10;
+let timerEnabled = true, timerSeconds = 36;
 let quizLogo = null, quizTitle = "";
 let currentShortId = "", currentQuizData = null;
 let timerInterval = null, timeRemaining = 0;
@@ -1329,7 +1326,7 @@ function buildSharePayload(data) {
     q: slimQ
   };
   if (data.templateId && data.templateId !== 't25') p.tpl = data.templateId;
-  if (data.timerEnabled) { p.te = 1; p.ts = data.timerSeconds || 10; }
+  if (data.timerEnabled) { p.te = 1; p.ts = data.timerSeconds || 36; }
   return p;
 }
 function expandSharePayload(p) {
@@ -1343,7 +1340,7 @@ function expandSharePayload(p) {
     templateId: p.templateId || p.tpl || 't25',
     logo: null,
     timerEnabled: !!(p.timeEnabled || p.te || p.timerEnabled),
-    timerSeconds: p.timeSeconds || p.ts || p.timerSeconds || 10,
+    timerSeconds: p.timeSeconds || p.ts || p.timerSeconds || 36,
     createdAt: Date.now(),
     questions: rawQ.map(q => {
       if (Array.isArray(q)) {
@@ -1665,6 +1662,7 @@ function processBulk() {
     questionsBank = []; renderPreview([]);
     document.getElementById("nextToTypeBtn").disabled = true;
   }
+  updateTimerTotalSummary();
 }
 const EXAMPLE_DATA = `What is the capital of France?,Paris,London,Berlin,Madrid,Paris
 Who wrote Hamlet?,Shakespeare,Dickens,Hemingway,Tolstoy,Shakespeare
@@ -1678,6 +1676,27 @@ document.getElementById("loadExampleBtn").addEventListener('click', function() {
   processBulk();
 });
 
+function updateTimerTotalSummary() {
+  const summary = document.getElementById('timerTotalSummary');
+  const input = document.getElementById('timerSeconds');
+  if (!summary || !input) return;
+  const seconds = Math.max(3, Math.min(120, parseInt(input.value, 10) || 36));
+  const count = Array.isArray(questionsBank) ? questionsBank.length : 0;
+  if (!document.getElementById('enableTimerCheck')?.checked) {
+    summary.textContent = 'Timer is disabled.';
+    return;
+  }
+  if (!count) {
+    summary.textContent = `Default: ${seconds} seconds per question. Load questions to calculate total time.`;
+    return;
+  }
+  const total = seconds * count;
+  const mins = Math.floor(total / 60);
+  const secs = total % 60;
+  const formatted = `${mins}:${String(secs).padStart(2, '0')}`;
+  summary.textContent = `${count} questions × ${seconds} sec = ${formatted} min total`;
+}
+
 function saveState() { try { localStorage.setItem('quizCraftState', JSON.stringify({ currentView, currentViewData, currentShortId, selectedTemplate, timerEnabled, timerSeconds, quizTitle, quizLogo, currentMode, questionsBank: questionsBank.length ? questionsBank : [] })); } catch (e) {} }
 function restoreState() {
   try {
@@ -1689,7 +1708,7 @@ function restoreState() {
     currentShortId = s.currentShortId || '';
     selectedTemplate = (s.selectedTemplate && s.selectedTemplate.id) ? s.selectedTemplate : CANVA_TEMPLATES[0];
     timerEnabled = s.timerEnabled !== undefined ? s.timerEnabled : true;
-    timerSeconds = s.timerSeconds || 10;
+    timerSeconds = (!s.timerSeconds || s.timerSeconds === 10) ? 36 : s.timerSeconds;
     quizTitle = s.quizTitle || '';
     quizLogo = s.quizLogo || null;
     currentMode = s.currentMode || null;
@@ -1895,6 +1914,7 @@ function showCreateView() {
   document.getElementById("nextToTypeBtn").disabled = true;
   document.getElementById("enableTimerCheck").checked = timerEnabled;
   document.getElementById("timerSeconds").value = timerSeconds;
+  updateTimerTotalSummary();
   const eb = document.getElementById("loadExampleBtn"); eb.innerHTML = '<i class="fas fa-file-alt"></i> Load Example'; eb.classList.remove('loaded'); exampleLoaded = false;
   if (!selectedTemplate || !selectedTemplate.id) selectedTemplate = CANVA_TEMPLATES[0];
   processBulk(); pushState('create', null);
@@ -2455,8 +2475,9 @@ function renderTemplateGallery() {
   const c = document.getElementById('quizTplCount'); if (c) c.textContent = CANVA_TEMPLATES.length + ' templates';
 }
 
-document.getElementById("enableTimerCheck").onchange = function() { timerEnabled = this.checked; document.getElementById("timerSeconds").disabled = !this.checked; saveState(); };
-document.getElementById("timerSeconds").onchange = function() { timerSeconds = parseInt(this.value) || 10; saveState(); };
+document.getElementById("enableTimerCheck").onchange = function() { timerEnabled = this.checked; document.getElementById("timerSeconds").disabled = !this.checked; updateTimerTotalSummary(); saveState(); };
+document.getElementById("timerSeconds").onchange = function() { timerSeconds = parseInt(this.value) || 36; updateTimerTotalSummary(); saveState(); };
+document.getElementById("timerSeconds").oninput = updateTimerTotalSummary;
 
 document.getElementById("nextToTypeBtn").onclick = () => {
   if (questionsBank.length === 0) return showToast("Please add some questions first", 'error');
@@ -2469,14 +2490,8 @@ document.getElementById("nextToTypeBtn").onclick = () => {
 document.getElementById("backFromTypeBtn").onclick = () => { document.getElementById("stepType").style.display = "none"; document.getElementById("stepUpload").style.display = "block"; saveState(); window.scrollTo({ top: 0, behavior: 'smooth' }); };
 document.getElementById("cancelCreateBtn").onclick = () => navigateTo('home');
 
-function showCreatedReadyLine(mode) {
-  const line = document.getElementById('createdReadyLine');
-  const text = document.getElementById('createdReadyText');
-  if (!line) return;
-  const label = (mode === 'mocktest' || mode === 'mock') ? 'Mock test ready' : 'Quiz ready';
-  if (text) text.innerHTML = label + ' — use <b>Play</b> or <b>Share</b>';
-  line.style.display = 'flex';
-}
+function showCreatedReadyLine(mode) { /* Ready banner intentionally removed for a cleaner flow. */ }
+
 function hideCreatedReadyLine() {
   const line = document.getElementById('createdReadyLine');
   if (line) line.style.display = 'none';
@@ -2492,7 +2507,7 @@ document.getElementById("finalCreateBtn").onclick = () => {
     if (questionsBank.length === 0) return showToast("Please load questions first", 'error');
     quizTitle = (document.getElementById("quizNameInput").value || '').trim();
     timerEnabled = document.getElementById("enableTimerCheck").checked;
-    timerSeconds = parseInt(document.getElementById("timerSeconds").value) || 10;
+    timerSeconds = parseInt(document.getElementById("timerSeconds").value) || 36;
     
     if (!currentMode) return showToast("No mode selected", "error");
     
@@ -2910,7 +2925,7 @@ function vmApplyTemplate(tplId) {
 
 let vmQuestions = [], vmImages = {}, vmLogoImg = null, vmLogoData = null, vmTitle = '';
 let vmThemeIdx = 0, vmCustomTheme = null, vmOrientation = 'portrait';
-let vmSecPerQManual = 5, vmRevealSecManual = 3, vmSecPerQ = 5, vmRevealSec = 3, vmIntroSec = 3;
+let vmSecPerQManual = 20, vmRevealSecManual = 3, vmSecPerQ = 20, vmRevealSec = 3, vmIntroSec = 3;
 let vmShowIntro = true, vmShowReveal = true, vmShowTimerBar = true, vmShowWatermark = true;
 let vmQuestionAnim = 'slideUp', vmOptionAnim = 'cascade', vmAnswerEffect = 'confetti';
 let vmOptionStyle = 'glass', vmOptionShape = 'pill', vmQuestionBox = 'rounded', vmTimerStyle = 'bar';
@@ -3729,7 +3744,7 @@ function renderVideoStudio(data) {
   vmQuestions = data.q || [];
   vmTitle = (data.quizTitle || '').trim();
   vmLogoData = data.quizLogo || null;
-  vmSecPerQManual = 5; vmRevealSecManual = 3; vmSecPerQ = 5; vmRevealSec = 3;
+  vmSecPerQManual = 20; vmRevealSecManual = 3; vmSecPerQ = 20; vmRevealSec = 3;
   vmShowIntro = true; vmShowReveal = true; vmShowTimerBar = true; vmShowWatermark = true;
   vmQuestionAnim = 'slideUp'; vmOptionAnim = 'cascade'; vmAnswerEffect = 'confetti';
   vmOptionStyle = 'glass'; vmOptionShape = 'pill'; vmQuestionBox = 'rounded'; vmTimerStyle = 'bar';
@@ -3770,7 +3785,6 @@ function renderVideoStudio(data) {
                 <button class="vm-intro-toggle on" id="introToggleBtn"><span class="sw-mini"></span><span>Intro</span></button>
               </div>
             </div>
-            <div class="vm-live-badge" id="vmLiveBadge"><span class="vm-live-dot"></span>LIVE</div>
             <div class="vm-rec-badge" id="vmRecBadge"><div class="vm-rec-dot"></div><span>REC</span><span id="vmRecTime">00:00</span>/<span id="vmRecTotal">00:00</span></div>
             <canvas id="vmCanvas"></canvas>
           </div>
@@ -3950,7 +3964,7 @@ function renderVideoStudio(data) {
         <div class="vm-color-row"><div class="crl"><i class="fas fa-palette"></i> Option Color</div><div class="crt"><button class="vm-color-reset-chip" id="vmOColorReset">↺</button><button class="vm-swatch-btn" id="vmOColorSwatch"><span class="vm-swatch-fill" id="vmOColorPreview"></span><span class="vm-swatch-ic"><i class="fas fa-palette"></i></span></button></div></div>
       </div></div>
       <div class="vm-flyout right" data-key="timing"><div class="vm-flyout-head"><div class="vm-flyout-title"><span class="ti">⏱️</span> Timing</div><button class="vm-flyout-close" data-close>✕</button></div><div class="vm-flyout-body">
-        <div class="vm-row"><span>📝 Time per Question</span><div><input type="number" id="vmSecInput" value="5" min="2" max="60"><span style="font-size:.6rem;color:#94a3b8;margin-left:3px;">sec</span></div></div>
+        <div class="vm-row"><span>📝 Time per Question</span><div><input type="number" id="vmSecInput" value="20" min="2" max="60"><span style="font-size:.6rem;color:#94a3b8;margin-left:3px;">sec</span></div></div>
         <div class="vm-row"><span>✅ Answer Reveal</span><div><input type="number" id="vmRevealInput" value="3" min="1" max="30"><span style="font-size:.6rem;color:#94a3b8;margin-left:3px;">sec</span></div></div>
       </div></div>
       <div class="vm-flyout right" data-key="layout"><div class="vm-flyout-head"><div class="vm-flyout-title"><span class="ti">📐</span> Layout & Show</div><button class="vm-flyout-close" data-close>✕</button></div><div class="vm-flyout-body">
@@ -4125,6 +4139,8 @@ function renderVideoStudio(data) {
     vmRefreshIdle();
     refreshTimingUI();
     const mb = document.getElementById('vmMuteBtn'); if (mb) { mb.innerHTML = vmMuted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>'; mb.classList.toggle('muted', vmMuted); }
+    // Start a live preview automatically once the Video Studio is ready.
+    setTimeout(() => { if (document.getElementById('vmCanvas') && !vmRecording) vmPlayPreview(); }, 650);
   });
 }
 </script>
@@ -4401,7 +4417,7 @@ window.qcFirebaseReady = (async () => {
       questionCount: questions.length,
       templateId: String(payload.tpl || payload.templateId || 't25'),
       timeEnabled: !!(payload.te || payload.timeEnabled || payload.timerEnabled),
-      timeSeconds: Number(payload.ts || payload.timeSeconds || payload.timerSeconds || 10),
+      timeSeconds: Number(payload.ts || payload.timeSeconds || payload.timerSeconds || 36),
       quizId: String(payload.i || payload.id || ''),
       version: 4,
       createdAt: serverTimestamp()
