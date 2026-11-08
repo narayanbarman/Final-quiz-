@@ -801,7 +801,11 @@ textarea.input-field{resize:vertical;min-height:80px}
 /* One compact card: create-account face <-> sign-in face (180-degree flip). */
 .qc-auth-card{perspective:1200px;transform-style:preserve-3d;backface-visibility:visible;}
 .qc-auth-card.qc-flipping{animation:qcAccountHalfFlip .95s cubic-bezier(.22,.72,.24,1) both;}
+/* Counter-rotate the card contents during the second half so labels and text
+   stay readable instead of appearing mirrored while the card turns. */
+.qc-auth-card.qc-flipping > *{animation:qcFlipContentCounter .95s cubic-bezier(.22,.72,.24,1) both;}
 @keyframes qcAccountHalfFlip{0%{transform:perspective(1200px) rotateY(0deg) scale(1)}45%{transform:perspective(1200px) rotateY(90deg) scale(.985)}100%{transform:perspective(1200px) rotateY(180deg) scale(1)}}
+@keyframes qcFlipContentCounter{0%,45%{transform:rotateY(0deg)}100%{transform:rotateY(180deg)}}
 /* Existing-account notice stays small and inline; never cover the card. */
 .qc-auth-error.account-exists{display:block!important;color:#b45309!important;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:9px 11px;min-height:0!important;text-align:left;line-height:1.4!important;font-weight:700;}
 .qc-auth-card.is-signin .qc-auth-error.account-exists{color:#fde68a!important;background:#422006;border-color:#92400e;}
