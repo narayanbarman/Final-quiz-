@@ -953,12 +953,12 @@ textarea.input-field{resize:vertical;min-height:80px}
         <div class="quiz-name-marquee" aria-hidden="true"><div class="quiz-name-marquee-track"><span>Add your quiz name</span><span>Add your quiz name</span><span>Add your quiz name</span><span>Add your quiz name</span></div></div>
         <input type="text" id="quizNameInput" class="quiz-name-input" placeholder="" value="" maxlength="80" autocomplete="off" aria-label="Quiz name" />
       </div>
-      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
-        <label for="logoUpload" style="cursor:pointer;font-size:.7rem;color:var(--text-secondary);"><i class="fas fa-camera"></i> Logo</label>
+      <div id="videoLogoControls" style="display:none;align-items:center;gap:6px;flex-shrink:0;">
+        <label for="logoUpload" style="cursor:pointer;font-size:.7rem;color:var(--text-secondary);"><i class="fas fa-camera"></i> Video logo</label>
         <input type="file" id="logoUpload" accept="image/*" style="display:none" />
       </div>
     </div>
-    <div id="logoPreview" style="margin-bottom:6px;"></div>
+    <div id="logoPreview" style="margin-bottom:6px;display:none;"></div>
     <div class="input-group">
       <label class="input-label"><i class="fas fa-upload"></i> Bulk Upload Questions</label>
       <div class="upload-area" id="dropzone">
@@ -1211,7 +1211,16 @@ document.getElementById('sendHelpBtn').onclick = () => {
 };
 
 function getAllQuizzes() { try { return JSON.parse(localStorage.getItem("quizCraftData") || "{}"); } catch { return {}; } }
-function saveQuizData(id, data) { try { const all = getAllQuizzes(); all[id] = data; localStorage.setItem("quizCraftData", JSON.stringify(all)); } catch (e) { console.error(e); } }
+function saveQuizData(id, data) {
+  try {
+    if (data && typeof data === 'object') data.updatedAt = Date.now();
+    const all = getAllQuizzes(); all[id] = data;
+    localStorage.setItem("quizCraftData", JSON.stringify(all));
+    if (!window.qcCloudHydrating && window.qcAuthUser && typeof window.qcCloudSaveQuiz === 'function') {
+      window.qcCloudSaveQuiz(id, data).catch(e => console.warn('Cloud quiz save deferred:', e));
+    }
+  } catch (e) { console.error(e); }
+}
 function getQuizData(id) { return getAllQuizzes()[id] || null; }
 function toBase64Url(str) {
   try {
@@ -1405,6 +1414,7 @@ function deleteQuizData(id) {
     localStorage.setItem("quizCraftData", JSON.stringify(all));
     const plays = JSON.parse(localStorage.getItem("quizCraftPlays") || "{}");
     delete plays[id]; localStorage.setItem("quizCraftPlays", JSON.stringify(plays));
+    if (window.qcAuthUser && typeof window.qcCloudDeleteQuiz === 'function') window.qcCloudDeleteQuiz(id).catch(e => console.warn('Cloud delete failed:', e));
   } catch (e) {}
 }
 function getQuizPlays(id) { try { const p = JSON.parse(localStorage.getItem("quizCraftPlays") || "{}"); return p[id] || []; } catch { return []; } }
@@ -1412,8 +1422,10 @@ function addQuizPlay(id, result) {
   try {
     const plays = JSON.parse(localStorage.getItem("quizCraftPlays") || "{}");
     if (!plays[id]) plays[id] = [];
-    plays[id].push({ ...result, date: Date.now(), pid: Math.random().toString(36).substring(2, 8) });
+    const play = { ...result, date: Date.now(), pid: Math.random().toString(36).substring(2, 10) };
+    plays[id].push(play);
     localStorage.setItem("quizCraftPlays", JSON.stringify(plays));
+    if (window.qcAuthUser && typeof window.qcCloudSavePlay === 'function') window.qcCloudSavePlay(id, play).catch(e => console.warn('Cloud play save deferred:', e));
   } catch (e) {}
 }
 function generateId() { return Math.random().toString(36).substring(2, 10); }
@@ -1882,7 +1894,7 @@ function buildQuizHtml(data, tplId) {
   // Note: Added explicit text-shadow and color to title for better contrast
   return `<div class="theme-${tplId}" style="border-radius:var(--radius);padding:14px;">
     <div class="flex-between" style="margin-bottom:8px;background:rgba(255,255,255,.82);backdrop-filter:blur(8px);border-radius:60px;padding:6px 14px;box-shadow:0 2px 10px rgba(0,0,0,0.05);">
-      <div style="display:flex;align-items:center;gap:8px;">${data.logo ? `<img src="${data.logo}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;" />` : ''}<span style="font-weight:800;color:#1e293b;font-size:.85rem;text-shadow:0 1px 2px rgba(0,0,0,0.1);">${data.title}</span></div>
+      <div style="display:flex;align-items:center;gap:8px;">${data.mode === 'video' && data.logo ? `<img src="${data.logo}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;" />` : ''}<span style="font-weight:800;color:#1e293b;font-size:.85rem;text-shadow:0 1px 2px rgba(0,0,0,0.1);">${data.title}</span></div>
       ${timerHtml}
     </div>
     <div class="booklet-wrap" style="background:transparent;"><div class="booklet" id="quizBookNav"></div></div>
@@ -1905,7 +1917,7 @@ function buildMockHtml(data, tplId) {
   return `<div class="theme-${tplId}" style="border-radius:var(--radius);padding:0;overflow:hidden;">
     <div class="mock-header-sticky">
       <div class="mock-header-top">
-        <div class="quiz-title">${data.logo ? `<img src="${data.logo}" />` : ''}<span>${data.title}</span></div>
+        <div class="quiz-title">${data.mode === 'video' && data.logo ? `<img src="${data.logo}" />` : ''}<span>${data.title}</span></div>
         <div class="mock-header-actions">${timerHtml}<button id="submitMockBtn" class="btn-success"><i class="fas fa-check-double"></i> Submit</button></div>
       </div>
       <div class="booklet-wrap"><div class="booklet" id="mockBookNav"></div></div>
@@ -2281,6 +2293,11 @@ document.querySelectorAll("#tabBar .tab-btn").forEach(btn => {
 document.querySelectorAll(".home-mode-btn").forEach(btn => {
   btn.addEventListener("click", function() {
     currentMode = this.dataset.mode;
+    const logoControls = document.getElementById('videoLogoControls');
+    const logoPreview = document.getElementById('logoPreview');
+    if (logoControls) logoControls.style.display = currentMode === 'video' ? 'flex' : 'none';
+    if (logoPreview) logoPreview.style.display = currentMode === 'video' && quizLogo ? 'block' : 'none';
+    if (currentMode !== 'video') quizLogo = null;
     navigateTo('create');
     syncQuizNameHint();
   });
@@ -2315,7 +2332,7 @@ document.getElementById("bulkTextArea").addEventListener("input", processBulk);
 document.getElementById("logoUpload").onchange = (e) => {
   const f = e.target.files[0]; if (!f) return;
   const r = new FileReader();
-  r.onload = (ev) => { quizLogo = ev.target.result; document.getElementById("logoPreview").innerHTML = `<img src="${quizLogo}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--border);" />`; saveState(); };
+  r.onload = (ev) => { quizLogo = ev.target.result; const preview = document.getElementById("logoPreview"); preview.innerHTML = `<img src="${quizLogo}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--border);" />`; preview.style.display = 'block'; saveState(); };
   r.readAsDataURL(f);
 };
 
@@ -2392,7 +2409,7 @@ document.getElementById("finalCreateBtn").onclick = () => {
     }
     
     const id = generateId();
-    const data = { title: quizTitle, questions: JSON.parse(JSON.stringify(questionsBank)), mode: currentMode, templateId: selectedTemplate.id, logo: quizLogo, timerEnabled, timerSeconds, createdAt: Date.now() };
+    const data = { title: quizTitle, questions: JSON.parse(JSON.stringify(questionsBank)), mode: currentMode, templateId: selectedTemplate.id, logo: null, timerEnabled, timerSeconds, createdAt: Date.now() };
     saveQuizData(id, data);
     try { localStorage.setItem('qcGuestQuizCreates', String(Number(localStorage.getItem('qcGuestQuizCreates') || 0) + 1)); } catch (e) {}
     // Start short-link creation immediately so Share is ready
@@ -4012,7 +4029,7 @@ function renderVideoStudio(data) {
 // Firebase Firestore integration for QuizCraft.
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import { getFirestore, collection, addDoc, doc, getDoc, getDocs, setDoc, orderBy, query, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { getFirestore, collection, addDoc, doc, getDoc, getDocs, setDoc, deleteDoc, orderBy, query, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 const firebaseConfig = {
   apiKey: 'AIzaSyCbGOSqhgJPS8GzmxTN3htxdZdNVSZO008',
   authDomain: 'gkapp-e6c43.firebaseapp.com',
@@ -4026,6 +4043,78 @@ window.qcFirebaseReady = (async () => {
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
   const auth = getAuth(app);
+  // Private per-account storage. Quiz questions and play results are kept in subcollections
+  // so one large quiz does not exceed Firestore's 1 MiB document limit.
+  const userRoot = uid => doc(db, 'users', uid);
+  const userQuizRef = (uid, quizId) => doc(db, 'users', uid, 'quizzes', String(quizId));
+  window.qcCloudSaveQuiz = async (quizId, data) => {
+    const user = auth.currentUser; if (!user || !quizId || !data) return;
+    const ref = userQuizRef(user.uid, quizId);
+    const clean = { ...data, logo: null, updatedAt: Date.now(), questionCount: (data.questions || []).length };
+    delete clean.questions;
+    await setDoc(ref, clean, { merge: true });
+    const qCol = collection(db, 'users', user.uid, 'quizzes', String(quizId), 'questions');
+    const existing = await getDocs(qCol);
+    const keep = new Set();
+    for (let i = 0; i < (data.questions || []).length; i++) {
+      const q = data.questions[i] || {};
+      const qid = 'q_' + String(i + 1).padStart(4, '0'); keep.add(qid);
+      await setDoc(doc(qCol, qid), { questionNumber: i + 1, text: q.text || '', options: Array.isArray(q.options) ? q.options : [], correct: q.correct || '', image: q.image || null }, { merge: true });
+    }
+    for (const old of existing.docs) if (!keep.has(old.id)) await deleteDoc(old.ref);
+  };
+  window.qcCloudSavePlay = async (quizId, play) => {
+    const user = auth.currentUser; if (!user || !quizId || !play) return;
+    await setDoc(doc(db, 'users', user.uid, 'quizzes', String(quizId), 'plays', String(play.pid || Date.now())), play, { merge: true });
+  };
+  window.qcCloudDeleteQuiz = async quizId => {
+    const user = auth.currentUser; if (!user || !quizId) return;
+    const ref = userQuizRef(user.uid, quizId);
+    const [qs, ps] = await Promise.all([
+      getDocs(collection(db, 'users', user.uid, 'quizzes', String(quizId), 'questions')),
+      getDocs(collection(db, 'users', user.uid, 'quizzes', String(quizId), 'plays'))
+    ]);
+    for (const d of [...qs.docs, ...ps.docs]) await deleteDoc(d.ref);
+    await deleteDoc(ref);
+  };
+  window.qcCloudSyncAccount = async user => {
+    if (!user) return;
+    window.qcCloudHydrating = true;
+    try {
+      // Compare first, so an older browser copy never overwrites a newer cloud version.
+      const localQuizzes = JSON.parse(localStorage.getItem('quizCraftData') || '{}');
+      const localPlays = JSON.parse(localStorage.getItem('quizCraftPlays') || '{}');
+      let cloudList = await getDocs(collection(db, 'users', user.uid, 'quizzes'));
+      const cloudMeta = new Map(cloudList.docs.map(d => [d.id, d.data()]));
+      for (const [id, data] of Object.entries(localQuizzes)) {
+        const remote = cloudMeta.get(id);
+        const localTime = Number(data.updatedAt || data.createdAt || 0);
+        const remoteTime = Number(remote && (remote.updatedAt || remote.createdAt) || 0);
+        if (!remote || localTime > remoteTime) await window.qcCloudSaveQuiz(id, data);
+        for (const play of (localPlays[id] || [])) await window.qcCloudSavePlay(id, play);
+      }
+      // Merge cloud quizzes into this device without deleting local-only items.
+      cloudList = await getDocs(collection(db, 'users', user.uid, 'quizzes'));
+      const merged = { ...localQuizzes };
+      for (const item of cloudList.docs) {
+        const meta = item.data();
+        const qSnap = await getDocs(query(collection(db, 'users', user.uid, 'quizzes', item.id, 'questions'), orderBy('questionNumber')));
+        const questions = qSnap.docs.map(qd => { const q = qd.data(); return { text: q.text || '', options: q.options || [], correct: q.correct || '', image: q.image || null }; });
+        const cloudData = { ...meta, questions };
+        const local = merged[item.id];
+        if (!local || Number(meta.updatedAt || meta.createdAt || 0) > Number(local.updatedAt || local.createdAt || 0)) merged[item.id] = cloudData;
+        const pSnap = await getDocs(collection(db, 'users', user.uid, 'quizzes', item.id, 'plays'));
+        const allPlays = JSON.parse(localStorage.getItem('quizCraftPlays') || '{}');
+        const byPid = new Map((allPlays[item.id] || []).map(p => [p.pid, p]));
+        pSnap.docs.forEach(pd => { const v = pd.data(); byPid.set(v.pid || pd.id, v); });
+        allPlays[item.id] = Array.from(byPid.values()).sort((a,b) => Number(a.date||0)-Number(b.date||0));
+        localStorage.setItem('quizCraftPlays', JSON.stringify(allPlays));
+      }
+      localStorage.setItem('quizCraftData', JSON.stringify(merged));
+      if (typeof window.renderHomeRecent === 'function') window.renderHomeRecent();
+      if (typeof window.renderFullDashboard === 'function' && document.getElementById('panelDashboard')?.classList.contains('active')) window.renderFullDashboard();
+    } finally { window.qcCloudHydrating = false; }
+  };
   const googleProvider = new GoogleAuthProvider();
   googleProvider.setCustomParameters({ prompt: 'select_account' });
   window.qcAuth = auth;
@@ -4082,7 +4171,16 @@ window.qcFirebaseReady = (async () => {
     if(user){ const photo=user.photoURL || 'https://www.gravatar.com/avatar/?d=mp&s=96'; b.innerHTML=`<img src="${photo}" alt=""><span>${(user.displayName || 'Account').split(' ')[0]}</span>`; b.title=user.email || 'Account'; }
     else { b.innerHTML='<i class="fas fa-user"></i><span>Login</span>'; b.title='Login'; }
   };
-  onAuthStateChanged(auth, (user) => { window.qcAuthUser=user || null; qcRenderAccountButton(user); if(user && Number(localStorage.getItem('qcGuestQuizCreates')||0)>=5) { /* signed-in users can continue */ } });
+  let qcLastSyncedUid = null;
+  onAuthStateChanged(auth, async (user) => {
+    window.qcAuthUser = user || null; qcRenderAccountButton(user);
+    if (user && qcLastSyncedUid !== user.uid) {
+      qcLastSyncedUid = user.uid;
+      try { await window.qcCloudSyncAccount(user); showToast('Your quizzes and results are synced to your account', 'success'); }
+      catch (e) { console.error('QuizCraft account sync failed:', e); showToast('Signed in, but cloud sync failed. Your local data is safe.', 'error'); qcLastSyncedUid = null; }
+    }
+    if (!user) qcLastSyncedUid = null;
+  });
   getRedirectResult(auth).catch(err => { console.error('Google sign-in redirect:',err); const el=document.getElementById('qcAuthError'); if(el) el.textContent='Google sign-in could not finish. Please try again.'; });
   document.getElementById('qcGoogleSignIn')?.addEventListener('click', async () => {
     const err=document.getElementById('qcAuthError'); err.textContent='';
