@@ -782,6 +782,30 @@ textarea.input-field{resize:vertical;min-height:80px}
 .qc-auth-user b,.qc-auth-user small{display:block;overflow-wrap:anywhere;}.qc-auth-user b{color:#1e293b;font-size:.88rem;}.qc-auth-user small{margin-top:3px;color:#64748b;font-size:.72rem;}
 @media(max-width:480px){.brand-header{gap:8px}.brand-header .brand-tagline{display:none}.qc-account-btn{padding:4px 9px;font-size:.7rem}.qc-auth-card{padding:25px 19px 18px}}
 
+
+/* Distinct professional account creation and sign-in screens */
+.qc-auth-card{transition:background .2s,border-color .2s;}
+.qc-auth-card:not(.is-signin){background:radial-gradient(circle at 95% 0%,#e9e7ff 0,transparent 34%),linear-gradient(155deg,#fff 0%,#f7f6ff 100%);}
+.qc-auth-card.is-signin{background:radial-gradient(circle at 5% 0%,#dff5ff 0,transparent 35%),linear-gradient(155deg,#fff 0%,#f3faff 100%);border-color:#cfe8f7;}
+.qc-auth-card.is-signin .qc-auth-mark{background:linear-gradient(135deg,#087eae,#2563eb);box-shadow:0 9px 24px rgba(14,116,180,.22);}
+.qc-auth-card.is-signin .qc-auth-primary{background:linear-gradient(135deg,#087eae,#2563eb);box-shadow:0 7px 18px rgba(14,116,180,.2);}
+.qc-auth-card.is-signin .qc-auth-switch{color:#087eae;}
+.qc-forgot-btn{display:inline-flex;float:right;margin:8px 0 0;padding:5px 2px;border:0;background:transparent;color:#2563eb;font-size:.73rem;font-weight:800;cursor:pointer;}
+.qc-forgot-btn:disabled{opacity:.6;cursor:wait;}
+.qc-inline-action{border:0;background:transparent;color:#4f46e5;font-weight:900;text-decoration:underline;cursor:pointer;padding:0 2px;}
+.qc-logout-overlay{position:fixed;inset:0;z-index:100700;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(15,23,42,.58);backdrop-filter:blur(7px);}
+.qc-logout-overlay.active{display:flex;}
+.qc-logout-card{width:min(360px,100%);padding:26px 23px 20px;border-radius:23px;background:#fff;text-align:center;box-shadow:0 24px 70px rgba(15,23,42,.28);animation:qcLogoutPop .18s ease-out;}
+@keyframes qcLogoutPop{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+.qc-logout-icon{width:54px;height:54px;margin:0 auto 13px;display:grid;place-items:center;border-radius:17px;background:#fff1f2;color:#dc2626;font-size:22px;}
+.qc-logout-card h3{margin:0 0 7px;color:#172033;font-size:1.12rem;font-weight:900;}
+.qc-logout-card p{margin:0 auto 21px;max-width:270px;color:#64748b;font-size:.8rem;line-height:1.5;}
+.qc-logout-actions{display:flex;gap:10px;}
+.qc-logout-actions button{flex:1;min-height:43px;border-radius:12px;font-size:.8rem;font-weight:850;cursor:pointer;}
+.qc-logout-cancel{border:1px solid #e2e8f0;background:#fff;color:#475569;}
+.qc-logout-confirm{border:1px solid #dc2626;background:#dc2626;color:#fff;box-shadow:0 5px 13px rgba(220,38,38,.2);}
+.qc-logout-confirm:hover{background:#b91c1c;}
+
 </style>
 </head>
 <body>
@@ -3919,7 +3943,7 @@ function renderVideoStudio(data) {
 <script type="module">
 // Firebase Firestore integration for QuizCraft.
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { getFirestore, collection, addDoc, doc, getDoc, getDocs, setDoc, orderBy, query, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 const firebaseConfig = {
   apiKey: 'AIzaSyCbGOSqhgJPS8GzmxTN3htxdZdNVSZO008',
@@ -3941,18 +3965,19 @@ window.qcFirebaseReady = (async () => {
   let qcEmailCreateMode = true;
 
   const qcUpdateEmailAuthMode = () => {
-    const title=document.getElementById('qcAuthTitle');
-    const subtitle=document.getElementById('qcAuthSubtitle');
-    const submit=document.getElementById('qcEmailSubmit');
-    const toggle=document.getElementById('qcAuthModeSwitch');
-    const password=document.getElementById('qcAuthPassword');
+    const title=document.getElementById('qcAuthTitle'), subtitle=document.getElementById('qcAuthSubtitle');
+    const submit=document.getElementById('qcEmailSubmit'), toggle=document.getElementById('qcAuthModeSwitch');
+    const password=document.getElementById('qcAuthPassword'), card=document.querySelector('.qc-auth-card');
+    const forgot=document.getElementById('qcForgotPassword');
     if(!title || !submit || !toggle || !password) return;
-    title.textContent=qcEmailCreateMode ? 'Create your free account' : 'Welcome back';
-    subtitle.textContent=qcEmailCreateMode ? 'Create an account to save your access and keep making quizzes.' : 'Sign in to continue creating quizzes.';
-    submit.textContent=qcEmailCreateMode ? 'Create account' : 'Sign in';
-    toggle.textContent=qcEmailCreateMode ? 'Already have an account? Sign in' : 'New to QuizCraft? Create an account';
+    title.textContent=qcEmailCreateMode ? 'Join QuizCraft' : 'Welcome back';
+    subtitle.textContent=qcEmailCreateMode ? 'Create your free account and keep building great quizzes.' : 'Sign in to pick up right where you left off.';
+    submit.textContent=qcEmailCreateMode ? 'Create my free account' : 'Sign in to QuizCraft';
+    toggle.textContent=qcEmailCreateMode ? 'Already have an account? Sign in' : 'New to QuizCraft? Create a free account';
     password.autocomplete=qcEmailCreateMode ? 'new-password' : 'current-password';
-    const error=document.getElementById('qcAuthError'); if(error) error.textContent='';
+    if(card) card.classList.toggle('is-signin',!qcEmailCreateMode);
+    if(forgot) forgot.style.display=qcEmailCreateMode?'none':'inline-flex';
+    const error=document.getElementById('qcAuthError'); if(error){error.textContent='';error.style.color='';}
   };
   window.qcOpenAccount = (forceLogin) => {
     const modal = document.getElementById('qcAccountModal');
@@ -3976,7 +4001,14 @@ window.qcFirebaseReady = (async () => {
     }
   };
   window.qcCloseAccount = () => { const m=document.getElementById('qcAccountModal'); if(m){m.classList.remove('active');m.setAttribute('aria-hidden','true');} };
-  window.qcSignOut = async () => { try { await signOut(auth); window.qcCloseAccount(); } catch(e) { console.error(e); } };
+  window.qcShowLogoutConfirm = () => { const el=document.getElementById('qcLogoutConfirm'); if(el){el.classList.add('active');el.setAttribute('aria-hidden','false');} };
+  window.qcHideLogoutConfirm = () => { const el=document.getElementById('qcLogoutConfirm'); if(el){el.classList.remove('active');el.setAttribute('aria-hidden','true');} };
+  window.qcSignOut = async () => {
+    const yes=document.getElementById('qcConfirmLogoutBtn'); if(yes){yes.disabled=true;yes.textContent='Signing out…';}
+    try { await signOut(auth); window.qcHideLogoutConfirm(); window.qcCloseAccount(); showToast('You have been signed out','success'); }
+    catch(e) { console.error(e); const err=document.getElementById('qcAuthError'); if(err) err.textContent='Could not sign out. Please try again.'; }
+    finally { if(yes){yes.disabled=false;yes.textContent='Yes, sign out';} }
+  };
   const qcRenderAccountButton = (user) => {
     const b=document.getElementById('qcAccountBtn'); if(!b) return;
     if(user){ const photo=user.photoURL || 'https://www.gravatar.com/avatar/?d=mp&s=96'; b.innerHTML=`<img src="${photo}" alt=""><span>${(user.displayName || 'Account').split(' ')[0]}</span>`; b.title=user.email || 'Account'; }
@@ -3990,6 +4022,14 @@ window.qcFirebaseReady = (async () => {
     catch(e) { if(e.code==='auth/popup-blocked' || e.code==='auth/operation-not-supported-in-this-environment') { try { await signInWithRedirect(auth,googleProvider); } catch(re){ err.textContent='Google sign-in unavailable. Try email instead.'; } } else { console.error(e); err.textContent=e.code==='auth/unauthorized-domain'?'Add this website domain in Firebase Authentication settings.':'Google sign-in failed. Please try again.'; } }
   });
   document.getElementById('qcAuthModeSwitch')?.addEventListener('click', () => { qcEmailCreateMode=!qcEmailCreateMode; qcUpdateEmailAuthMode(); });
+  document.getElementById('qcForgotPassword')?.addEventListener('click', async () => {
+    const email=document.getElementById('qcAuthEmailInput').value.trim(), err=document.getElementById('qcAuthError');
+    if(!email){err.textContent='Enter your email address first, then choose Forgot password.';document.getElementById('qcAuthEmailInput').focus();return;}
+    const btn=document.getElementById('qcForgotPassword'); btn.disabled=true; btn.textContent='Sending reset email…'; err.textContent='';
+    try { await sendPasswordResetEmail(auth,email); err.style.color='#047857'; err.textContent='Password reset email sent. Check your inbox and spam folder.'; }
+    catch(ex){ console.error('Password reset error:',ex); err.style.color='#dc2626'; const msgs={'auth/invalid-email':'Enter a valid email address.','auth/user-not-found':'No QuizCraft account was found with this email.','auth/too-many-requests':'Too many attempts. Please wait and try again.','auth/network-request-failed':'Network problem. Check your connection and try again.'}; err.textContent=msgs[ex.code]||'Could not send the reset email. Please try again.'; }
+    finally {btn.disabled=false;btn.textContent='Forgot password?';}
+  });
   document.getElementById('qcEmailAuthForm')?.addEventListener('submit', async (e) => {
     e.preventDefault(); const email=document.getElementById('qcAuthEmailInput').value.trim(); const password=document.getElementById('qcAuthPassword').value; const err=document.getElementById('qcAuthError'); err.textContent='';
     const submit=document.getElementById('qcEmailSubmit');
@@ -4013,7 +4053,11 @@ window.qcFirebaseReady = (async () => {
         'auth/too-many-requests':'Too many attempts. Please wait a little and try again.',
         'auth/network-request-failed':'Network problem. Check your internet connection and try again.'
       };
-      err.textContent=messages[ex.code] || ('Authentication failed ('+(ex.code || 'unknown error')+'). Please try again.');
+      if(ex.code==='auth/email-already-in-use'){
+        qcEmailCreateMode=false; qcUpdateEmailAuthMode(); document.getElementById('qcAuthEmailInput').value=email;
+        err.innerHTML='This email already has a QuizCraft account. <button type="button" class="qc-inline-action" id="qcGoSignInNow">Sign in now</button>';
+        document.getElementById('qcGoSignInNow')?.addEventListener('click',()=>{qcEmailCreateMode=false;qcUpdateEmailAuthMode();document.getElementById('qcAuthPassword').focus();});
+      } else { err.textContent=messages[ex.code] || ('Authentication failed ('+(ex.code || 'unknown error')+'). Please try again.'); }
     } finally { submit.disabled=false; submit.style.opacity='1'; qcUpdateEmailAuthMode(); }
   });
 
@@ -4121,7 +4165,7 @@ window.qcFirebaseReady.catch(err => console.error('QuizCraft Firebase initializa
     <p id="qcAuthSubtitle">Sign in to continue creating unlimited quizzes.</p>
     <div id="qcAuthUserPanel" style="display:none;">
       <div class="qc-auth-user"><img id="qcAuthAvatar" alt="Profile"><div><b id="qcAuthName"></b><small id="qcAuthUserEmail"></small></div></div>
-      <button class="qc-auth-signout" type="button" onclick="qcSignOut()">Sign out</button>
+      <button class="qc-auth-signout" type="button" onclick="qcShowLogoutConfirm()">Sign out</button>
     </div>
     <div id="qcAuthFormPanel">
       <button class="qc-google-btn" id="qcGoogleSignIn" type="button"><svg class="qc-google-logo" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.72 7.18l7.62 5.91c4.45-4.11 7.14-10.16 7.14-17.56z"/><path fill="#FBBC05" d="M10.54 28.59A14.4 14.4 0 0 1 9.75 24c0-1.59.27-3.13.76-4.59l-7.98-6.19A23.9 23.9 0 0 0 0 24c0 3.87.93 7.53 2.56 10.78l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.91-5.79l-7.62-5.91c-2.11 1.41-4.82 2.25-8.29 2.25-6.26 0-11.57-4.22-13.46-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg> Continue with Google</button>
@@ -4132,11 +4176,20 @@ window.qcFirebaseReady.catch(err => console.error('QuizCraft Firebase initializa
         <label class="qc-auth-label" for="qcAuthPassword">Password</label>
         <input id="qcAuthPassword" type="password" placeholder="At least 6 characters" minlength="6" autocomplete="current-password" required>
         <button class="qc-auth-primary" id="qcEmailSubmit" type="submit">Continue with email</button>
+        <button class="qc-forgot-btn" id="qcForgotPassword" type="button" style="display:none">Forgot password?</button>
       </form>
       <button class="qc-auth-switch" id="qcAuthModeSwitch" type="button">New to QuizCraft? Create an account</button>
       <p class="qc-auth-error" id="qcAuthError" role="alert"></p>
     </div>
     <p class="qc-auth-foot">Your quizzes stay in this browser. Sign in to unlock continued quiz creation.</p>
+  </div>
+</div>
+<div id="qcLogoutConfirm" class="qc-logout-overlay" aria-hidden="true">
+  <div class="qc-logout-card" role="dialog" aria-modal="true" aria-labelledby="qcLogoutTitle">
+    <div class="qc-logout-icon"><i class="fas fa-right-from-bracket"></i></div>
+    <h3 id="qcLogoutTitle">Sign out of QuizCraft?</h3>
+    <p>You will need to sign in again to continue using your account.</p>
+    <div class="qc-logout-actions"><button type="button" class="qc-logout-cancel" onclick="qcHideLogoutConfirm()">Cancel</button><button type="button" class="qc-logout-confirm" id="qcConfirmLogoutBtn" onclick="qcSignOut()">Yes, sign out</button></div>
   </div>
 </div>
 </body>
