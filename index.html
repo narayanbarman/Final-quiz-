@@ -1097,25 +1097,26 @@ function buildSharePayload(data) {
 }
 function expandSharePayload(p) {
   if (!p) return null;
+  // Supports both the older compact share format and the newer readable Firestore format.
   const rawQ = p.q || p.questions;
-  if (!rawQ || !rawQ.length) return null;
+  if (!Array.isArray(rawQ) || !rawQ.length) return null;
   return {
-    title: p.t || p.title || '',
-    mode: p.m || p.mode || 'quiz',
-    templateId: p.tpl || p.templateId || 't25',
+    title: p.quizTitle || p.t || p.title || '',
+    mode: p.quizType || p.m || p.mode || 'quiz',
+    templateId: p.templateId || p.tpl || 't25',
     logo: null,
-    timerEnabled: !!(p.te || p.timerEnabled),
-    timerSeconds: p.ts || p.timerSeconds || 10,
+    timerEnabled: !!(p.timeEnabled || p.te || p.timerEnabled),
+    timerSeconds: p.timeSeconds || p.ts || p.timerSeconds || 10,
     createdAt: Date.now(),
     questions: rawQ.map(q => {
       if (Array.isArray(q)) {
         return { text: q[0] || '', options: q[1] || [], correct: q[2] || '', image: q[3] || null };
       }
       return {
-        text: q.t || q.text || '',
-        options: q.o || q.options || [],
-        correct: q.c || q.correct || '',
-        image: q.i || q.image || null
+        text: q.question || q.text || q.t || '',
+        options: q.options || q.o || [],
+        correct: q.correctAnswer || q.correct || q.c || '',
+        image: q.image || q.i || null
       };
     })
   };
@@ -3815,55 +3816,57 @@ const firebaseConfig = {
   appId: '1:61692118652:web:de0809f404c98de91febf9',
   measurementId: 'G-7RDVJNE1TE'
 };
-// Assign the promise immediately so the main page can safely await module startup.
 window.qcFirebaseReady = (async () => {
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
+
+  // Convert QuizCraft's internal compact data into readable Firestore fields.
   window.qcSaveSharedQuiz = async (payload) => {
-    // Keep the Firestore document fields aligned with the published rules.
-    // Firestore does not allow arrays directly inside arrays. QuizCraft's
-    // compact format stores each question as [text, options[], correct, image?].
-    // Convert the outer question array into an array of MAPS; options remain
-    // arrays inside each map, which Firestore supports.
-    const firestoreQuestions = (Array.isArray(payload.q) ? payload.q : []).map((row) => {
-      if (row && !Array.isArray(row) && typeof row === 'object') {
-        return {
-          text: String(row.text || row.t || ''),
-          options: Array.isArray(row.options || row.o) ? (row.options || row.o) : [],
-          correct: String(row.correct || row.c || ''),
-          ...(row.image || row.i ? { image: row.image || row.i } : {})
-        };
-      }
-      const q = Array.isArray(row) ? row : [];
-      return {
-        text: String(q[0] || ''),
-        options: Array.isArray(q[1]) ? q[1] : [],
-        correct: String(q[2] || ''),
-        ...(typeof q[3] === 'string' && q[3] ? { image: q[3] } : {})
+    const sourceQuestions = Array.isArray(payload.q) ? payload.q : (Array.isArray(payload.questions) ? payload.questions : []);
+    const questions = sourceQuestions.map((row) => {
+      const q = Array.isArray(row) ? {
+        question: row[0], options: row[1], correctAnswer: row[2], image: row[3]
+      } : {
+        question: row.question || row.text || row.t || '',
+        options: row.options || row.o || [],
+        correctAnswer: row.correctAnswer || row.correct || row.c || '',
+        image: row.image || row.i || null
       };
+      const item = {
+        question: String(q.question || ''),
+        options: Array.isArray(q.options) ? q.options.map(x => String(x)) : [],
+        correctAnswer: String(q.correctAnswer || '')
+      };
+      if (q.image) item.image = q.image;
+      return item;
     });
+
+    if (!questions.length) throw new Error('This quiz has no questions to share.');
     const record = {
-      v: payload.v || 2,
-      i: payload.i || '',
-      t: payload.t || '',
-      m: payload.m || 'quiz',
-      q: firestoreQuestions,
-      ...(payload.tpl ? { tpl: payload.tpl } : {}),
-      ...(payload.te ? { te: payload.te, ts: payload.ts || 10 } : {}),
-      sharedAt: serverTimestamp()
+      quizTitle: String(payload.t || payload.quizTitle || payload.title || 'My Quiz'),
+      quizType: String(payload.m || payload.quizType || payload.mode || 'quiz'),
+      questions,
+      templateId: String(payload.tpl || payload.templateId || 't25'),
+      timeEnabled: !!(payload.te || payload.timeEnabled || payload.timerEnabled),
+      timeSeconds: Number(payload.ts || payload.timeSeconds || payload.timerSeconds || 10),
+      quizId: String(payload.i || payload.id || ''),
+      version: 3,
+      createdAt: serverTimestamp()
     };
     const ref = await addDoc(collection(db, 'quizShares'), record);
     return ref.id;
   };
+
   window.qcGetSharedQuiz = async (shareId) => {
     const snap = await getDoc(doc(db, 'quizShares', shareId));
-    return snap.exists() ? snap.data() : null;
+    if (!snap.exists()) return null;
+    const record = snap.data();
+    // Return the readable document as-is; expandSharePayload understands both formats.
+    return record;
   };
   return true;
 })();
-window.qcFirebaseReady.catch(err => {
-  console.error('QuizCraft Firebase initialization failed:', err);
-});
+window.qcFirebaseReady.catch(err => console.error('QuizCraft Firebase initialization failed:', err));
 </script>
 
 </body>
