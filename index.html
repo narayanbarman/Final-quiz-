@@ -53,7 +53,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 .demo-cta{background:transparent;border:1px solid #e8eaf2;border-radius:10px;padding:5px 8px 5px 10px;margin:0 auto 10px;max-width:290px;display:flex;align-items:center;justify-content:space-between;gap:8px;opacity:.78}
 .demo-cta .demo-text{font-size:.66rem;font-weight:600;color:#64748b;line-height:1.25}
 .demo-cta .demo-text small{display:inline;font-weight:500;color:#94a3b8;font-size:.62rem;margin-left:3px;opacity:.9}
-.demo-cta .btn{padding:4px 9px !important;font-size:.64rem !important;border-radius:40px !important;box-shadow:none !important}
+.demo-cta .btn{padding:4px 9px !important;font-size:.64rem !important;border-radius:40px !important;box-shadow:none !important;background:#eef2f7 !important;border:1px solid #dbe2ea !important;color:#475569 !important;font-weight:600 !important}.demo-cta .btn:hover{background:#e5eaf1 !important}
 .share-summary{margin:0 auto 12px;padding:12px 14px;border-radius:14px;background:#f8fafc;border:1px solid #e2e8f0;max-width:320px}
 .share-summary .ss-title{font-size:1rem;font-weight:800;color:#0f172a;margin:0 0 2px;word-break:break-word}
 .share-summary .ss-meta{font-size:.75rem;color:#64748b;font-weight:600}
@@ -755,8 +755,21 @@ textarea.input-field{resize:vertical;min-height:80px}
 .brand-header{position:relative;}
 .qc-account-btn{margin-left:auto;display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:38px;padding:5px 12px;border:1px solid var(--border);border-radius:999px;background:#fff;color:#334155;font-size:.76rem;font-weight:800;cursor:pointer;box-shadow:0 3px 12px rgba(15,23,42,.06);max-width:150px;}
 .qc-account-btn img{width:27px;height:27px;border-radius:50%;object-fit:cover;}
-.qc-support-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:36px;padding:5px 10px;border:1px solid #dbeafe;border-radius:999px;background:#eff6ff;color:#3b5ccc;font-size:.72rem;font-weight:750;cursor:pointer;white-space:nowrap}
-.qc-support-btn:hover{background:#e0eaff;border-color:#c7d2fe}
+.qc-more-wrap{position:relative;display:inline-flex;align-items:center;margin:0 10px 0 0;order:0;flex:0 0 auto}
+.qc-more-btn{width:36px;height:36px;border:1px solid var(--border);border-radius:10px;background:#fff;color:#475569;display:grid;place-items:center;font-size:1rem;cursor:pointer;box-shadow:0 2px 8px rgba(15,23,42,.04)}
+.qc-more-btn:hover,.qc-more-btn[aria-expanded="true"]{background:#f8fafc;border-color:#cbd5e1;color:#334155}
+.qc-more-menu{position:absolute;left:0;top:calc(100% + 8px);z-index:10020;width:185px;padding:6px;background:#fff;border:1px solid #e2e8f0;border-radius:13px;box-shadow:0 14px 35px rgba(15,23,42,.16);display:none}
+.qc-more-menu.open{display:block;animation:qcMenuIn .14s ease-out}
+.qc-more-menu button{width:100%;display:flex;align-items:center;gap:10px;padding:11px 10px;border:0;border-radius:9px;background:transparent;color:#334155;font-size:.82rem;font-weight:600;font-family:inherit;text-align:left;cursor:pointer}
+.qc-more-menu button:hover{background:#f1f5f9}
+.qc-more-menu i{width:17px;color:#64748b;text-align:center}
+@keyframes qcMenuIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.qc-rating-row{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:12px 0 16px}
+.qc-rating-choice{min-width:0;min-height:68px;padding:7px 2px;border:1px solid #e2e8f0;border-radius:10px;background:#fff;color:#475569;cursor:pointer;font-size:.65rem;font-weight:700;line-height:1.2}
+.qc-rating-choice i{display:block;font-size:1.15rem;margin-bottom:5px}
+.qc-rating-choice.selected{border-color:#6366f1;background:#eef2ff;color:#4338ca;box-shadow:0 0 0 2px rgba(99,102,241,.1)}
+.qc-feedback-note{font-size:.75rem;color:#64748b;line-height:1.45;margin:0 0 12px}
+.qc-clear-btn{font-weight:500 !important}
 .qc-clear-btn{border:1px solid #fecaca;background:#fff7f7;color:#dc2626;border-radius:999px;padding:6px 11px;font-size:.7rem;font-weight:750;cursor:pointer}
 .qc-clear-btn:hover{background:#fee2e2}
 .qc-auth-overlay{position:fixed;inset:0;z-index:100500;background:rgba(15,23,42,.58);backdrop-filter:blur(9px);display:none;align-items:center;justify-content:center;padding:16px;}
@@ -883,10 +896,16 @@ textarea.input-field{resize:vertical;min-height:80px}
 <body>
 <div class="app-full" id="app">
   <div class="brand-header">
+    <div class="qc-more-wrap">
+      <button id="qcMoreBtn" class="qc-more-btn" type="button" aria-label="Open menu" aria-expanded="false" aria-haspopup="true"><i class="fas fa-bars"></i></button>
+      <div id="qcMoreMenu" class="qc-more-menu" role="menu">
+        <button type="button" role="menuitem" onclick="qcCloseMoreMenu();qcOpenHelp()"><i class="fas fa-circle-question"></i> Help &amp; Contact</button>
+        <button type="button" role="menuitem" onclick="qcCloseMoreMenu();qcOpenFeedback()"><i class="fas fa-comment-dots"></i> Give Feedback</button>
+      </div>
+    </div>
     <div class="logo"><i class="fas fa-pen-fancy"></i></div>
     <div class="brand-name">Quiz<span>Craft</span></div>
     <span class="brand-tagline"><i class="fas fa-bolt"></i> Quizzes · Mock Tests · Videos</span>
-    <button id="qcSupportBtn" class="qc-support-btn" type="button" onclick="qcOpenSupport()" aria-label="Support and feedback"><i class="fas fa-comment-dots"></i><span>Support</span></button>
     <button id="qcAccountBtn" class="qc-account-btn" type="button" onclick="qcOpenAccount()" aria-label="Login or account"><i class="fas fa-user"></i><span>Login</span></button>
   </div>
   <div id="toast" class="toast"></div>
@@ -1056,13 +1075,10 @@ textarea.input-field{resize:vertical;min-height:80px}
     <div style="margin-top:6px;">
       <a href="mailto:narayanbarman3210@gmail.com">Contact</a> · 
       <a href="https://wa.me/918101565420" target="_blank" rel="noopener">WhatsApp</a> · 
-      <button type="button" onclick="qcOpenSupport()" style="background:none;border:none;color:var(--primary);font-weight:600;cursor:pointer;font-size:inherit;font-family:inherit;padding:0;">Feedback</button>
+      <button type="button" onclick="qcOpenFeedback()" style="background:none;border:none;color:var(--primary);font-weight:600;cursor:pointer;font-size:inherit;font-family:inherit;padding:0;">Feedback</button>
     </div>
   </div>
 </div>
-
-<!-- HELP FAB -->
-<button class="help-fab" id="helpFab" title="Help & Support" aria-hidden="true" tabindex="-1"><i class="fas fa-headset"></i></button>
 
 <!-- CLEAR ALL CONFIRMATION -->
 <div class="modal-overlay" id="qcClearAllModal" role="dialog" aria-modal="true" aria-labelledby="qcClearAllTitle">
@@ -1081,10 +1097,10 @@ textarea.input-field{resize:vertical;min-height:80px}
 <div class="modal-overlay" id="helpModal">
   <div class="modal-card" style="text-align:left; padding:20px;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-      <h3 style="font-size:1.1rem; color:var(--text); margin:0;"><i class="fas fa-headset" style="color:var(--primary);"></i> Support & Feedback</h3>
+      <h3 style="font-size:1.1rem; color:var(--text); margin:0;"><i class="fas fa-circle-question" style="color:var(--primary);"></i> Help & Contact</h3>
       <button id="closeHelpBtn" style="background:none; border:none; font-size:1.2rem; color:#94a3b8; cursor:pointer;">✕</button>
     </div>
-    <p style="font-size:0.8rem; margin-bottom:12px; color:var(--text-secondary);">Questions, issues, or feedback? We read every message and love hearing how QuizCraft is working for you.</p>
+    <p style="font-size:0.8rem; margin-bottom:12px; color:var(--text-secondary);">Need help using QuizCraft or want to contact us? Choose a contact option below.</p>
     <div class="input-group">
       <label class="input-label">Type</label>
       <select id="helpType" class="input-field" style="cursor:pointer;">
@@ -1114,6 +1130,28 @@ textarea.input-field{resize:vertical;min-height:80px}
         <a href="mailto:narayanbarman3210@gmail.com" style="font-size:0.75rem; color:var(--primary); font-weight:600; text-decoration:none;"><i class="fas fa-envelope"></i> narayanbarman3210@gmail.com</a>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- SEPARATE QUICK FEEDBACK MODAL -->
+<div class="modal-overlay" id="qcFeedbackModal" role="dialog" aria-modal="true" aria-labelledby="qcFeedbackTitle">
+  <div class="modal-card" style="max-width:390px;text-align:left;padding:22px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <h3 id="qcFeedbackTitle" style="font-size:1.08rem;color:var(--text);margin:0;"><i class="fas fa-comment-dots" style="color:var(--primary);"></i> Your feedback</h3>
+      <button type="button" onclick="qcCloseFeedback()" aria-label="Close feedback" style="background:none;border:0;color:#94a3b8;font-size:1.2rem;cursor:pointer;">✕</button>
+    </div>
+    <p class="qc-feedback-note">Is QuizCraft helpful for you?</p>
+    <div class="qc-rating-row" aria-label="Rate your experience">
+      <button type="button" class="qc-rating-choice" data-rating="Very good" onclick="qcSelectRating('Very good',this)"><i class="far fa-grin-stars"></i>Very good</button>
+      <button type="button" class="qc-rating-choice" data-rating="Good" onclick="qcSelectRating('Good',this)"><i class="far fa-smile"></i>Good</button>
+      <button type="button" class="qc-rating-choice" data-rating="Average" onclick="qcSelectRating('Average',this)"><i class="far fa-meh"></i>Average</button>
+      <button type="button" class="qc-rating-choice" data-rating="Poor" onclick="qcSelectRating('Poor',this)"><i class="far fa-frown"></i>Poor</button>
+      <button type="button" class="qc-rating-choice" data-rating="Very poor" onclick="qcSelectRating('Very poor',this)"><i class="far fa-angry"></i>Very poor</button>
+    </div>
+    <label class="input-label" for="qcFeedbackText">Anything we can improve? <span style="font-weight:400;color:#94a3b8;">(optional)</span></label>
+    <textarea id="qcFeedbackText" class="input-field" rows="4" placeholder="Share an idea, problem, or suggestion..."></textarea>
+    <button id="qcSendFeedbackBtn" type="button" class="btn btn-primary btn-block" onclick="qcSendFeedback()"><i class="fas fa-paper-plane"></i> Send Feedback</button>
+    <p style="font-size:.68rem;color:#94a3b8;text-align:center;margin:10px 0 0;">Your email app will open to send your feedback.</p>
   </div>
 </div>
 
@@ -1209,9 +1247,32 @@ function initLiveUsers() {
   }, 8000);
 }
 
-/* Help System */
-window.qcOpenSupport = () => document.getElementById('helpModal').classList.add('active');
-document.getElementById('helpFab').onclick = window.qcOpenSupport;
+/* Help, feedback and compact three-line menu */
+window.qcOpenHelp = () => document.getElementById('helpModal').classList.add('active');
+window.qcOpenSupport = window.qcOpenHelp; // legacy links remain compatible
+window.qcOpenFeedback = () => { qcSelectedRating = ''; document.querySelectorAll('.qc-rating-choice').forEach(el => el.classList.remove('selected')); const box = document.getElementById('qcFeedbackText'); if (box) box.value = ''; document.getElementById('qcFeedbackModal').classList.add('active'); };
+window.qcCloseFeedback = () => document.getElementById('qcFeedbackModal').classList.remove('active');
+let qcSelectedRating = '';
+window.qcSelectRating = (rating, button) => {
+  qcSelectedRating = rating;
+  document.querySelectorAll('.qc-rating-choice').forEach(el => el.classList.toggle('selected', el === button));
+};
+window.qcSendFeedback = () => {
+  const note = (document.getElementById('qcFeedbackText').value || '').trim();
+  if (!qcSelectedRating && !note) return showToast('Please choose a rating or write a short comment.', 'error');
+  const ratingText = qcSelectedRating ? `User rating: ${qcSelectedRating}` : 'No rating selected';
+  const body = encodeURIComponent(`${ratingText}\n\nFeedback:\n${note || '(No additional comment)'}`);
+  const subject = encodeURIComponent('QuizCraft user feedback');
+  window.location.href = `mailto:narayanbarman3210@gmail.com?subject=${subject}&body=${body}`;
+  qcCloseFeedback();
+  showToast('Opening your email app…', 'success');
+};
+const qcMoreBtn = document.getElementById('qcMoreBtn');
+const qcMoreMenu = document.getElementById('qcMoreMenu');
+window.qcCloseMoreMenu = () => { if(qcMoreMenu) qcMoreMenu.classList.remove('open'); if(qcMoreBtn) qcMoreBtn.setAttribute('aria-expanded','false'); };
+if(qcMoreBtn) qcMoreBtn.addEventListener('click', e => { e.stopPropagation(); const open = qcMoreMenu.classList.toggle('open'); qcMoreBtn.setAttribute('aria-expanded', String(open)); });
+document.addEventListener('click', e => { if(qcMoreMenu && !e.target.closest('.qc-more-wrap')) qcCloseMoreMenu(); });
+document.addEventListener('keydown', e => { if(e.key === 'Escape'){ qcCloseMoreMenu(); qcCloseFeedback(); } });
 document.getElementById('closeHelpBtn').onclick = () => document.getElementById('helpModal').classList.remove('active');
 document.getElementById('helpModal').addEventListener('click', (e) => {
   if (e.target.id === 'helpModal') document.getElementById('helpModal').classList.remove('active');
