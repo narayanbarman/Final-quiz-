@@ -798,15 +798,25 @@ textarea.input-field{resize:vertical;min-height:80px}
 .qc-forgot-btn:disabled{opacity:.6;cursor:wait;}
 .qc-inline-action{border:0;background:transparent;color:#4f46e5;font-weight:900;text-decoration:underline;cursor:pointer;padding:0 2px;}
 .qc-auth-error.is-error{color:#dc2626!important;background:#fff1f2;border:1px solid #fecdd3;border-radius:10px;padding:9px 11px;min-height:0!important;text-align:left;line-height:1.45!important;}
-/* Smooth screen transition: soft fade + slight vertical glide. No 3D rotation,
-   so the card and every letter remain upright and readable throughout. */
-.qc-auth-card{transform:none;backface-visibility:visible;}
-.qc-auth-card.qc-flipping{animation:qcAuthSoftSwap .62s cubic-bezier(.22,.75,.25,1) both;}
-@keyframes qcAuthSoftSwap{
-  0%{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}
-  42%{opacity:0;transform:translateY(-9px) scale(.985);filter:blur(2px)}
-  58%{opacity:0;transform:translateY(9px) scale(.985);filter:blur(2px)}
-  100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}
+/* Page-turn transition: a blank cover sheet swings away to reveal the
+   other form. The text itself never rotates, so it is always readable. */
+.qc-auth-card{position:relative;isolation:isolate;overflow:hidden;}
+.qc-auth-card.qc-flipping::after{
+  content:'';position:absolute;z-index:50;inset:0;border-radius:inherit;
+  pointer-events:none;transform-origin:left center;backface-visibility:hidden;
+  background:linear-gradient(105deg,#fff 0%,#fbfbff 68%,#e7e8f4 100%);
+  box-shadow:inset -18px 0 28px rgba(15,23,42,.10), 12px 0 24px rgba(15,23,42,.10);
+  animation:qcPageTurn .78s cubic-bezier(.62,.02,.34,1) both;
+}
+.qc-auth-card.is-signin.qc-flipping::after{
+  background:linear-gradient(105deg,#080d18 0%,#111827 68%,#263449 100%);
+  box-shadow:inset -18px 0 28px rgba(0,0,0,.28),12px 0 24px rgba(0,0,0,.24);
+}
+@keyframes qcPageTurn{
+  0%{transform:perspective(1200px) rotateY(0deg);opacity:1}
+  42%{transform:perspective(1200px) rotateY(-72deg);opacity:1}
+  52%{transform:perspective(1200px) rotateY(-92deg);opacity:.12}
+  58%,100%{transform:perspective(1200px) rotateY(-92deg);opacity:0}
 }
 /* Existing-account notice stays small and inline; never cover the card. */
 .qc-auth-error.account-exists{display:block!important;color:#b45309!important;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:9px 11px;min-height:0!important;text-align:left;line-height:1.4!important;font-weight:700;}
@@ -828,7 +838,7 @@ textarea.input-field{resize:vertical;min-height:80px}
 .qc-auth-card.is-signin .qc-auth-divider:before,.qc-auth-card.is-signin .qc-auth-divider:after{background:#34445c;}
 .qc-auth-card.is-signin .qc-auth-foot{border-color:#2a394e;color:#8292a8!important;}
 .qc-auth-card.is-signin .qc-auth-error:not(.is-error){color:#cbd5e1!important;}
-@media(prefers-reduced-motion:reduce){.qc-auth-card.qc-flipping{animation-duration:.01ms;filter:none!important;}}
+@media(prefers-reduced-motion:reduce){.qc-auth-card.qc-flipping::after{animation-duration:.01ms;}}
 .qc-logout-overlay{position:fixed;inset:0;z-index:100700;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(15,23,42,.58);backdrop-filter:blur(7px);}
 .qc-logout-overlay.active{display:flex;}
 .qc-logout-card{width:min(360px,100%);padding:26px 23px 20px;border-radius:23px;background:#fff;text-align:center;box-shadow:0 24px 70px rgba(15,23,42,.28);animation:qcLogoutPop .18s ease-out;}
@@ -4006,7 +4016,7 @@ window.qcFirebaseReady = (async () => {
     const password=document.getElementById('qcAuthPassword'), card=document.querySelector('.qc-auth-card');
     const forgot=document.getElementById('qcForgotPassword');
     if(!title || !submit || !toggle || !password) return;
-    title.textContent=qcEmailCreateMode ? 'Join QuizCraft' : 'Welcome back';
+    title.textContent=qcEmailCreateMode ? 'Join QuizCraft' : 'Sign in';
     subtitle.textContent=qcEmailCreateMode ? 'Create your free account and keep building great quizzes.' : 'Sign in to pick up right where you left off.';
     submit.textContent=qcEmailCreateMode ? 'Create my free account' : 'Sign in';
     toggle.textContent=qcEmailCreateMode ? 'Already have an account? Sign in' : 'New to QuizCraft? Create a free account';
@@ -4060,8 +4070,8 @@ window.qcFirebaseReady = (async () => {
   document.getElementById('qcAuthModeSwitch')?.addEventListener('click', () => {
     const card=document.querySelector('.qc-auth-card');
     if(card){card.classList.remove('qc-flipping');void card.offsetWidth;card.classList.add('qc-flipping');}
-    window.setTimeout(()=>{qcEmailCreateMode=!qcEmailCreateMode;qcUpdateEmailAuthMode();},310);
-    window.setTimeout(()=>{if(card)card.classList.remove('qc-flipping');},650);
+    window.setTimeout(()=>{qcEmailCreateMode=!qcEmailCreateMode;qcUpdateEmailAuthMode();},390);
+    window.setTimeout(()=>{if(card)card.classList.remove('qc-flipping');},800);
   });
   document.getElementById('qcForgotPassword')?.addEventListener('click', async () => {
     const email=document.getElementById('qcAuthEmailInput').value.trim(), err=document.getElementById('qcAuthError');
@@ -4103,22 +4113,22 @@ window.qcFirebaseReady = (async () => {
         err.classList.add('account-exists');
         err.textContent=flipMessage;
         if(card){card.classList.remove('qc-flipping');void card.offsetWidth;card.classList.add('qc-flipping');}
-        // Swap the form at the halfway point so the reverse face is Sign In.
+        // Reveal the sign-in form as the blank page cover swings away.
         window.setTimeout(()=>{
           qcEmailCreateMode=false;
           qcUpdateEmailAuthMode(true);
           if(emailField) emailField.value=email;
           const authTitle=document.getElementById('qcAuthTitle');
           const authSubtitle=document.getElementById('qcAuthSubtitle');
-          if(authTitle) authTitle.textContent='Sign in to QuizCraft';
+          if(authTitle) authTitle.textContent='Sign in';
           if(authSubtitle) authSubtitle.textContent='You already have an account with this email. Enter your password to continue.';
           err.classList.add('account-exists');
           err.textContent=flipMessage;
-        },310);
+        },390);
         window.setTimeout(()=>{
           if(card) card.classList.remove('qc-flipping');
           document.getElementById('qcAuthPassword')?.focus();
-        },650);
+        },800);
       } else {
         err.classList.add('is-error');
         err.textContent=messages[ex.code] || ('Authentication failed ('+(ex.code || 'unknown error')+'). Please try again.');
