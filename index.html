@@ -800,9 +800,9 @@ textarea.input-field{resize:vertical;min-height:80px}
 .qc-auth-error.is-error{color:#dc2626!important;background:#fff1f2;border:1px solid #fecdd3;border-radius:10px;padding:9px 11px;min-height:0!important;text-align:left;line-height:1.45!important;}
 /* Slow, clear card flip when an existing email is detected */
 .qc-auth-card{perspective:1200px;transform-style:preserve-3d;}
-.qc-auth-card.qc-flipping{animation:qcAccountSlowFlip 1.18s cubic-bezier(.45,.05,.25,1) both;}
-.qc-auth-card.qc-flipping::after{content:'You already have an account with this email';position:absolute;z-index:8;inset:0;display:flex;align-items:center;justify-content:center;padding:34px;text-align:center;border-radius:26px;background:rgba(255,255,255,.97);color:#18243a;font-size:1.05rem;font-weight:850;line-height:1.5;box-shadow:inset 0 0 0 1px #e4e9f2;backface-visibility:hidden;}
-@keyframes qcAccountSlowFlip{0%{transform:perspective(1200px) rotateY(0deg) scale(1)}43%{transform:perspective(1200px) rotateY(88deg) scale(.985)}57%{transform:perspective(1200px) rotateY(88deg) scale(.985)}100%{transform:perspective(1200px) rotateY(0deg) scale(1)}}
+.qc-auth-card.qc-flipping{animation:qcAccountFullFlip 1.65s cubic-bezier(.42,0,.25,1) both;}
+.qc-auth-card.qc-flipping::after{content:'You already have an account with this email';position:absolute;z-index:8;inset:0;display:flex;align-items:center;justify-content:center;padding:34px;text-align:center;border-radius:26px;background:rgba(255,255,255,.98);color:#18243a;font-size:1.05rem;font-weight:850;line-height:1.5;box-shadow:inset 0 0 0 1px #e4e9f2;backface-visibility:hidden;}
+@keyframes qcAccountFullFlip{0%{transform:perspective(1200px) rotateY(0deg) scale(1)}22%{transform:perspective(1200px) rotateY(80deg) scale(.985)}50%{transform:perspective(1200px) rotateY(180deg) scale(.975)}78%{transform:perspective(1200px) rotateY(280deg) scale(.985)}100%{transform:perspective(1200px) rotateY(360deg) scale(1)}}
 /* Sign-in gets a distinct premium midnight theme; account creation stays white */
 .qc-auth-card.is-signin{background:radial-gradient(circle at 85% 0%,rgba(45,212,191,.20),transparent 34%),linear-gradient(155deg,#080d18 0%,#111827 58%,#172033 100%);border:1px solid #263449;box-shadow:0 28px 90px rgba(2,8,23,.48);}
 .qc-auth-card.is-signin h2{color:#f8fafc;}
@@ -4098,14 +4098,18 @@ window.qcFirebaseReady = (async () => {
           qcEmailCreateMode=false;
           qcUpdateEmailAuthMode(true);
           if(emailField) emailField.value=email;
+          const authTitle=document.getElementById('qcAuthTitle');
+          const authSubtitle=document.getElementById('qcAuthSubtitle');
+          if(authTitle) authTitle.textContent='You already have an account with this email';
+          if(authSubtitle) authSubtitle.textContent='Please sign in with your existing password to continue.';
           err.classList.remove('is-error');
           err.style.color='#5eead4';
-          err.textContent='You already have an account with this email. Please sign in.';
-        },560);
+          err.textContent='';
+        },825);
         window.setTimeout(()=>{
           if(card) card.classList.remove('qc-flipping');
           document.getElementById('qcAuthPassword')?.focus();
-        },1200);
+        },1680);
       } else {
         err.classList.add('is-error');
         err.textContent=messages[ex.code] || ('Authentication failed ('+(ex.code || 'unknown error')+'). Please try again.');
