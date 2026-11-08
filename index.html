@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover" />
-<title>Quiz</title>
+<title>QuizCraft</title>
 <meta name="description" content="" />
 <meta property="og:type" content="website" />
-<meta property="og:title" content="Quiz" />
+<meta property="og:title" content="QuizCraft" />
 <meta property="og:description" content="" />
 <meta name="twitter:card" content="summary" />
-<meta name="twitter:title" content="Quiz" />
+<meta name="twitter:title" content="QuizCraft" />
 <meta name="twitter:description" content="" />
 <meta name="theme-color" content="#6c5ce7" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -1204,7 +1204,7 @@ function wireShareButtons(id, data) {
   if (inp) { inp.value = ''; inp.placeholder = 'Uploading quiz and creating short link…'; }
 
   let shareUrl = makeShareUrl(id, d);
-  const msg = () => line + '\n' + shareUrl;
+  const msg = () => 'QuizCraft\n' + line + '\n' + shareUrl;
   const bind = () => {
     const copyBtn = document.getElementById('copyLinkBtn');
     if (copyBtn) {
@@ -3804,7 +3804,7 @@ function renderVideoStudio(data) {
 <script type="module">
 // Firebase Firestore integration for QuizCraft.
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import { getFirestore, collection, addDoc, doc, getDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { getFirestore, collection, addDoc, doc, getDoc, getDocs, setDoc, orderBy, query, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 const firebaseConfig = {
   apiKey: 'AIzaSyCbGOSqhgJPS8GzmxTN3htxdZdNVSZO008',
   authDomain: 'gkapp-e6c43.firebaseapp.com',
@@ -3818,7 +3818,10 @@ window.qcFirebaseReady = (async () => {
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  // Convert QuizCraft's internal compact data into readable Firestore fields.
+  // Store quiz metadata in quizShares/{shareId} and EACH question as a
+  // separate document in quizShares/{shareId}/questions/{questionNumber}.
+  // This avoids nested arrays in the Firebase Console: question, option1,
+  // option2, answer, etc. are ordinary, directly readable text fields.
   window.qcSaveSharedQuiz = async (payload) => {
     const sourceQuestions = Array.isArray(payload.q) ? payload.q : (Array.isArray(payload.questions) ? payload.questions : []);
     const questions = sourceQuestions.map((row) => {
@@ -3830,37 +3833,81 @@ window.qcFirebaseReady = (async () => {
         correctAnswer: row.correctAnswer || row.correct || row.c || '',
         image: row.image || row.i || null
       };
-      const item = {
+      return {
         question: String(q.question || ''),
         options: Array.isArray(q.options) ? q.options.map(x => String(x)) : [],
-        correctAnswer: String(q.correctAnswer || '')
+        correctAnswer: String(q.correctAnswer || ''),
+        image: q.image || null
       };
-      if (q.image) item.image = q.image;
-      return item;
     });
 
     if (!questions.length) throw new Error('This quiz has no questions to share.');
-    const record = {
+    if (questions.length > 200) throw new Error('A quiz can contain up to 200 questions.');
+
+    const parentRef = await addDoc(collection(db, 'quizShares'), {
       quizTitle: String(payload.t || payload.quizTitle || payload.title || 'My Quiz'),
       quizType: String(payload.m || payload.quizType || payload.mode || 'quiz'),
-      questions,
+      questionCount: questions.length,
       templateId: String(payload.tpl || payload.templateId || 't25'),
       timeEnabled: !!(payload.te || payload.timeEnabled || payload.timerEnabled),
       timeSeconds: Number(payload.ts || payload.timeSeconds || payload.timerSeconds || 10),
       quizId: String(payload.i || payload.id || ''),
-      version: 3,
+      version: 4,
       createdAt: serverTimestamp()
-    };
-    const ref = await addDoc(collection(db, 'quizShares'), record);
-    return ref.id;
+    });
+
+    // Each question is a flat document with ordinary text fields.
+    // Sequential writes avoid exceeding Firestore batch limits.
+    for (let index = 0; index < questions.length; index++) {
+      const q = questions[index];
+      const questionRecord = {
+        questionNumber: index + 1,
+        question: q.question,
+        optionsCount: q.options.length,
+        correctAnswer: q.correctAnswer
+      };
+      q.options.forEach((option, optionIndex) => {
+        questionRecord['option' + (optionIndex + 1)] = option;
+      });
+      if (q.image) questionRecord.image = q.image;
+      await setDoc(doc(db, 'quizShares', parentRef.id, 'questions', 'question_' + String(index + 1).padStart(3, '0')), questionRecord);
+    }
+    return parentRef.id;
   };
 
   window.qcGetSharedQuiz = async (shareId) => {
     const snap = await getDoc(doc(db, 'quizShares', shareId));
     if (!snap.exists()) return null;
     const record = snap.data();
-    // Return the readable document as-is; expandSharePayload understands both formats.
-    return record;
+
+    // Backward compatibility with quizzes saved in the previous array format.
+    if (Array.isArray(record.questions) || Array.isArray(record.q)) return record;
+
+    const questionRef = collection(db, 'quizShares', shareId, 'questions');
+    const questionSnap = await getDocs(query(questionRef, orderBy('questionNumber', 'asc')));
+    const questions = questionSnap.docs.map(questionDoc => {
+      const q = questionDoc.data();
+      const options = [];
+      const count = Number(q.optionsCount || 0);
+      for (let i = 1; i <= count; i++) options.push(String(q['option' + i] || ''));
+      return {
+        question: String(q.question || ''),
+        options,
+        correctAnswer: String(q.correctAnswer || ''),
+        image: q.image || null
+      };
+    });
+    return {
+      quizTitle: record.quizTitle || 'My Quiz',
+      quizType: record.quizType || 'quiz',
+      questions,
+      templateId: record.templateId || 't25',
+      timeEnabled: !!record.timeEnabled,
+      timeSeconds: Number(record.timeSeconds || 10),
+      quizId: record.quizId || shareId,
+      version: record.version || 4,
+      createdAt: record.createdAt || null
+    };
   };
   return true;
 })();
