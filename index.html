@@ -798,11 +798,13 @@ textarea.input-field{resize:vertical;min-height:80px}
 .qc-forgot-btn:disabled{opacity:.6;cursor:wait;}
 .qc-inline-action{border:0;background:transparent;color:#4f46e5;font-weight:900;text-decoration:underline;cursor:pointer;padding:0 2px;}
 .qc-auth-error.is-error{color:#dc2626!important;background:#fff1f2;border:1px solid #fecdd3;border-radius:10px;padding:9px 11px;min-height:0!important;text-align:left;line-height:1.45!important;}
-/* Slow, clear card flip when an existing email is detected */
-.qc-auth-card{perspective:1200px;transform-style:preserve-3d;}
-.qc-auth-card.qc-flipping{animation:qcAccountFullFlip 1.65s cubic-bezier(.42,0,.25,1) both;}
-.qc-auth-card.qc-flipping::after{content:'You already have an account with this email';position:absolute;z-index:8;inset:0;display:flex;align-items:center;justify-content:center;padding:34px;text-align:center;border-radius:26px;background:rgba(255,255,255,.98);color:#18243a;font-size:1.05rem;font-weight:850;line-height:1.5;box-shadow:inset 0 0 0 1px #e4e9f2;backface-visibility:hidden;}
-@keyframes qcAccountFullFlip{0%{transform:perspective(1200px) rotateY(0deg) scale(1)}22%{transform:perspective(1200px) rotateY(80deg) scale(.985)}50%{transform:perspective(1200px) rotateY(180deg) scale(.975)}78%{transform:perspective(1200px) rotateY(280deg) scale(.985)}100%{transform:perspective(1200px) rotateY(360deg) scale(1)}}
+/* One compact card: create-account face <-> sign-in face (180-degree flip). */
+.qc-auth-card{perspective:1200px;transform-style:preserve-3d;backface-visibility:visible;}
+.qc-auth-card.qc-flipping{animation:qcAccountHalfFlip .95s cubic-bezier(.22,.72,.24,1) both;}
+@keyframes qcAccountHalfFlip{0%{transform:perspective(1200px) rotateY(0deg) scale(1)}45%{transform:perspective(1200px) rotateY(90deg) scale(.985)}100%{transform:perspective(1200px) rotateY(180deg) scale(1)}}
+/* Existing-account notice stays small and inline; never cover the card. */
+.qc-auth-error.account-exists{display:block!important;color:#b45309!important;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:9px 11px;min-height:0!important;text-align:left;line-height:1.4!important;font-weight:700;}
+.qc-auth-card.is-signin .qc-auth-error.account-exists{color:#fde68a!important;background:#422006;border-color:#92400e;}
 /* Sign-in gets a distinct premium midnight theme; account creation stays white */
 .qc-auth-card.is-signin{background:radial-gradient(circle at 85% 0%,rgba(45,212,191,.20),transparent 34%),linear-gradient(155deg,#080d18 0%,#111827 58%,#172033 100%);border:1px solid #263449;box-shadow:0 28px 90px rgba(2,8,23,.48);}
 .qc-auth-card.is-signin h2{color:#f8fafc;}
@@ -4005,7 +4007,7 @@ window.qcFirebaseReady = (async () => {
     password.autocomplete=qcEmailCreateMode ? 'new-password' : 'current-password';
     if(card) card.classList.toggle('is-signin',!qcEmailCreateMode);
     if(forgot) forgot.style.display=qcEmailCreateMode?'none':'inline-flex';
-    const error=document.getElementById('qcAuthError'); if(error && !preserveError){error.textContent='';error.style.color='';error.classList.remove('is-error');}
+    const error=document.getElementById('qcAuthError'); if(error && !preserveError){error.textContent='';error.style.color='';error.classList.remove('is-error');error.classList.remove('account-exists');}
   };
   window.qcOpenAccount = (forceLogin) => {
     const modal = document.getElementById('qcAccountModal');
@@ -4049,7 +4051,12 @@ window.qcFirebaseReady = (async () => {
     try { await signInWithPopup(auth, googleProvider); window.qcCloseAccount(); showToast('Signed in successfully','success'); }
     catch(e) { if(e.code==='auth/popup-blocked' || e.code==='auth/operation-not-supported-in-this-environment') { try { await signInWithRedirect(auth,googleProvider); } catch(re){ err.textContent='Google sign-in unavailable. Try email instead.'; } } else { console.error(e); err.textContent=e.code==='auth/unauthorized-domain'?'Add this website domain in Firebase Authentication settings.':'Google sign-in failed. Please try again.'; } }
   });
-  document.getElementById('qcAuthModeSwitch')?.addEventListener('click', () => { qcEmailCreateMode=!qcEmailCreateMode; qcUpdateEmailAuthMode(); });
+  document.getElementById('qcAuthModeSwitch')?.addEventListener('click', () => {
+    const card=document.querySelector('.qc-auth-card');
+    if(card){card.classList.remove('qc-flipping');void card.offsetWidth;card.classList.add('qc-flipping');}
+    window.setTimeout(()=>{qcEmailCreateMode=!qcEmailCreateMode;qcUpdateEmailAuthMode();},430);
+    window.setTimeout(()=>{if(card)card.classList.remove('qc-flipping');},980);
+  });
   document.getElementById('qcForgotPassword')?.addEventListener('click', async () => {
     const email=document.getElementById('qcAuthEmailInput').value.trim(), err=document.getElementById('qcAuthError');
     if(!email){err.textContent='Enter your email address first, then choose Forgot password.';document.getElementById('qcAuthEmailInput').focus();return;}
@@ -4086,30 +4093,26 @@ window.qcFirebaseReady = (async () => {
         if(emailField) emailField.value=email;
         const card=document.querySelector('.qc-auth-card');
         const flipMessage='You already have an account with this email';
-        err.classList.add('is-error');
+        err.classList.remove('is-error');
+        err.classList.add('account-exists');
         err.textContent=flipMessage;
-        if(card){
-          card.classList.remove('qc-flipping');
-          void card.offsetWidth;
-          card.classList.add('qc-flipping');
-        }
-        // Change the form while the card is edge-on, then reveal the sign-in face.
+        if(card){card.classList.remove('qc-flipping');void card.offsetWidth;card.classList.add('qc-flipping');}
+        // Swap the form at the halfway point so the reverse face is Sign In.
         window.setTimeout(()=>{
           qcEmailCreateMode=false;
           qcUpdateEmailAuthMode(true);
           if(emailField) emailField.value=email;
           const authTitle=document.getElementById('qcAuthTitle');
           const authSubtitle=document.getElementById('qcAuthSubtitle');
-          if(authTitle) authTitle.textContent='You already have an account with this email';
-          if(authSubtitle) authSubtitle.textContent='Please sign in with your existing password to continue.';
-          err.classList.remove('is-error');
-          err.style.color='#5eead4';
-          err.textContent='';
-        },825);
+          if(authTitle) authTitle.textContent='Sign in to QuizCraft';
+          if(authSubtitle) authSubtitle.textContent='You already have an account with this email. Enter your password to continue.';
+          err.classList.add('account-exists');
+          err.textContent=flipMessage;
+        },430);
         window.setTimeout(()=>{
           if(card) card.classList.remove('qc-flipping');
           document.getElementById('qcAuthPassword')?.focus();
-        },1680);
+        },980);
       } else {
         err.classList.add('is-error');
         err.textContent=messages[ex.code] || ('Authentication failed ('+(ex.code || 'unknown error')+'). Please try again.');
