@@ -901,6 +901,7 @@ textarea.input-field{resize:vertical;min-height:80px}
       <div id="qcMoreMenu" class="qc-more-menu" role="menu">
         <button type="button" role="menuitem" onclick="qcCloseMoreMenu();qcOpenHelp()"><i class="fas fa-circle-question"></i> Help &amp; Contact</button>
         <button type="button" role="menuitem" onclick="qcCloseMoreMenu();qcOpenFeedback()"><i class="fas fa-comment-dots"></i> Give Feedback</button>
+        <button type="button" id="qcFeedbackInboxMenuItem" role="menuitem" style="display:none;" onclick="qcCloseMoreMenu();qcOpenFeedbackInbox()"><i class="fas fa-inbox"></i> Feedback Inbox</button>
       </div>
     </div>
     <div class="logo"><i class="fas fa-pen-fancy"></i></div>
@@ -1148,7 +1149,19 @@ textarea.input-field{resize:vertical;min-height:80px}
     <label class="input-label" for="qcFeedbackText">Anything we can improve? <span style="font-weight:400;color:#94a3b8;">(optional)</span></label>
     <textarea id="qcFeedbackText" class="input-field" rows="4" placeholder="Share an idea, problem, or suggestion..."></textarea>
     <button id="qcSendFeedbackBtn" type="button" class="btn btn-primary btn-block" onclick="qcSendFeedback()"><i class="fas fa-paper-plane"></i> Send Feedback</button>
-    <p style="font-size:.68rem;color:#94a3b8;text-align:center;margin:10px 0 0;">Your email app will open to send your feedback.</p>
+    <p id="qcFeedbackStatus" role="status" style="font-size:.72rem;color:#64748b;text-align:center;margin:10px 0 0;">Your feedback is sent securely to QuizCraft.</p>
+  </div>
+</div>
+
+<!-- Private feedback inbox: visible only to the QuizCraft administrator -->
+<div class="modal-overlay" id="qcFeedbackInboxModal" role="dialog" aria-modal="true" aria-labelledby="qcFeedbackInboxTitle">
+  <div class="modal-card" style="max-width:620px;text-align:left;padding:22px;max-height:85vh;overflow:auto;">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px;">
+      <div><h3 id="qcFeedbackInboxTitle" style="margin:0;color:var(--text);font-size:1.1rem;"><i class="fas fa-inbox" style="color:var(--primary);"></i> Feedback Inbox</h3><p id="qcFeedbackInboxCount" style="margin:4px 0 0;color:#64748b;font-size:.75rem;">Loading feedback…</p></div>
+      <button type="button" onclick="qcCloseFeedbackInbox()" aria-label="Close inbox" style="background:none;border:0;color:#94a3b8;font-size:1.2rem;cursor:pointer;">✕</button>
+    </div>
+    <div id="qcFeedbackInboxList" style="display:grid;gap:10px;"><p style="color:#64748b;text-align:center;padding:22px;">Loading…</p></div>
+    <button type="button" class="btn btn-outline btn-block" style="margin-top:14px;" onclick="qcLoadFeedbackInbox()"><i class="fas fa-rotate"></i> Refresh</button>
   </div>
 </div>
 
@@ -1247,22 +1260,48 @@ function initLiveUsers() {
 /* Help, feedback and compact three-line menu */
 window.qcOpenHelp = () => document.getElementById('helpModal').classList.add('active');
 window.qcOpenSupport = window.qcOpenHelp; // legacy links remain compatible
-window.qcOpenFeedback = () => { qcSelectedRating = ''; document.querySelectorAll('.qc-rating-choice').forEach(el => el.classList.remove('selected')); const box = document.getElementById('qcFeedbackText'); if (box) box.value = ''; document.getElementById('qcFeedbackModal').classList.add('active'); };
+window.qcOpenFeedback = () => { qcSelectedRating = ''; document.querySelectorAll('.qc-rating-choice').forEach(el => el.classList.remove('selected')); const box = document.getElementById('qcFeedbackText'); if (box) box.value = ''; const status=document.getElementById('qcFeedbackStatus'); if(status){status.textContent='Your feedback is sent securely to QuizCraft.';status.style.color='#64748b';} const btn=document.getElementById('qcSendFeedbackBtn'); if(btn){btn.disabled=false;btn.innerHTML='<i class="fas fa-paper-plane"></i> Send Feedback';} document.getElementById('qcFeedbackModal').classList.add('active'); };
 window.qcCloseFeedback = () => document.getElementById('qcFeedbackModal').classList.remove('active');
 let qcSelectedRating = '';
 window.qcSelectRating = (rating, button) => {
   qcSelectedRating = rating;
   document.querySelectorAll('.qc-rating-choice').forEach(el => el.classList.toggle('selected', el === button));
 };
-window.qcSendFeedback = () => {
+window.qcSendFeedback = async () => {
   const note = (document.getElementById('qcFeedbackText').value || '').trim();
   if (!qcSelectedRating && !note) return showToast('Please choose a rating or write a short comment.', 'error');
-  const ratingText = qcSelectedRating ? `User rating: ${qcSelectedRating}` : 'No rating selected';
-  const body = encodeURIComponent(`${ratingText}\n\nFeedback:\n${note || '(No additional comment)'}`);
-  const subject = encodeURIComponent('QuizCraft user feedback');
-  window.location.href = `mailto:narayanbarman3210@gmail.com?subject=${subject}&body=${body}`;
-  qcCloseFeedback();
-  showToast('Opening your email app…', 'success');
+  const btn=document.getElementById('qcSendFeedbackBtn'), status=document.getElementById('qcFeedbackStatus');
+  if(btn){btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Sending…';}
+  if(status){status.textContent='Submitting your feedback…';status.style.color='#64748b';}
+  try {
+    if (!window.qcSubmitFeedback) throw new Error('Feedback service is not ready. Please try again in a moment.');
+    await window.qcSubmitFeedback({ rating: qcSelectedRating || 'Not rated', message: note });
+    if(status){status.textContent='Thank you! Your feedback has been received.';status.style.color='#047857';}
+    showToast('Thank you! Feedback submitted successfully.', 'success');
+    window.setTimeout(() => { qcCloseFeedback(); }, 900);
+  } catch (err) {
+    console.error('Feedback submission failed:', err);
+    if(status){status.textContent=err.message || 'Could not submit feedback. Please try again.';status.style.color='#dc2626';}
+    showToast('Feedback could not be sent. Please try again.', 'error');
+    if(btn){btn.disabled=false;btn.innerHTML='<i class="fas fa-paper-plane"></i> Try Again';}
+  }
+};
+window.qcCloseFeedbackInbox = () => document.getElementById('qcFeedbackInboxModal').classList.remove('active');
+window.qcOpenFeedbackInbox = async () => { document.getElementById('qcFeedbackInboxModal').classList.add('active'); await window.qcLoadFeedbackInbox(); };
+window.qcLoadFeedbackInbox = async () => {
+  const list=document.getElementById('qcFeedbackInboxList'), count=document.getElementById('qcFeedbackInboxCount');
+  if(list) list.innerHTML='<p style="color:#64748b;text-align:center;padding:22px;">Loading feedback…</p>';
+  try {
+    if(!window.qcGetFeedbackInbox) throw new Error('Feedback inbox is not ready.');
+    const rows=await window.qcGetFeedbackInbox();
+    if(count) count.textContent=`${rows.length} feedback ${rows.length===1?'response':'responses'}`;
+    if(!rows.length){list.innerHTML='<p style="color:#64748b;text-align:center;padding:24px;">No feedback received yet.</p>';return;}
+    list.innerHTML=rows.map(row=>{
+      const safe=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+      const date=row.createdAt?.toDate ? row.createdAt.toDate().toLocaleString() : (row.createdAt ? new Date(row.createdAt).toLocaleString() : 'Date unavailable');
+      return `<article style="border:1px solid #e2e8f0;border-radius:13px;padding:12px;background:#fff;"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center;"><strong style="color:#334155;font-size:.86rem;">${safe(row.rating||'Not rated')}</strong><span style="font-size:.68rem;color:#94a3b8;">${safe(date)}</span></div><p style="margin:7px 0 4px;color:#334155;font-size:.82rem;white-space:pre-wrap;">${safe(row.message||'No written comment')}</p><div style="font-size:.68rem;color:#94a3b8;">${safe(row.email||'Anonymous user')}</div></article>`;
+    }).join('');
+  } catch(err) { console.error(err); if(count) count.textContent='Could not load feedback'; if(list) list.innerHTML='<p style="color:#dc2626;text-align:center;padding:20px;">Unable to load feedback. Check your administrator sign-in and Firestore rules.</p>'; }
 };
 const qcMoreBtn = document.getElementById('qcMoreBtn');
 const qcMoreMenu = document.getElementById('qcMoreMenu');
@@ -4163,6 +4202,27 @@ window.qcFirebaseReady = (async () => {
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
   const auth = getAuth(app);
+  const FEEDBACK_ADMIN_EMAIL = 'narayanbarman3210@gmail.com';
+  window.qcSubmitFeedback = async ({ rating, message }) => {
+    const user = auth.currentUser;
+    const text = String(message || '').trim();
+    if (text.length > 3000) throw new Error('Please keep feedback under 3,000 characters.');
+    await addDoc(collection(db, 'feedback'), {
+      rating: String(rating || 'Not rated').slice(0, 30),
+      message: text,
+      uid: user ? user.uid : null,
+      email: user && user.email ? user.email : null,
+      displayName: user && user.displayName ? user.displayName : null,
+      createdAt: serverTimestamp(),
+      app: 'QuizCraft'
+    });
+  };
+  window.qcGetFeedbackInbox = async () => {
+    const user = auth.currentUser;
+    if (!user || String(user.email || '').toLowerCase() !== FEEDBACK_ADMIN_EMAIL) throw new Error('Administrator access required.');
+    const snap = await getDocs(query(collection(db, 'feedback'), orderBy('createdAt', 'desc')));
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  };
   // Private per-account storage. Quiz questions and play results are kept in subcollections
   // so one large quiz does not exceed Firestore's 1 MiB document limit.
   const userRoot = uid => doc(db, 'users', uid);
@@ -4299,6 +4359,8 @@ window.qcFirebaseReady = (async () => {
   let qcLastSyncedUid = null;
   onAuthStateChanged(auth, async (user) => {
     window.qcAuthUser = user || null; qcRenderAccountButton(user);
+    const inboxItem=document.getElementById('qcFeedbackInboxMenuItem');
+    if(inboxItem) inboxItem.style.display=(user && String(user.email||'').toLowerCase()==='narayanbarman3210@gmail.com')?'flex':'none';
     if (user && qcLastSyncedUid !== user.uid) {
       qcLastSyncedUid = user.uid;
       try { await window.qcCloudSyncAccount(user); showToast('Your quizzes and results are synced to your account', 'success'); }
