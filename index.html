@@ -763,8 +763,11 @@ textarea.input-field{resize:vertical;min-height:80px}
 .qc-auth-card h2{margin:0 0 6px;color:#172033;font-size:1.35rem;font-weight:900;letter-spacing:-.4px;}
 .qc-auth-card>p{color:#64748b;font-size:.83rem;line-height:1.5;margin:0 0 19px;}
 .qc-google-btn,.qc-auth-primary{width:100%;min-height:47px;border-radius:13px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:.88rem;font-weight:800;cursor:pointer;}
-.qc-google-btn{background:#fff;border:1px solid #dbe2ee;color:#253047;box-shadow:0 3px 10px rgba(15,23,42,.04);}
-.qc-google-btn i{color:#4285f4;font-size:1.05rem;}
+.qc-google-btn{background:#fff;border:1px solid #dadce0;color:#3c4043;box-shadow:0 1px 2px rgba(60,64,67,.12);font-family:Roboto,Arial,sans-serif;font-weight:600;transition:background .15s,box-shadow .15s;}
+.qc-google-btn:hover{background:#f8faff;box-shadow:0 2px 6px rgba(60,64,67,.18);}
+.qc-google-logo{width:19px;height:19px;flex:0 0 19px;}
+.qc-auth-signout{display:inline-flex;align-items:center;justify-content:center;margin:10px auto 0;padding:7px 12px;border:0;border-radius:8px;background:transparent;color:#94a3b8;font-size:.72rem;font-weight:600;cursor:pointer;}
+.qc-auth-signout:hover{background:#f1f5f9;color:#64748b;}
 .qc-auth-primary{margin-top:13px;border:0;background:linear-gradient(135deg,#6258e8,#8b5cf6);color:#fff;box-shadow:0 7px 18px rgba(99,102,241,.22);}
 .qc-auth-divider{display:flex;align-items:center;gap:10px;margin:17px 0;color:#94a3b8;font-size:.7rem;font-weight:700;}
 .qc-auth-divider:before,.qc-auth-divider:after{content:'';height:1px;background:#e2e8f0;flex:1;}
@@ -3935,8 +3938,22 @@ window.qcFirebaseReady = (async () => {
   googleProvider.setCustomParameters({ prompt: 'select_account' });
   window.qcAuth = auth;
   window.qcAuthUser = auth.currentUser || null;
-  let qcEmailCreateMode = false;
+  let qcEmailCreateMode = true;
 
+  const qcUpdateEmailAuthMode = () => {
+    const title=document.getElementById('qcAuthTitle');
+    const subtitle=document.getElementById('qcAuthSubtitle');
+    const submit=document.getElementById('qcEmailSubmit');
+    const toggle=document.getElementById('qcAuthModeSwitch');
+    const password=document.getElementById('qcAuthPassword');
+    if(!title || !submit || !toggle || !password) return;
+    title.textContent=qcEmailCreateMode ? 'Create your free account' : 'Welcome back';
+    subtitle.textContent=qcEmailCreateMode ? 'Create an account to save your access and keep making quizzes.' : 'Sign in to continue creating quizzes.';
+    submit.textContent=qcEmailCreateMode ? 'Create account' : 'Sign in';
+    toggle.textContent=qcEmailCreateMode ? 'Already have an account? Sign in' : 'New to QuizCraft? Create an account';
+    password.autocomplete=qcEmailCreateMode ? 'new-password' : 'current-password';
+    const error=document.getElementById('qcAuthError'); if(error) error.textContent='';
+  };
   window.qcOpenAccount = (forceLogin) => {
     const modal = document.getElementById('qcAccountModal');
     if (!modal) return;
@@ -3949,12 +3966,13 @@ window.qcFirebaseReady = (async () => {
       formPanel.style.display='none'; userPanel.style.display='block';
       title.textContent='Your QuizCraft account'; subtitle.textContent='You are signed in.';
       const u=window.qcAuthUser; document.getElementById('qcAuthName').textContent=u.displayName || 'QuizCraft user';
-      document.getElementById('qcAuthEmail').textContent=u.email || '';
+      document.getElementById('qcAuthUserEmail').textContent=u.email || '';
       const av=document.getElementById('qcAuthAvatar'); av.src=u.photoURL || 'https://www.gravatar.com/avatar/?d=mp&s=96';
     } else {
       formPanel.style.display='block'; userPanel.style.display='none';
-      title.textContent=forceLogin ? 'Keep creating with QuizCraft' : 'Welcome to QuizCraft';
-      subtitle.textContent=forceLogin ? 'You have created 5 free quizzes. Sign in to continue.' : 'Sign in to continue creating and manage your account.';
+      qcEmailCreateMode=true; // New visitors see account creation first.
+      qcUpdateEmailAuthMode();
+      if(forceLogin) subtitle.textContent='You have used your 5 free quizzes. Create an account or sign in to continue.';
     }
   };
   window.qcCloseAccount = () => { const m=document.getElementById('qcAccountModal'); if(m){m.classList.remove('active');m.setAttribute('aria-hidden','true');} };
@@ -3971,11 +3989,32 @@ window.qcFirebaseReady = (async () => {
     try { await signInWithPopup(auth, googleProvider); window.qcCloseAccount(); showToast('Signed in successfully','success'); }
     catch(e) { if(e.code==='auth/popup-blocked' || e.code==='auth/operation-not-supported-in-this-environment') { try { await signInWithRedirect(auth,googleProvider); } catch(re){ err.textContent='Google sign-in unavailable. Try email instead.'; } } else { console.error(e); err.textContent=e.code==='auth/unauthorized-domain'?'Add this website domain in Firebase Authentication settings.':'Google sign-in failed. Please try again.'; } }
   });
-  document.getElementById('qcAuthModeSwitch')?.addEventListener('click', () => { qcEmailCreateMode=!qcEmailCreateMode; document.getElementById('qcAuthTitle').textContent=qcEmailCreateMode?'Create your account':'Welcome to QuizCraft'; document.getElementById('qcEmailSubmit').textContent=qcEmailCreateMode?'Create account':'Continue with email'; document.getElementById('qcAuthModeSwitch').textContent=qcEmailCreateMode?'Already have an account? Sign in':'New to QuizCraft? Create an account'; document.getElementById('qcAuthPassword').autocomplete=qcEmailCreateMode?'new-password':'current-password'; document.getElementById('qcAuthError').textContent=''; });
+  document.getElementById('qcAuthModeSwitch')?.addEventListener('click', () => { qcEmailCreateMode=!qcEmailCreateMode; qcUpdateEmailAuthMode(); });
   document.getElementById('qcEmailAuthForm')?.addEventListener('submit', async (e) => {
-    e.preventDefault(); const email=document.getElementById('qcAuthEmail').value.trim(); const password=document.getElementById('qcAuthPassword').value; const err=document.getElementById('qcAuthError'); err.textContent='';
-    try { if(qcEmailCreateMode) await createUserWithEmailAndPassword(auth,email,password); else await signInWithEmailAndPassword(auth,email,password); window.qcCloseAccount(); showToast('Signed in successfully','success'); }
-    catch(ex) { console.error(ex); const messages={'auth/email-already-in-use':'This email already has an account. Please sign in.','auth/invalid-email':'Enter a valid email address.','auth/weak-password':'Use a password with at least 6 characters.','auth/invalid-credential':'Email or password is incorrect.'}; err.textContent=messages[ex.code] || 'Could not sign in. Please try again.'; }
+    e.preventDefault(); const email=document.getElementById('qcAuthEmailInput').value.trim(); const password=document.getElementById('qcAuthPassword').value; const err=document.getElementById('qcAuthError'); err.textContent='';
+    const submit=document.getElementById('qcEmailSubmit');
+    if(!email || !password){ err.textContent='Enter your email address and password.'; return; }
+    const wasCreate=qcEmailCreateMode;
+    submit.disabled=true; submit.style.opacity='.7'; submit.textContent=wasCreate?'Creating account…':'Signing in…';
+    try {
+      if(wasCreate) await createUserWithEmailAndPassword(auth,email,password);
+      else await signInWithEmailAndPassword(auth,email,password);
+      window.qcCloseAccount(); showToast(wasCreate?'Account created successfully':'Signed in successfully','success');
+    } catch(ex) {
+      console.error('QuizCraft email authentication error:',ex);
+      const messages={
+        'auth/email-already-in-use':'This email already has an account. Choose “Sign in” below.',
+        'auth/invalid-email':'Enter a valid email address.',
+        'auth/weak-password':'Use a password with at least 6 characters.',
+        'auth/invalid-credential':'Email or password is incorrect. Check your details or create an account.',
+        'auth/user-not-found':'No account found with this email. Create an account first.',
+        'auth/wrong-password':'Incorrect password. Please try again.',
+        'auth/operation-not-allowed':'Email/Password sign-in is not enabled in Firebase Authentication settings.',
+        'auth/too-many-requests':'Too many attempts. Please wait a little and try again.',
+        'auth/network-request-failed':'Network problem. Check your internet connection and try again.'
+      };
+      err.textContent=messages[ex.code] || ('Authentication failed ('+(ex.code || 'unknown error')+'). Please try again.');
+    } finally { submit.disabled=false; submit.style.opacity='1'; qcUpdateEmailAuthMode(); }
   });
 
   // Store quiz metadata in quizShares/{shareId} and EACH question as a
@@ -4081,15 +4120,15 @@ window.qcFirebaseReady.catch(err => console.error('QuizCraft Firebase initializa
     <h2 id="qcAuthTitle">Welcome to QuizCraft</h2>
     <p id="qcAuthSubtitle">Sign in to continue creating unlimited quizzes.</p>
     <div id="qcAuthUserPanel" style="display:none;">
-      <div class="qc-auth-user"><img id="qcAuthAvatar" alt="Profile"><div><b id="qcAuthName"></b><small id="qcAuthEmail"></small></div></div>
-      <button class="qc-auth-primary" type="button" onclick="qcSignOut()"><i class="fas fa-sign-out-alt"></i> Sign out</button>
+      <div class="qc-auth-user"><img id="qcAuthAvatar" alt="Profile"><div><b id="qcAuthName"></b><small id="qcAuthUserEmail"></small></div></div>
+      <button class="qc-auth-signout" type="button" onclick="qcSignOut()">Sign out</button>
     </div>
     <div id="qcAuthFormPanel">
-      <button class="qc-google-btn" id="qcGoogleSignIn" type="button"><i class="fab fa-google"></i> Continue with Google</button>
+      <button class="qc-google-btn" id="qcGoogleSignIn" type="button"><svg class="qc-google-logo" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.72 7.18l7.62 5.91c4.45-4.11 7.14-10.16 7.14-17.56z"/><path fill="#FBBC05" d="M10.54 28.59A14.4 14.4 0 0 1 9.75 24c0-1.59.27-3.13.76-4.59l-7.98-6.19A23.9 23.9 0 0 0 0 24c0 3.87.93 7.53 2.56 10.78l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.91-5.79l-7.62-5.91c-2.11 1.41-4.82 2.25-8.29 2.25-6.26 0-11.57-4.22-13.46-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg> Continue with Google</button>
       <div class="qc-auth-divider"><span>or continue with email</span></div>
       <form id="qcEmailAuthForm">
-        <label class="qc-auth-label" for="qcAuthEmail">Email address</label>
-        <input id="qcAuthEmail" type="email" placeholder="you@example.com" autocomplete="email" required>
+        <label class="qc-auth-label" for="qcAuthEmailInput">Email address</label>
+        <input id="qcAuthEmailInput" type="email" placeholder="you@example.com" autocomplete="email" required>
         <label class="qc-auth-label" for="qcAuthPassword">Password</label>
         <input id="qcAuthPassword" type="password" placeholder="At least 6 characters" minlength="6" autocomplete="current-password" required>
         <button class="qc-auth-primary" id="qcEmailSubmit" type="submit">Continue with email</button>
