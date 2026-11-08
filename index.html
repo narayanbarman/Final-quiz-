@@ -1213,7 +1213,8 @@ function wireShareButtons(id, data) {
   if (inp) { inp.value = ''; inp.placeholder = 'Uploading quiz and creating short link…'; }
 
   let shareUrl = makeShareUrl(id, d);
-  const msg = () => 'QuizCraft\n' + line + '\n' + shareUrl;
+  // WhatsApp message: quiz title/count followed by the short link only.
+  const msg = () => line + '\n' + shareUrl;
   const bind = () => {
     const copyBtn = document.getElementById('copyLinkBtn');
     if (copyBtn) {
@@ -1338,7 +1339,7 @@ function compressQuizImage(file) {
       const img = new Image();
       img.onerror = () => reject(new Error('Image decode failed'));
       img.onload = () => {
-        const maxSide = 1200;
+        const maxSide = 1600;
         const scale = Math.min(1, maxSide / Math.max(img.naturalWidth, img.naturalHeight));
         const canvas = document.createElement('canvas');
         canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
@@ -1349,13 +1350,14 @@ function compressQuizImage(file) {
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         // Keep the data URL comfortably below Firestore's 1 MiB document limit.
-        let quality = 0.82;
+        let quality = 0.90;
         let result = canvas.toDataURL('image/jpeg', quality);
-        while (result.length > 420000 && quality > 0.38) {
-          quality -= 0.08;
+        while (result.length > 650000 && quality > 0.50) {
+          quality -= 0.05;
           result = canvas.toDataURL('image/jpeg', quality);
         }
-        if (result.length > 850000) return reject(new Error('Image remains too large after compression'));
+        // Firestore documents are limited to 1 MiB; leave room for question text and fields.
+        if (result.length > 800000) return reject(new Error('Image remains too large after compression'));
         resolve(result);
       };
       img.src = reader.result;
@@ -1797,7 +1799,7 @@ function attachQuizEvents(data) {
     slide.className = "question-card";
     slide.style.display = idx === 0 ? "block" : "none";
     const answered = answersLocal[idx] !== null;
-    slide.innerHTML = `<h3 style="margin-bottom:8px;display:flex;align-items:flex-start;gap:8px;"><span class="q-number">${idx+1}</span><span>${q.text}</span></h3>${q.image ? `<img src="${q.image}" style="max-width:100%;max-height:120px;border-radius:var(--radius-sm);margin:6px 0;object-fit:contain;" />` : ''}<div class="options-area"></div>`;
+    slide.innerHTML = `<h3 style="margin-bottom:8px;display:flex;align-items:flex-start;gap:8px;"><span class="q-number">${idx+1}</span><span>${q.text}</span></h3>${q.image ? `<img src="${q.image}" alt="Question image" loading="lazy" style="display:block;width:auto;max-width:100%;height:auto;max-height: min(42vh, 320px);object-fit:contain;object-position:center;border-radius:var(--radius-sm);margin:10px auto;background:#f8fafc;padding:3px;box-sizing:border-box;" />` : ''}<div class="options-area"></div>`;
     const optsDiv = slide.querySelector(".options-area");
     const letters = ['A','B','C','D'];
     let correctOptionEl = null;
@@ -1886,7 +1888,7 @@ function attachMockEvents(data) {
     qCard.className = "question-card"; qCard.id = `mock_q_${idx}`;
     const answered = answersLocal[idx] !== null;
     const answerText = answersLocal[idx] || '';
-    qCard.innerHTML = `<h3 style="margin-bottom:6px;display:flex;align-items:flex-start;gap:8px;"><span class="q-number">${idx+1}</span><span>${q.text}</span></h3>${q.image ? `<img src="${q.image}" style="max-width:100%;max-height:100px;border-radius:var(--radius-sm);margin:4px 0;object-fit:contain;" />` : ''}<div class="mock-options-wrap" style="margin-top:6px;"></div>`;
+    qCard.innerHTML = `<h3 style="margin-bottom:6px;display:flex;align-items:flex-start;gap:8px;"><span class="q-number">${idx+1}</span><span>${q.text}</span></h3>${q.image ? `<img src="${q.image}" alt="Question image" loading="lazy" style="display:block;width:auto;max-width:100%;height:auto;max-height:min(42vh,320px);object-fit:contain;object-position:center;border-radius:var(--radius-sm);margin:10px auto;background:#f8fafc;padding:3px;box-sizing:border-box;" />` : ''}<div class="mock-options-wrap" style="margin-top:6px;"></div>`;
     const optsWrap = qCard.querySelector(".mock-options-wrap");
     q.options.forEach((opt, oi) => {
       const label = document.createElement("label");
