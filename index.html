@@ -886,11 +886,18 @@ textarea.input-field{resize:vertical;min-height:80px}
     <div class="tab-panel active" id="panelPlay"><div id="renderZone" style="margin-top:3px;width:100%;"></div></div>
     <div class="tab-panel" id="panelShare">
       <div style="text-align:center;padding:18px 8px;">
-        <h4 id="shareHeading" style="margin-bottom:18px;font-size:1.08rem;font-weight:800;">My quiz (5 questions)</h4>
+        <div style="width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,#ede9fe,#e0e7ff);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:1.55rem;color:#6366f1;"><i class="fas fa-link"></i></div>
+        <h4 id="shareHeading" style="margin-bottom:4px;font-size:1.05rem;font-weight:800;">My Quiz (5 questions)</h4>
+        <p id="shareMetaText" style="font-size:.82rem;color:var(--text-secondary);margin-bottom:14px;max-width:300px;margin-left:auto;margin-right:auto;">Anyone with this link can play — no account needed.</p>
         <div style="text-align:left;max-width:520px;margin:0 auto 7px;font-size:.88rem;font-weight:700;color:var(--text);">Link</div>
         <div class="share-link-wrapper">
           <input type="text" id="shareLinkInput" readonly placeholder="Creating short link…" />
           <button class="btn btn-primary" id="copyLinkBtn" type="button"><i class="fas fa-copy"></i> Copy</button>
+        </div>
+        <div class="share-actions" style="margin-top:14px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+          <button class="btn btn-outline btn-sm" id="shareWhatsApp" type="button"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+          <button class="btn btn-outline btn-sm" id="shareTwitter" type="button"><i class="fab fa-twitter"></i> X / Twitter</button>
+          <button class="btn btn-outline btn-sm" id="shareEmail" type="button"><i class="fas fa-envelope"></i> Email</button>
         </div>
       </div>
     </div>
@@ -1081,7 +1088,7 @@ function buildSharePayload(data) {
   if (!data || !data.questions) return null;
   const slimQ = data.questions.map(q => {
     const row = [q.text || '', q.options || [], q.correct || ''];
-    if (q.image && typeof q.image === 'string' && q.image.length < 40000) row.push(q.image);
+    if (q.image && typeof q.image === 'string') row.push(q.image);
     return row;
   });
   const p = {
@@ -1199,8 +1206,10 @@ function wireShareButtons(id, data) {
   const d = data || getQuizData(id) || currentQuizData || {};
   const { title, n, line } = shareLabel(d);
   const heading = document.getElementById('shareHeading');
+  const metaEl = document.getElementById('shareMetaText');
   const inp = document.getElementById('shareLinkInput');
   if (heading) heading.textContent = title + ' (' + n + ' ' + (n === 1 ? 'question' : 'questions') + ')';
+  if (metaEl) metaEl.textContent = 'Anyone with this link can play — no account needed.';
   if (inp) { inp.value = ''; inp.placeholder = 'Uploading quiz and creating short link…'; }
 
   let shareUrl = makeShareUrl(id, d);
@@ -1222,7 +1231,7 @@ function wireShareButtons(id, data) {
     const tw = document.getElementById('shareTwitter');
     if (tw) tw.onclick = () => { if (shareUrl) window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(line) + '&url=' + encodeURIComponent(shareUrl), '_blank'); else showToast('Please wait. Creating your short link…'); };
     const em = document.getElementById('shareEmail');
-    if (em) em.onclick = () => { if (shareUrl) window.location.href = 'mailto:?subject=' + encodeURIComponent(line) + '&body=' + encodeURIComponent(msg()); else showToast('Please wait. Creating your short link…'); };
+    if (em) em.onclick = () => { if (shareUrl) window.location.href = 'mailto:?subject=' + encodeURIComponent('QuizCraft') + '&body=' + encodeURIComponent(line + '\n' + shareUrl); else showToast('Please wait. Creating your short link…'); };
   };
   bind();
   ensureShareLink(id, d).then(url => {
@@ -1319,6 +1328,42 @@ function parseBulkToQuestions(raw) {
   }
   return { questions: qs, errors };
 }
+// Resize/compress question images so they remain visible in shared quizzes
+// and fit safely inside Firestore's per-document size limit.
+function compressQuizImage(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('File read failed'));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('Image decode failed'));
+      img.onload = () => {
+        const maxSide = 1200;
+        const scale = Math.min(1, maxSide / Math.max(img.naturalWidth, img.naturalHeight));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
+        canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return reject(new Error('Canvas unavailable'));
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        // Keep the data URL comfortably below Firestore's 1 MiB document limit.
+        let quality = 0.82;
+        let result = canvas.toDataURL('image/jpeg', quality);
+        while (result.length > 420000 && quality > 0.38) {
+          quality -= 0.08;
+          result = canvas.toDataURL('image/jpeg', quality);
+        }
+        if (result.length > 850000) return reject(new Error('Image remains too large after compression'));
+        resolve(result);
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 function renderPreview(questions) {
   const div = document.getElementById("parsedPreview");
   if (!questions.length) { div.innerHTML = `<div style="background:#fafbff;border-radius:var(--radius-sm);padding:10px;text-align:center;color:var(--text-secondary);font-size:.8rem;"><i class="fas fa-info-circle"></i> No questions loaded yet.</div>`; return; }
@@ -1353,14 +1398,15 @@ function renderPreview(questions) {
         document.body.removeChild(input);
         if (!file) return;
         if (file.size > 4 * 1024 * 1024) { showToast('Image too large (max 4MB)', 'error'); return; }
-        const reader = new FileReader();
-        reader.onload = () => {
-          questionsBank[idx].image = reader.result;
+        compressQuizImage(file).then(dataUrl => {
+          questionsBank[idx].image = dataUrl;
           renderPreview(questionsBank);
-          showToast('Image added', 'success');
-        };
-        reader.onerror = () => showToast('Could not read image', 'error');
-        reader.readAsDataURL(file);
+          saveState();
+          showToast('Image added and optimized', 'success');
+        }).catch(err => {
+          console.error('Quiz image processing failed:', err);
+          showToast('Could not process this image. Try another image.', 'error');
+        });
       };
       input.click();
     });
