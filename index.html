@@ -750,6 +750,35 @@ textarea.input-field{resize:vertical;min-height:80px}
 @keyframes qcSpin { to { transform:rotate(360deg); } }
 @keyframes qcLoadMove { 0%{transform:translateX(-110%)} 100%{transform:translateX(290%)} }
 
+
+/* QuizCraft account and sign-in UI */
+.brand-header{position:relative;}
+.qc-account-btn{margin-left:auto;display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:38px;padding:5px 12px;border:1px solid var(--border);border-radius:999px;background:#fff;color:#334155;font-size:.76rem;font-weight:800;cursor:pointer;box-shadow:0 3px 12px rgba(15,23,42,.06);max-width:150px;}
+.qc-account-btn img{width:27px;height:27px;border-radius:50%;object-fit:cover;}
+.qc-auth-overlay{position:fixed;inset:0;z-index:100500;background:rgba(15,23,42,.58);backdrop-filter:blur(9px);display:none;align-items:center;justify-content:center;padding:16px;}
+.qc-auth-overlay.active{display:flex;}
+.qc-auth-card{position:relative;width:min(420px,100%);max-height:92vh;overflow:auto;padding:28px 24px 20px;border:1px solid rgba(255,255,255,.7);border-radius:26px;background:linear-gradient(160deg,#fff 0%,#f7f8ff 100%);box-shadow:0 25px 80px rgba(15,23,42,.25);text-align:center;}
+.qc-auth-close{position:absolute;right:14px;top:12px;width:34px;height:34px;border:0;border-radius:50%;background:#eef2ff;color:#475569;font-size:24px;cursor:pointer;}
+.qc-auth-mark{width:58px;height:58px;margin:0 auto 13px;display:grid;place-items:center;border-radius:19px;background:linear-gradient(135deg,#6258e8,#8b5cf6);color:#fff;font-size:25px;box-shadow:0 9px 24px rgba(99,102,241,.25);}
+.qc-auth-card h2{margin:0 0 6px;color:#172033;font-size:1.35rem;font-weight:900;letter-spacing:-.4px;}
+.qc-auth-card>p{color:#64748b;font-size:.83rem;line-height:1.5;margin:0 0 19px;}
+.qc-google-btn,.qc-auth-primary{width:100%;min-height:47px;border-radius:13px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:.88rem;font-weight:800;cursor:pointer;}
+.qc-google-btn{background:#fff;border:1px solid #dbe2ee;color:#253047;box-shadow:0 3px 10px rgba(15,23,42,.04);}
+.qc-google-btn i{color:#4285f4;font-size:1.05rem;}
+.qc-auth-primary{margin-top:13px;border:0;background:linear-gradient(135deg,#6258e8,#8b5cf6);color:#fff;box-shadow:0 7px 18px rgba(99,102,241,.22);}
+.qc-auth-divider{display:flex;align-items:center;gap:10px;margin:17px 0;color:#94a3b8;font-size:.7rem;font-weight:700;}
+.qc-auth-divider:before,.qc-auth-divider:after{content:'';height:1px;background:#e2e8f0;flex:1;}
+.qc-auth-label{display:block;text-align:left;margin:11px 0 5px;color:#475569;font-size:.73rem;font-weight:800;}
+#qcEmailAuthForm input{width:100%;height:45px;padding:0 13px;border:1px solid #dbe2ee;border-radius:11px;background:#fff;color:#172033;font:inherit;font-size:.86rem;outline:none;}
+#qcEmailAuthForm input:focus{border-color:#8178f2;box-shadow:0 0 0 3px rgba(99,102,241,.12);}
+.qc-auth-switch{margin-top:14px;padding:7px;border:0;background:transparent;color:#5b55d8;font-size:.76rem;font-weight:800;cursor:pointer;}
+.qc-auth-error{min-height:17px;margin:8px 0 0!important;color:#dc2626!important;font-size:.73rem!important;}
+.qc-auth-foot{margin:15px 0 0!important;padding-top:12px;border-top:1px solid #e9edf5;color:#94a3b8!important;font-size:.68rem!important;}
+.qc-auth-user{display:flex;align-items:center;gap:12px;padding:13px;margin:12px 0;border:1px solid #e5eaf3;border-radius:15px;background:#fff;text-align:left;}
+.qc-auth-user img{width:46px;height:46px;border-radius:50%;object-fit:cover;background:#eef2ff;}
+.qc-auth-user b,.qc-auth-user small{display:block;overflow-wrap:anywhere;}.qc-auth-user b{color:#1e293b;font-size:.88rem;}.qc-auth-user small{margin-top:3px;color:#64748b;font-size:.72rem;}
+@media(max-width:480px){.brand-header{gap:8px}.brand-header .brand-tagline{display:none}.qc-account-btn{padding:4px 9px;font-size:.7rem}.qc-auth-card{padding:25px 19px 18px}}
+
 </style>
 </head>
 <body>
@@ -758,6 +787,7 @@ textarea.input-field{resize:vertical;min-height:80px}
     <div class="logo"><i class="fas fa-pen-fancy"></i></div>
     <div class="brand-name">Quiz<span>Craft</span></div>
     <span class="brand-tagline"><i class="fas fa-bolt"></i> Quizzes · Mock Tests · Videos</span>
+    <button id="qcAccountBtn" class="qc-account-btn" type="button" onclick="qcOpenAccount()" aria-label="Login or account"><i class="fas fa-user"></i><span>Login</span></button>
   </div>
   <div id="toast" class="toast"></div>
 
@@ -1612,7 +1642,10 @@ function renderFullDashboard() {
     return;
   }
   const playsCount = ids.reduce((s, id) => s + getQuizPlays(id).length, 0);
-  let html = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+  const totalPlays = ids.reduce((s, id) => s + getQuizPlays(id).length, 0);
+  const totalQs = ids.reduce((s, id) => s + (all[id].questions?.length || 0), 0);
+  let html = `<div class="stat-grid" style="margin:0 0 14px;"><div class="stat-card"><div class="stat-number">${ids.length}</div><div class="stat-label">Quizzes</div></div><div class="stat-card"><div class="stat-number">${totalQs}</div><div class="stat-label">Questions</div></div><div class="stat-card"><div class="stat-number">${totalPlays}</div><div class="stat-label">Plays</div></div></div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
     <h4 style="font-size:1rem;color:var(--text);margin:0;">📚 Your Quizzes <span style="font-size:.75rem;font-weight:600;color:var(--text-secondary);">(${ids.length})</span></h4>
     <span style="font-size:.7rem;background:#eef2ff;color:#4338ca;padding:4px 10px;border-radius:20px;font-weight:600;">${playsCount} total play${playsCount===1?'':'s'}</span>
   </div>`;
@@ -1623,9 +1656,6 @@ function renderFullDashboard() {
     const date = new Date(q.createdAt).toLocaleDateString();
     html += `<div class="quiz-list-item" onclick="navigateTo('play', { id: '${id}' })"><div><div class="ql-title">${q.title || 'Untitled'}</div><div class="ql-meta"><span>${q.questions.length} Qs</span><span>${q.mode === 'quiz' ? '📝 Quiz' : '📖 Mocktest'}</span><span>${date}</span></div></div><div class="ql-stats"><span><i class="fas fa-users"></i> ${total}</span><span><i class="fas fa-star"></i> ${avg || '-'}</span><span style="background:${total && pass/total >= .6 ? '#e6f9f1' : '#fde8ef'};">${total ? Math.round((pass/total)*100)+'%' : '—'}</span><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();deleteQuiz('${id}')" style="color:var(--danger);border-color:#fde8ef;padding:2px 10px;font-size:.65rem;"><i class="fas fa-trash"></i></button></div></div>`;
   });
-  const totalPlays = ids.reduce((s, id) => s + getQuizPlays(id).length, 0);
-  const totalQs = ids.reduce((s, id) => s + (all[id].questions?.length || 0), 0);
-  html += `<div class="stat-grid" style="margin-top:12px;"><div class="stat-card"><div class="stat-number">${ids.length}</div><div class="stat-label">Quizzes</div></div><div class="stat-card"><div class="stat-number">${totalQs}</div><div class="stat-label">Questions</div></div><div class="stat-card"><div class="stat-number">${totalPlays}</div><div class="stat-label">Plays</div></div></div>`;
   container.innerHTML = html;
 }
 window.deleteQuiz = function(id) { if (!confirm("Delete this quiz and all its data?")) return; deleteQuizData(id); showToast("Quiz deleted", 'success'); renderFullDashboard(); };
@@ -2238,6 +2268,11 @@ function hideCreatedReadyLine() {
 
 document.getElementById("finalCreateBtn").onclick = () => {
   try {
+    if (!window.qcAuthUser && Number(localStorage.getItem('qcGuestQuizCreates') || 0) >= 5) {
+      if (typeof window.qcOpenAccount === 'function') window.qcOpenAccount(true);
+      else showToast('Please sign in to create more quizzes.', 'info');
+      return;
+    }
     if (questionsBank.length === 0) return showToast("Please load questions first", 'error');
     quizTitle = (document.getElementById("quizNameInput").value || '').trim();
     timerEnabled = document.getElementById("enableTimerCheck").checked;
@@ -2264,6 +2299,7 @@ document.getElementById("finalCreateBtn").onclick = () => {
     const id = generateId();
     const data = { title: quizTitle, questions: JSON.parse(JSON.stringify(questionsBank)), mode: currentMode, templateId: selectedTemplate.id, logo: quizLogo, timerEnabled, timerSeconds, createdAt: Date.now() };
     saveQuizData(id, data);
+    try { localStorage.setItem('qcGuestQuizCreates', String(Number(localStorage.getItem('qcGuestQuizCreates') || 0) + 1)); } catch (e) {}
     // Start short-link creation immediately so Share is ready
     try { ensureShareLink(id, data); } catch (e) {}
     currentShortId = id; currentQuizData = data;
@@ -3880,6 +3916,7 @@ function renderVideoStudio(data) {
 <script type="module">
 // Firebase Firestore integration for QuizCraft.
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { getFirestore, collection, addDoc, doc, getDoc, getDocs, setDoc, orderBy, query, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 const firebaseConfig = {
   apiKey: 'AIzaSyCbGOSqhgJPS8GzmxTN3htxdZdNVSZO008',
@@ -3893,6 +3930,53 @@ const firebaseConfig = {
 window.qcFirebaseReady = (async () => {
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
+  const auth = getAuth(app);
+  const googleProvider = new GoogleAuthProvider();
+  googleProvider.setCustomParameters({ prompt: 'select_account' });
+  window.qcAuth = auth;
+  window.qcAuthUser = auth.currentUser || null;
+  let qcEmailCreateMode = false;
+
+  window.qcOpenAccount = (forceLogin) => {
+    const modal = document.getElementById('qcAccountModal');
+    if (!modal) return;
+    modal.classList.add('active'); modal.setAttribute('aria-hidden','false');
+    const formPanel = document.getElementById('qcAuthFormPanel');
+    const userPanel = document.getElementById('qcAuthUserPanel');
+    const title = document.getElementById('qcAuthTitle');
+    const subtitle = document.getElementById('qcAuthSubtitle');
+    if (window.qcAuthUser) {
+      formPanel.style.display='none'; userPanel.style.display='block';
+      title.textContent='Your QuizCraft account'; subtitle.textContent='You are signed in.';
+      const u=window.qcAuthUser; document.getElementById('qcAuthName').textContent=u.displayName || 'QuizCraft user';
+      document.getElementById('qcAuthEmail').textContent=u.email || '';
+      const av=document.getElementById('qcAuthAvatar'); av.src=u.photoURL || 'https://www.gravatar.com/avatar/?d=mp&s=96';
+    } else {
+      formPanel.style.display='block'; userPanel.style.display='none';
+      title.textContent=forceLogin ? 'Keep creating with QuizCraft' : 'Welcome to QuizCraft';
+      subtitle.textContent=forceLogin ? 'You have created 5 free quizzes. Sign in to continue.' : 'Sign in to continue creating and manage your account.';
+    }
+  };
+  window.qcCloseAccount = () => { const m=document.getElementById('qcAccountModal'); if(m){m.classList.remove('active');m.setAttribute('aria-hidden','true');} };
+  window.qcSignOut = async () => { try { await signOut(auth); window.qcCloseAccount(); } catch(e) { console.error(e); } };
+  const qcRenderAccountButton = (user) => {
+    const b=document.getElementById('qcAccountBtn'); if(!b) return;
+    if(user){ const photo=user.photoURL || 'https://www.gravatar.com/avatar/?d=mp&s=96'; b.innerHTML=`<img src="${photo}" alt=""><span>${(user.displayName || 'Account').split(' ')[0]}</span>`; b.title=user.email || 'Account'; }
+    else { b.innerHTML='<i class="fas fa-user"></i><span>Login</span>'; b.title='Login'; }
+  };
+  onAuthStateChanged(auth, (user) => { window.qcAuthUser=user || null; qcRenderAccountButton(user); if(user && Number(localStorage.getItem('qcGuestQuizCreates')||0)>=5) { /* signed-in users can continue */ } });
+  getRedirectResult(auth).catch(err => { console.error('Google sign-in redirect:',err); const el=document.getElementById('qcAuthError'); if(el) el.textContent='Google sign-in could not finish. Please try again.'; });
+  document.getElementById('qcGoogleSignIn')?.addEventListener('click', async () => {
+    const err=document.getElementById('qcAuthError'); err.textContent='';
+    try { await signInWithPopup(auth, googleProvider); window.qcCloseAccount(); showToast('Signed in successfully','success'); }
+    catch(e) { if(e.code==='auth/popup-blocked' || e.code==='auth/operation-not-supported-in-this-environment') { try { await signInWithRedirect(auth,googleProvider); } catch(re){ err.textContent='Google sign-in unavailable. Try email instead.'; } } else { console.error(e); err.textContent=e.code==='auth/unauthorized-domain'?'Add this website domain in Firebase Authentication settings.':'Google sign-in failed. Please try again.'; } }
+  });
+  document.getElementById('qcAuthModeSwitch')?.addEventListener('click', () => { qcEmailCreateMode=!qcEmailCreateMode; document.getElementById('qcAuthTitle').textContent=qcEmailCreateMode?'Create your account':'Welcome to QuizCraft'; document.getElementById('qcEmailSubmit').textContent=qcEmailCreateMode?'Create account':'Continue with email'; document.getElementById('qcAuthModeSwitch').textContent=qcEmailCreateMode?'Already have an account? Sign in':'New to QuizCraft? Create an account'; document.getElementById('qcAuthPassword').autocomplete=qcEmailCreateMode?'new-password':'current-password'; document.getElementById('qcAuthError').textContent=''; });
+  document.getElementById('qcEmailAuthForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault(); const email=document.getElementById('qcAuthEmail').value.trim(); const password=document.getElementById('qcAuthPassword').value; const err=document.getElementById('qcAuthError'); err.textContent='';
+    try { if(qcEmailCreateMode) await createUserWithEmailAndPassword(auth,email,password); else await signInWithEmailAndPassword(auth,email,password); window.qcCloseAccount(); showToast('Signed in successfully','success'); }
+    catch(ex) { console.error(ex); const messages={'auth/email-already-in-use':'This email already has an account. Please sign in.','auth/invalid-email':'Enter a valid email address.','auth/weak-password':'Use a password with at least 6 characters.','auth/invalid-credential':'Email or password is incorrect.'}; err.textContent=messages[ex.code] || 'Could not sign in. Please try again.'; }
+  });
 
   // Store quiz metadata in quizShares/{shareId} and EACH question as a
   // separate document in quizShares/{shareId}/questions/{questionNumber}.
@@ -3990,5 +4074,31 @@ window.qcFirebaseReady = (async () => {
 window.qcFirebaseReady.catch(err => console.error('QuizCraft Firebase initialization failed:', err));
 </script>
 
+<div id="qcAccountModal" class="qc-auth-overlay" aria-hidden="true">
+  <div class="qc-auth-card">
+    <button class="qc-auth-close" type="button" onclick="qcCloseAccount()" aria-label="Close">&times;</button>
+    <div class="qc-auth-mark"><i class="fas fa-pen-nib"></i></div>
+    <h2 id="qcAuthTitle">Welcome to QuizCraft</h2>
+    <p id="qcAuthSubtitle">Sign in to continue creating unlimited quizzes.</p>
+    <div id="qcAuthUserPanel" style="display:none;">
+      <div class="qc-auth-user"><img id="qcAuthAvatar" alt="Profile"><div><b id="qcAuthName"></b><small id="qcAuthEmail"></small></div></div>
+      <button class="qc-auth-primary" type="button" onclick="qcSignOut()"><i class="fas fa-sign-out-alt"></i> Sign out</button>
+    </div>
+    <div id="qcAuthFormPanel">
+      <button class="qc-google-btn" id="qcGoogleSignIn" type="button"><i class="fab fa-google"></i> Continue with Google</button>
+      <div class="qc-auth-divider"><span>or continue with email</span></div>
+      <form id="qcEmailAuthForm">
+        <label class="qc-auth-label" for="qcAuthEmail">Email address</label>
+        <input id="qcAuthEmail" type="email" placeholder="you@example.com" autocomplete="email" required>
+        <label class="qc-auth-label" for="qcAuthPassword">Password</label>
+        <input id="qcAuthPassword" type="password" placeholder="At least 6 characters" minlength="6" autocomplete="current-password" required>
+        <button class="qc-auth-primary" id="qcEmailSubmit" type="submit">Continue with email</button>
+      </form>
+      <button class="qc-auth-switch" id="qcAuthModeSwitch" type="button">New to QuizCraft? Create an account</button>
+      <p class="qc-auth-error" id="qcAuthError" role="alert"></p>
+    </div>
+    <p class="qc-auth-foot">Your quizzes stay in this browser. Sign in to unlock continued quiz creation.</p>
+  </div>
+</div>
 </body>
 </html>
