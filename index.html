@@ -798,14 +798,16 @@ textarea.input-field{resize:vertical;min-height:80px}
 .qc-forgot-btn:disabled{opacity:.6;cursor:wait;}
 .qc-inline-action{border:0;background:transparent;color:#4f46e5;font-weight:900;text-decoration:underline;cursor:pointer;padding:0 2px;}
 .qc-auth-error.is-error{color:#dc2626!important;background:#fff1f2;border:1px solid #fecdd3;border-radius:10px;padding:9px 11px;min-height:0!important;text-align:left;line-height:1.45!important;}
-/* One compact card: create-account face <-> sign-in face (180-degree flip). */
-.qc-auth-card{perspective:1200px;transform-style:preserve-3d;backface-visibility:visible;}
-.qc-auth-card.qc-flipping{animation:qcAccountHalfFlip .95s cubic-bezier(.22,.72,.24,1) both;}
-/* Counter-rotate the card contents during the second half so labels and text
-   stay readable instead of appearing mirrored while the card turns. */
-.qc-auth-card.qc-flipping > *{animation:qcFlipContentCounter .95s cubic-bezier(.22,.72,.24,1) both;}
-@keyframes qcAccountHalfFlip{0%{transform:perspective(1200px) rotateY(0deg) scale(1)}45%{transform:perspective(1200px) rotateY(90deg) scale(.985)}100%{transform:perspective(1200px) rotateY(180deg) scale(1)}}
-@keyframes qcFlipContentCounter{0%,45%{transform:rotateY(0deg)}100%{transform:rotateY(180deg)}}
+/* Smooth screen transition: soft fade + slight vertical glide. No 3D rotation,
+   so the card and every letter remain upright and readable throughout. */
+.qc-auth-card{transform:none;backface-visibility:visible;}
+.qc-auth-card.qc-flipping{animation:qcAuthSoftSwap .62s cubic-bezier(.22,.75,.25,1) both;}
+@keyframes qcAuthSoftSwap{
+  0%{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}
+  42%{opacity:0;transform:translateY(-9px) scale(.985);filter:blur(2px)}
+  58%{opacity:0;transform:translateY(9px) scale(.985);filter:blur(2px)}
+  100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}
+}
 /* Existing-account notice stays small and inline; never cover the card. */
 .qc-auth-error.account-exists{display:block!important;color:#b45309!important;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:9px 11px;min-height:0!important;text-align:left;line-height:1.4!important;font-weight:700;}
 .qc-auth-card.is-signin .qc-auth-error.account-exists{color:#fde68a!important;background:#422006;border-color:#92400e;}
@@ -826,7 +828,7 @@ textarea.input-field{resize:vertical;min-height:80px}
 .qc-auth-card.is-signin .qc-auth-divider:before,.qc-auth-card.is-signin .qc-auth-divider:after{background:#34445c;}
 .qc-auth-card.is-signin .qc-auth-foot{border-color:#2a394e;color:#8292a8!important;}
 .qc-auth-card.is-signin .qc-auth-error:not(.is-error){color:#cbd5e1!important;}
-@media(prefers-reduced-motion:reduce){.qc-auth-card.qc-flipping{animation-duration:.01ms;}}
+@media(prefers-reduced-motion:reduce){.qc-auth-card.qc-flipping{animation-duration:.01ms;filter:none!important;}}
 .qc-logout-overlay{position:fixed;inset:0;z-index:100700;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(15,23,42,.58);backdrop-filter:blur(7px);}
 .qc-logout-overlay.active{display:flex;}
 .qc-logout-card{width:min(360px,100%);padding:26px 23px 20px;border-radius:23px;background:#fff;text-align:center;box-shadow:0 24px 70px rgba(15,23,42,.28);animation:qcLogoutPop .18s ease-out;}
@@ -4058,8 +4060,8 @@ window.qcFirebaseReady = (async () => {
   document.getElementById('qcAuthModeSwitch')?.addEventListener('click', () => {
     const card=document.querySelector('.qc-auth-card');
     if(card){card.classList.remove('qc-flipping');void card.offsetWidth;card.classList.add('qc-flipping');}
-    window.setTimeout(()=>{qcEmailCreateMode=!qcEmailCreateMode;qcUpdateEmailAuthMode();},430);
-    window.setTimeout(()=>{if(card)card.classList.remove('qc-flipping');},980);
+    window.setTimeout(()=>{qcEmailCreateMode=!qcEmailCreateMode;qcUpdateEmailAuthMode();},310);
+    window.setTimeout(()=>{if(card)card.classList.remove('qc-flipping');},650);
   });
   document.getElementById('qcForgotPassword')?.addEventListener('click', async () => {
     const email=document.getElementById('qcAuthEmailInput').value.trim(), err=document.getElementById('qcAuthError');
@@ -4112,11 +4114,11 @@ window.qcFirebaseReady = (async () => {
           if(authSubtitle) authSubtitle.textContent='You already have an account with this email. Enter your password to continue.';
           err.classList.add('account-exists');
           err.textContent=flipMessage;
-        },430);
+        },310);
         window.setTimeout(()=>{
           if(card) card.classList.remove('qc-flipping');
           document.getElementById('qcAuthPassword')?.focus();
-        },980);
+        },650);
       } else {
         err.classList.add('is-error');
         err.textContent=messages[ex.code] || ('Authentication failed ('+(ex.code || 'unknown error')+'). Please try again.');
