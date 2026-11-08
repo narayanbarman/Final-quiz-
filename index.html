@@ -784,8 +784,12 @@ textarea.input-field{resize:vertical;min-height:80px}
 
 
 /* Distinct professional account creation and sign-in screens */
-.qc-auth-card{transition:background .2s,border-color .2s;}
-.qc-auth-card:not(.is-signin){background:radial-gradient(circle at 95% 0%,#e9e7ff 0,transparent 34%),linear-gradient(155deg,#fff 0%,#f7f6ff 100%);}
+.qc-auth-card{transition:background .22s,border-color .22s,box-shadow .22s;}
+/* Create account: clean white canvas with a vivid violet action colour */
+.qc-auth-card:not(.is-signin){background:#fff;border:1px solid #e8eaf3;}
+.qc-auth-card:not(.is-signin) .qc-auth-mark{background:linear-gradient(135deg,#6d5dfc,#8b5cf6);box-shadow:0 9px 24px rgba(109,93,252,.22);}
+.qc-auth-card:not(.is-signin) .qc-auth-primary{background:linear-gradient(135deg,#635bdf,#8b5cf6);box-shadow:0 7px 18px rgba(99,91,223,.2);}
+/* Sign in: clearly different cool-blue surface */
 .qc-auth-card.is-signin{background:radial-gradient(circle at 5% 0%,#dff5ff 0,transparent 35%),linear-gradient(155deg,#fff 0%,#f3faff 100%);border-color:#cfe8f7;}
 .qc-auth-card.is-signin .qc-auth-mark{background:linear-gradient(135deg,#087eae,#2563eb);box-shadow:0 9px 24px rgba(14,116,180,.22);}
 .qc-auth-card.is-signin .qc-auth-primary{background:linear-gradient(135deg,#087eae,#2563eb);box-shadow:0 7px 18px rgba(14,116,180,.2);}
@@ -793,6 +797,9 @@ textarea.input-field{resize:vertical;min-height:80px}
 .qc-forgot-btn{display:inline-flex;float:right;margin:8px 0 0;padding:5px 2px;border:0;background:transparent;color:#2563eb;font-size:.73rem;font-weight:800;cursor:pointer;}
 .qc-forgot-btn:disabled{opacity:.6;cursor:wait;}
 .qc-inline-action{border:0;background:transparent;color:#4f46e5;font-weight:900;text-decoration:underline;cursor:pointer;padding:0 2px;}
+.qc-auth-error.is-error{color:#dc2626!important;background:#fff1f2;border:1px solid #fecdd3;border-radius:10px;padding:9px 11px;min-height:0!important;text-align:left;line-height:1.45!important;}
+.qc-auth-card.qc-existing-account-flash{animation:qcExistingAccount .62s cubic-bezier(.2,.8,.2,1);}
+@keyframes qcExistingAccount{0%{opacity:.75;transform:translateY(10px) scale(.985);box-shadow:0 0 0 0 rgba(37,99,235,0)}45%{opacity:1;transform:translateY(-3px) scale(1.008);box-shadow:0 0 0 7px rgba(37,99,235,.10)}100%{transform:translateY(0) scale(1);box-shadow:0 25px 80px rgba(15,23,42,.25)}}
 .qc-logout-overlay{position:fixed;inset:0;z-index:100700;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(15,23,42,.58);backdrop-filter:blur(7px);}
 .qc-logout-overlay.active{display:flex;}
 .qc-logout-card{width:min(360px,100%);padding:26px 23px 20px;border-radius:23px;background:#fff;text-align:center;box-shadow:0 24px 70px rgba(15,23,42,.28);animation:qcLogoutPop .18s ease-out;}
@@ -3964,7 +3971,7 @@ window.qcFirebaseReady = (async () => {
   window.qcAuthUser = auth.currentUser || null;
   let qcEmailCreateMode = true;
 
-  const qcUpdateEmailAuthMode = () => {
+  const qcUpdateEmailAuthMode = (preserveError=false) => {
     const title=document.getElementById('qcAuthTitle'), subtitle=document.getElementById('qcAuthSubtitle');
     const submit=document.getElementById('qcEmailSubmit'), toggle=document.getElementById('qcAuthModeSwitch');
     const password=document.getElementById('qcAuthPassword'), card=document.querySelector('.qc-auth-card');
@@ -3977,7 +3984,7 @@ window.qcFirebaseReady = (async () => {
     password.autocomplete=qcEmailCreateMode ? 'new-password' : 'current-password';
     if(card) card.classList.toggle('is-signin',!qcEmailCreateMode);
     if(forgot) forgot.style.display=qcEmailCreateMode?'none':'inline-flex';
-    const error=document.getElementById('qcAuthError'); if(error){error.textContent='';error.style.color='';}
+    const error=document.getElementById('qcAuthError'); if(error && !preserveError){error.textContent='';error.style.color='';error.classList.remove('is-error');}
   };
   window.qcOpenAccount = (forceLogin) => {
     const modal = document.getElementById('qcAccountModal');
@@ -4031,7 +4038,7 @@ window.qcFirebaseReady = (async () => {
     finally {btn.disabled=false;btn.textContent='Forgot password?';}
   });
   document.getElementById('qcEmailAuthForm')?.addEventListener('submit', async (e) => {
-    e.preventDefault(); const email=document.getElementById('qcAuthEmailInput').value.trim(); const password=document.getElementById('qcAuthPassword').value; const err=document.getElementById('qcAuthError'); err.textContent='';
+    e.preventDefault(); const email=document.getElementById('qcAuthEmailInput').value.trim(); const password=document.getElementById('qcAuthPassword').value; const err=document.getElementById('qcAuthError'); err.textContent=''; err.classList.remove('is-error'); err.style.color='';
     const submit=document.getElementById('qcEmailSubmit');
     if(!email || !password){ err.textContent='Enter your email address and password.'; return; }
     const wasCreate=qcEmailCreateMode;
@@ -4046,19 +4053,31 @@ window.qcFirebaseReady = (async () => {
         'auth/email-already-in-use':'This email already has an account. Choose “Sign in” below.',
         'auth/invalid-email':'Enter a valid email address.',
         'auth/weak-password':'Use a password with at least 6 characters.',
-        'auth/invalid-credential':'Email or password is incorrect. Check your details or create an account.',
+        'auth/invalid-credential':'Password is incorrect. Please check your password and try again.',
         'auth/user-not-found':'No account found with this email. Create an account first.',
-        'auth/wrong-password':'Incorrect password. Please try again.',
+        'auth/wrong-password':'Password is incorrect. Please try again.',
         'auth/operation-not-allowed':'Email/Password sign-in is not enabled in Firebase Authentication settings.',
         'auth/too-many-requests':'Too many attempts. Please wait a little and try again.',
         'auth/network-request-failed':'Network problem. Check your internet connection and try again.'
       };
       if(ex.code==='auth/email-already-in-use'){
-        qcEmailCreateMode=false; qcUpdateEmailAuthMode(); document.getElementById('qcAuthEmailInput').value=email;
-        err.innerHTML='This email already has a QuizCraft account. <button type="button" class="qc-inline-action" id="qcGoSignInNow">Sign in now</button>';
-        document.getElementById('qcGoSignInNow')?.addEventListener('click',()=>{qcEmailCreateMode=false;qcUpdateEmailAuthMode();document.getElementById('qcAuthPassword').focus();});
-      } else { err.textContent=messages[ex.code] || ('Authentication failed ('+(ex.code || 'unknown error')+'). Please try again.'); }
-    } finally { submit.disabled=false; submit.style.opacity='1'; qcUpdateEmailAuthMode(); }
+        qcEmailCreateMode=false;
+        qcUpdateEmailAuthMode();
+        document.getElementById('qcAuthEmailInput').value=email;
+        err.classList.add('is-error');
+        err.innerHTML='This email already has a QuizCraft account. Switching you to sign in…';
+        const card=document.querySelector('.qc-auth-card');
+        if(card){ card.classList.remove('qc-existing-account-flash'); void card.offsetWidth; card.classList.add('qc-existing-account-flash'); }
+        setTimeout(()=>{
+          err.classList.remove('is-error'); err.textContent='Welcome back! Enter your password to sign in.';
+          err.style.color='#087eae';
+          document.getElementById('qcAuthPassword')?.focus();
+        },620);
+      } else {
+        err.classList.add('is-error');
+        err.textContent=messages[ex.code] || ('Authentication failed ('+(ex.code || 'unknown error')+'). Please try again.');
+      }
+    } finally { submit.disabled=false; submit.style.opacity='1'; qcUpdateEmailAuthMode(true); }
   });
 
   // Store quiz metadata in quizShares/{shareId} and EACH question as a
